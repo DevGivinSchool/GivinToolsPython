@@ -1,4 +1,4 @@
-from list import *
+from test.list import *
 # На вход подаються строки
 # Глотова,Елена,Glotova,Elena,Glotova_Еlena@givinschool.org
 
@@ -11,7 +11,8 @@ mypassword = "HWrqCQR6Wd"
 
 api = yandex_connect.YandexConnectDirectory(token, org_id=None)
 
-department_list = api.department_list_full()
+# department_list = api.department_list_full()
+# {'id': 4, 'name': '@ДРУЗЬЯ_ШКОЛЫ'}
 
 for line in str.splitlines():
     str1 = line.split(',')

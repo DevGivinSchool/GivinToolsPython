@@ -3,9 +3,22 @@ Utilities for Givin School
 
 Все утилиты имеют префикс gtp_ остальные файлы вспомогательные.
 
-# PIP
+# ENV + PIP
+-- Глобальная установка virtualenv
+c:\> pip install virtualenv
+-- Далее установка в проекте
+-- Создание виртуального окружения
+c:\> cd c:\mygit\GivinToolsPython
+c:\MyGit\GivinToolsPython> python -m venv venv
+-- Активация виртуального окружения
+c:\MyGit\GivinToolsPython> cd c:\MyGit\GivinToolsPython\venv\Scripts\
+c:\MyGit\GivinToolsPython\venv\Scripts> activate
+-- Установка в виртуальное окружение всех необходимых зависимостей
+c:\MyGit\GivinToolsPython\venv\Scripts> pip install -r c:\MyGit\GivinToolsPython\requirements.txt
+-- Обновление самого pip в этом виртуальном окружении
+c:\MyGit\GivinToolsPython\venv\Scripts> python -m pip install --upgrade pip
 
-
+Далее настройка в PyCharm Project Interpreter
 
 # GTP Mail
 

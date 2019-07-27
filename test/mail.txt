@@ -1,0 +1,146 @@
+Received: from mxfront1j.mail.yandex.net (localhost [127.0.0.1])
+	by mxfront1j.mail.yandex.net with LMTP id GTIxjaFeA8-oPe6zSSg
+	for <robot@givinschool.org>; Tue, 23 Jul 2019 17:18:28 +0300
+Received: from mx02.i-teco.ru (mx02.i-teco.ru [46.163.252.9])	by
+ mxfront1j.mail.yandex.net (nwsmtp/Yandex) with ESMTPS id jU6hW8306B-IRZChsOx;
+	Tue, 23 Jul 2019 17:18:27 +0300	(using TLSv1.2 with cipher
+ ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))	(Client certificate not present)
+Return-Path: Bobrovsky@i-teco.ru
+X-Yandex-Front: mxfront1j.mail.yandex.net
+X-Yandex-TimeMark: 1563891507.806
+Authentication-Results: mxfront1j.mail.yandex.net; spf=pass
+ (mxfront1j.mail.yandex.net: domain of i-teco.ru designates 46.163.252.9 as
+ permitted sender, rule=[mx]) smtp.mail=Bobrovsky@i-teco.ru; dkim=pass
+ header.i=@i-teco.ru
+X-Yandex-Suid-Status: 1 1130000056381086
+X-Yandex-Spam: 1
+X-Yandex-Envelope: =?utf-8?q?aGVsbz1teDAyLmktdGVjby5ydQptYWlsX2Zyb209Qm9icm9?=
+ =?utf-8?q?2c2t5QGktdGVjby5ydQpyY3B0X3RvPXJvYm90QGdpdmluc2Nob29sLm9yZwpyZW1v?=
+ =?utf-8?q?dGVfaG9zdD1teDAyLmktdGVjby5ydQpyZW1vdGVfaXA9NDYuMTYzLjI1Mi45C?=
+ =?utf-8?q?g=3D=3D?=
+X-Yandex-Fwd: NDg3MDQwNTczNDc4MjIzNDQ1NSwxNDcxMzMyOTA0MDAzOTcwMzIzNg==
+Received: from mail.i-teco.ru (unknown [172.28.64.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mx02.i-teco.ru (Postfix) with ESMTPS id 0F0661FF93
+	for <robot@givinschool.org>; Tue, 23 Jul 2019 17:18:27 +0300 (MSK)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=i-teco.ru; s=dkim;
+	t=1563891507; bh=+K83KFufp1/J8qcenwKO7asE+n/04MW60Cc36uBn4Tg=;
+	h=From:To:Subject:Date;
+	b=DV+x4bchBPTYdYlLtOqzi90Ro9l10yo5B1u4SiVuARR6byHCksuloP+Nqay/Zu7/L
+	 5C4r/k0gElCtAOFCMVXi4kz+C45BurzFaV10Dy/vcmz2Z598aa0MaexFLj2akJqryf
+	 GzcTHFb+/ebbHLlfR+smtHjmZxkpFgeSC+P43rjg=
+From: =?windows-1251?B?we7h8O7i8ero6SDE7Ojy8Ojp?= <Bobrovsky@i-teco.ru>
+To: "'robot@givinschool.org'" <robot@givinschool.org>
+Subject: sf add
+Thread-Topic: sf add
+Thread-Index: AdVBYWFJrbmIHuBhROeDjkZsCp1FBg==
+Disposition-Notification-To: =?windows-1251?B?we7h8O7i8ero6SDE7Ojy8Ojp?=
+	<Bobrovsky@i-teco.ru>
+Return-Receipt-To: <Bobrovsky@i-teco.ru>
+Date: Tue, 23 Jul 2019 14:18:26 +0000
+Message-ID: <6d5dc78729b14ee5b55dc55fad584dc6@tnexpmbx04.msk.i-teco.ru>
+Accept-Language: ru-RU, en-US
+Content-Language: ru-RU
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+x-ms-exchange-transport-fromentityheader: Hosted
+x-originating-ip: [172.29.84.75]
+Content-Type: multipart/alternative;
+	boundary="_000_6d5dc78729b14ee5b55dc55fad584dc6tnexpmbx04mskitecoru_"
+MIME-Version: 1.0
+X-Greylist: Sender IP whitelisted, not delayed by milter-greylist-4.5.12
+ (mx02.i-teco.ru [0.0.0.0]); Tue, 23 Jul 2019 17:18:27 +0300 (MSK)
+X-KLMS-Rule-ID: 7
+X-KLMS-Message-Action: clean
+X-KLMS-AntiSpam-Status: not scanned, disabled by settings
+X-KLMS-AntiSpam-Interceptor-Info: not scanned
+X-KLMS-AntiPhishing: not scanned, disabled by settings
+X-KLMS-AntiVirus: Kaspersky Security for Linux Mail Server, version 8.0.2.16,
+ bases: 2019/07/23 08:52:00 #13569102
+X-KLMS-AntiVirus-Status: Clean, skipped
+X-Yandex-Forward: fdc0f95bb5612d1426c28dc85f1bf042
+
+--_000_6d5dc78729b14ee5b55dc55fad584dc6tnexpmbx04mskitecoru_
+Content-Type: text/plain; charset="windows-1251"
+Content-Transfer-Encoding: quoted-printable
+
+=C8=E2=E0=ED=EE=E2 =C8=E2=E0=ED
+=CF=E5=F2=F0=EE=E2 =CF=B8=F2=F0
+=C0=EA=F3=EB=E8=ED=E0 =C8=E7=F0=E0=EB=FA=E5=E2=ED=E0
+
+
+
+
+
+--_000_6d5dc78729b14ee5b55dc55fad584dc6tnexpmbx04mskitecoru_
+Content-Type: text/html; charset="windows-1251"
+Content-Transfer-Encoding: quoted-printable
+
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
+osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
+//www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dwindows-1=
+251">
+<meta name=3D"Generator" content=3D"Microsoft Word 14 (filtered medium)">
+<style><!--
+/* Font Definitions */
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";
+	mso-fareast-language:EN-US;}
+a:link, span.MsoHyperlink
+	{mso-style-priority:99;
+	color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-priority:99;
+	color:purple;
+	text-decoration:underline;}
+span.EmailStyle17
+	{mso-style-type:personal-compose;
+	font-family:"Calibri","sans-serif";
+	color:windowtext;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	font-size:10.0pt;
+	font-family:"Calibri","sans-serif";
+	mso-fareast-language:EN-US;}
+@page WordSection1
+	{size:612.0pt 792.0pt;
+	margin:2.0cm 42.5pt 2.0cm 3.0cm;}
+div.WordSection1
+	{page:WordSection1;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext=3D"edit">
+<o:idmap v:ext=3D"edit" data=3D"1" />
+</o:shapelayout></xml><![endif]-->
+</head>
+<body lang=3D"RU" link=3D"blue" vlink=3D"purple">
+<div class=3D"WordSection1">
+<p class=3D"MsoNormal">=C8=E2=E0=ED=EE=E2 =C8=E2=E0=ED<o:p></o:p></p>
+<p class=3D"MsoNormal">=CF=E5=F2=F0=EE=E2 =CF=B8=F2=F0<o:p></o:p></p>
+<p class=3D"MsoNormal">=C0=EA=F3=EB=E8=ED=E0 =C8=E7=F0=E0=EB=FA=E5=E2=ED=E0=
+<o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+</div>
+</body>
+</html>
+
+--_000_6d5dc78729b14ee5b55dc55fad584dc6tnexpmbx04mskitecoru_--

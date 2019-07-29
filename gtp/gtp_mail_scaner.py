@@ -8,13 +8,7 @@ from email import policy
 # formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 formatter = logging.Formatter('%(asctime)s|%(levelname)s|%(name)s|%(process)d:%(thread)d - %(message)s')
 
-# Конфигурация логирования
-# logging.basicConfig(
-#     format='%(asctime)s - %(levelname)s: %(message)s',
-#     level=logging.DEBUG,
-#     filename='d:\!SAVE\log\myapp.log',
-#     filemode='w'
-# )
+
 def setup_logger(name, log_file, level=logging.INFO):
     handler = logging.FileHandler(log_file, mode='w')
     handler.setFormatter(formatter)
@@ -51,11 +45,11 @@ def do_work():
         work_logger.info("RAW EMAIL MASSAGE")
         work_logger.info(f"email_message.get_content_charset()={email_message.get_content_charset()}")
         work_logger.info(f"email_message.get_charset()={email_message.get_charset()}")
-        work_logger.info("="*45)
+        work_logger.info("=" * 45)
         work_logger.info(email_message)
         work_logger.info("=" * 45)
         ffrom = email_message.get('From')
-        fsubject =  email_message.get('Subject')
+        fsubject = email_message.get('Subject')
         work_logger.info(f"uid={uuid}")
         work_logger.info(f"ffrom={ffrom}")
         work_logger.info(f"fsubject={fsubject}")
@@ -69,15 +63,16 @@ def do_work():
                 # skip any text/plain (txt) attachments
                 if ctype == 'text/plain' and 'attachment' not in cdispo:
                     body = part.get_payload()
-                    body2 = part.get_payload(decode=True)# decode
+                    body2 = part.get_payload(decode=True)  # decode
                     break
         else:
             work_logger.info("message is NOT multipart")
             body = email_message.get_payload()
             body2 = email_message.get_payload(decode=True)
-        #body.decode("utf-8")
+        # body.decode("utf-8")
         work_logger.info(f"body={body}")
         work_logger.info(f"body2={body2}")
+
 
 # context manager ensures the session is cleaned up
 with IMAPClient(host="imap.yandex.ru", use_uid=True) as client:

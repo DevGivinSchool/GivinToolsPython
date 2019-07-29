@@ -1,3 +1,4 @@
+bitrix24-python3-client==0.3.4
 certifi==2019.3.9
 chardet==3.0.4
 docutils==0.14

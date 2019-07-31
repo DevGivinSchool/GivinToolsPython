@@ -1,36 +1,40 @@
+"""Mail robot for Givin School. Processes incoming mail and performs tasks transmitted in letters.
+
+    Documentation style Sphinx - `<http://www.sphinx-doc.org/en/1.8/>`_
+
+"""
 from imapclient import IMAPClient
 import sys
 import os
 import logging
 import email
-from email import policy
 
+# Variables for logging
 log_dir = r"c:\!SAVE\log"
 # log_dir = "d:\!SAVE\log"
-# log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 log_formatter = logging.Formatter('%(asctime)s|%(levelname)s|%(name)s|%(process)d:%(thread)d - %(message)s')
 log_level = logging.DEBUG
 
 
-# Конфигурация логирования
-# logging.basicConfig(
-#     format='%(asctime)s - %(levelname)s: %(message)s',
-#     level=logging.DEBUG,
-#     filename='d:\!SAVE\log\myapp.log',
-#     filemode='w'
-# )
 def setup_logger(name, log_file, level=logging.INFO):
+    """Create custom loggers.
+    :param str name: Name of logger.
+    :param str log_file: File that logger writes to.
+    :param level: Logging level.
+    :return llogger: The custom logger.
+    """
     handler = logging.FileHandler(log_file, mode='w')
     handler.setFormatter(log_formatter)
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
-    logger.addHandler(handler)
-    return logger
+    llogger = logging.getLogger(name)
+    llogger.setLevel(level)
+    llogger.addHandler(handler)
+    return llogger
 
 
-logger = setup_logger('mail_scaner', os.path.join(log_dir, 'mail_scaner.log'), level=log_level)
-logger.info('START APP')
+logger = setup_logger('mail_scaner', os.path.join(log_dir, 'mail_scaner.log'), log_level)
+logger.info('START MAIL SCANER')
 
+# Get login and password from envirement
 if 'ymail_login' in os.environ:
     ymail_login = os.environ.get('ymail_login')
 else:
@@ -46,15 +50,11 @@ else:
 
 
 def get_decoded_email_body(msg):
-    """ Decode email body.
-    Detect character set if the header is not set.
-    We try to get text/plain, but if there is not one then fallback to text/html.
-    :param message_body: Raw 7-bit message body input e.g. from imaplib. Double encoded in quoted-printable and latin-1
-    :return: Message body as unicode string
+    """Decode email body.
+    Detect character set if the header is not set. We try to get text/plain.
+    :param msg: Raw 7-bit message body input e.g. from imaplib.
+    :return: Body of the letter in the desired encoding
     """
-
-    # msg = email.message_from_string(message_body)
-    # msg = message_body
 
     text = ""
     if msg.is_multipart():
@@ -71,8 +71,7 @@ def get_decoded_email_body(msg):
                 # text = part.get_payload(decode=True).decode(str(charset), "ignore").encode('utf8', 'replace')
                 text = text + part.get_payload(decode=True).decode(str(charset), "ignore")
 
-        if text is not None:
-            return text.strip()
+        return text.strip()
     else:
         # text = msg.get_payload(decode=True).decode(msg.get_content_charset(), 'ignore').encode('utf8', 'replace')
         text = msg.get_payload(decode=True).decode(msg.get_content_charset(), 'ignore')
@@ -80,12 +79,16 @@ def get_decoded_email_body(msg):
 
 
 def sort_mail(client):
+    """Sort mail and start baground jobs.
+    For each letter run job in the background.
+    :param IMAPClient client: IMAPClient instance.
+    """
     logger.info("do_work")
     messages = client.search('ALL')
     for uid, message_data in client.fetch(messages, 'RFC822').items():
         uuid = str(uid)
-        work_logger = setup_logger(uuid, os.path.join(log_dir, f'{uuid}.log', level=log_level))
-        email_message = email.message_from_bytes(message_data[b'RFC822'], policy=policy.default)
+        work_logger = setup_logger(uuid, os.path.join(log_dir, f'{uuid}.log', log_level))
+        email_message = email.message_from_bytes(message_data[b'RFC822'])
         work_logger.debug("RAW EMAIL MASSAGE")
         work_logger.debug(f"email_message.get_content_charset()={email_message.get_content_charset()}")
         work_logger.debug(f"email_message.get_charset()={email_message.get_charset()}")
@@ -102,11 +105,14 @@ def sort_mail(client):
 
 
 def main():
-    # context manager ensures the session is cleaned up
+    """Main.
+    Check mailbox and execute sort_mail() then go to idle mode for IMAPClient.
+    And every time if mail server return anything - execute sort_mail().
+    """
     with IMAPClient(host="imap.yandex.ru", use_uid=True) as client:
         client.login(ymail_login, ymail_password)
         client.select_folder('INBOX')
-        # Первый раз просто сканируем почту и делаем работу, а потом переходим в режим ожидания
+        # First sort_mail() execution then go to idle mode
         sort_mail(client)
         # Start IDLE mode
         client.idle()
@@ -114,11 +120,10 @@ def main():
         logger.info("Connection is now in IDLE mode, send yourself an email or quit with ^c")
         while True:
             try:
-                # Wait for up to 30 seconds for an IDLE response
+                # Wait for up to XX seconds for an IDLE response
                 responses = client.idle_check(timeout=60)
                 # print(f"Server sent:{responses if responses else 'nothing'}")
                 logger.debug(f"Server sent:{responses if responses else 'nothing'}")
-
                 # print(responses)
                 # logging.debug("Server sent:", responses if responses else "nothing")
                 if responses:
@@ -130,6 +135,8 @@ def main():
         logger.info("\nIDLE mode done")
         client.logout()
 
+
+logger.info('END MAIL SCANER')
 
 if __name__ == "__main__":
     main()

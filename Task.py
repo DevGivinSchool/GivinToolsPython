@@ -10,3 +10,4 @@ class Task:
 
     def display_task(self):
         print(f'Task {self.uuid}:\n   from = {self.ffrom}\n   subject = {self.subject}\n')
+        self.logger.debug(f'Task {self.uuid}:\n   from = {self.ffrom}\n   subject = {self.subject}\n')

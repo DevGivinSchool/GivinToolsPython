@@ -1,4 +1,4 @@
-# GivinToolsPython
+﻿# GivinToolsPython
 Utilities for Givin School
 
 Все утилиты имеют префикс gtp_ остальные файлы вспомогательные.
@@ -51,3 +51,6 @@ body2 = email_message.get_payload(decode=True)
 тогда это все переводиться в 
 body2=b'\xc8\xe2\xe0\xed\xee\xe2 \xc8\xe2\xe0\xed\r\n\xcf\xe5\xf2\xf0\xee\xe2 \xcf\xb8\xf2\xf0\r\n\xc0\xea\xf3\xeb\xe8\xed\xe0 \xc8\xe7\xf0\xe0\xeb\xfa\xe5\xe2\xed\xe0\r\n\r\n\r\n\r\n\r\n'
 
+# Полезные команды 
+
+pip freeze c:\MyGit\GivinToolsPython\requirements.txt

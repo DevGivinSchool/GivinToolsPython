@@ -1,4 +1,5 @@
 from bitrix24 import Bitrix24
+import requests
 
 clientId = "101"
 clientCode = "local.5d2a0084b949b0.22675909"
@@ -8,6 +9,16 @@ domainName = "newhuman.bitrix24.ru"
 
 def auth(bx24):
   auth_request = bx24.resolve_authorize_endpoint()
+
+#####################################
+  r = requests.get(auth_request)
+  print(auth_request)
+  data1 = r.url
+  print(data1)
+  print(r.content)
+
+  exit(0)
+#####################################
 
   # See https://github.com/yarbshk/pybitrix24
   auth_code = input("Enter auth code using URL: {}\n".format(auth_request))

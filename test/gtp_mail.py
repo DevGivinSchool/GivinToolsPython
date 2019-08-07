@@ -1,4 +1,4 @@
-from test.list import *
+from list import list_fio
 # На вход подаються строки
 # Глотова,Елена,Glotova,Elena,Glotova_Еlena@givinschool.org
 
@@ -11,12 +11,14 @@ mypassword = "HWrqCQR6Wd"
 
 api = yandex_connect.YandexConnectDirectory(token, org_id=None)
 
-# department_list = api.department_list_full()
+#department_list = api.department_list_full()
+#print(department_list)
 # {'id': 4, 'name': '@ДРУЗЬЯ_ШКОЛЫ'}
 
-for line in str.splitlines():
-    str1 = line.split(',')
+for line in list_fio.splitlines():
+    str1 = line.split(';')
     print(line)
+    break
     try:
         print(api.user_add(nickname=str1[0] + '_' + str1[1], password=mypassword, department_id=4, secname=str1[0],
                            name=str1[1]))

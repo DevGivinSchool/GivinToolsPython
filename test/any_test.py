@@ -1,18 +1,6 @@
-import os
-import sys
+import requests
 
-#print(os.environ)
+r = requests.get('https://newhuman.bitrix24.ru/oauth/authorize/?client_id=local.5d2a0084b949b0.22675909&response_type=code')
 
-if 'ymail_login' in os.environ:
-    ymail_login = os.environ.get('ymail_login')
-    print(ymail_login)
-else:
-    print("I can't see env ymail_login")
-    sys.exit(1)
+print(r.content.decode())
 
-if 'ymail_password' in os.environ:
-    ymail_password = os.environ.get('ymail_password')
-    print(ymail_password)
-else:
-    print("I can't see env ymail_password")
-    sys.exit(1)

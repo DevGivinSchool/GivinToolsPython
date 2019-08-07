@@ -1,4 +1,4 @@
-https://docs.python.org/3/library/atexit.html
+#https://docs.python.org/3/library/atexit.html
 
 
 import os
@@ -10,7 +10,7 @@ pidfile = "/tmp/mydaemon.pid"
 if os.path.isfile(pidfile):
     print(f"{pidfile} already exists, exiting")
     sys.exit()
-file(pidfile, 'w').write(pid)
+    file(pidfile, 'w').write(pid)
 try:
     pass
 finally:

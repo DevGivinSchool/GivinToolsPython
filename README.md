@@ -53,4 +53,5 @@ body2=b'\xc8\xe2\xe0\xed\xee\xe2 \xc8\xe2\xe0\xed\r\n\xcf\xe5\xf2\xf0\xee\xe2 \x
 
 # Полезные команды 
 
-pip freeze c:\MyGit\GivinToolsPython\requirements.txt
+pip freeze > c:\MyGit\GivinToolsPython\requirements.txt
+pip install -r c:\MyGit\GivinToolsPython\requirements.txt

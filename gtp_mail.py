@@ -18,13 +18,15 @@ api = yandex_connect.YandexConnectDirectory(token, org_id=None)
 
 for line in list_fio.splitlines():
     # Когда копирю из Google Sheets разделитель = Tab
-    line = line.replace('\t', ' ').split(' ')
+    line = line.split('\t')
     line.append(transliterate.translit(line[0], reversed=True) + "_" + transliterate.translit(line[1], reversed=True))
     print(line)
     try:
         # https://yandex.ru/dev/connect/directory/api/concepts/users/add-user-docpage/
-        print(api.user_add(nickname=line[2], password=mypassword, department_id=4, secname=line[0],
-                           name=line[1]))
+        result = api.user_add(nickname=line[2], password=mypassword, department_id=4, secname=line[0],
+                           name=line[1])
+        print(type(result))
+        print(result)
     except yandex_connect.YandexConnectExceptionY as e:
         # print(e.args[0])
         if e.args[0] == 500:

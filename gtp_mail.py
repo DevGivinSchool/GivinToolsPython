@@ -17,7 +17,8 @@ api = yandex_connect.YandexConnectDirectory(token, org_id=None)
 # {'id': 4, 'name': '@ДРУЗЬЯ_ШКОЛЫ'}
 
 for line in list_fio.splitlines():
-    line = line.split(' ')
+    # Когда копирю из Google Sheets разделитель = Tab
+    line = line.replace('\t', ' ').split(' ')
     line.append(transliterate.translit(line[0], reversed=True) + "_" + transliterate.translit(line[1], reversed=True))
     print(line)
     try:
@@ -25,7 +26,7 @@ for line in list_fio.splitlines():
         print(api.user_add(nickname=line[2], password=mypassword, department_id=4, secname=line[0],
                            name=line[1]))
     except yandex_connect.YandexConnectExceptionY as e:
-        #print(e.args[0])
+        # print(e.args[0])
         if e.args[0] == 500:
             print("Unhandled exception: Такой пользователь уже существует")
         else:

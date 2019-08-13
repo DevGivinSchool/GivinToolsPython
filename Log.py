@@ -3,23 +3,35 @@ import os
 
 
 class Log:
-    """Kласс для логирования"""
-    LEVEL = logging.DEBUG
+    """Kласс для логирования. log_level передаётся конструктор, по умолчанию logging.INFO"""
 
     @staticmethod
-    def setup_logger(name, file_name, level=LEVEL):
+    def setup_logger(name, log_path, log_name='log.log', level=logging.INFO):
         """Create custom loggers.
-        :param str name: Name of logger.
-        :param str file_name: File that logger writes to.
+        :param str name: Logger name.
+        :param log_path: Directory that create log file.
+        :param str log_name: File that logger writes to.
         :param level: Logging level.
         :return llogger: The custom logger.
         """
-        log_dir = r"c:\!SAVE\log"
-        log_file = os.path.join(log_dir, file_name)
+        # Если директории для логирования не существует создаём её
+        if not os.path.exists(log_path):
+            try:
+                os.mkdir(log_path)
+            except OSError:
+                print("Creation of the directory %s failed" % log_path)
+                exit(1)
+        log_file = ""
+        try:
+            log_file = os.path.join(log_path, log_name)
+        except OSError:
+            print(f"Creation of the log_file from log_path:'{log_path}' and log_name:'{log_name}' failed")
+            exit(1)
+
         log_formatter = logging.Formatter('%(asctime)s|%(levelname)s|%(name)s|%(process)d:%(thread)d - %(message)s')
         handler = logging.FileHandler(log_file, mode='w')
         handler.setFormatter(log_formatter)
-        llogger = logging.getLogger(name)
-        llogger.setLevel(level)
-        llogger.addHandler(handler)
-        return llogger
+        custom_logger = logging.getLogger(name)
+        custom_logger.setLevel(level)
+        custom_logger.addHandler(handler)
+        return custom_logger

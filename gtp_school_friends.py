@@ -50,21 +50,29 @@
 from Log import Log
 import logging
 import os
+import config
+from imapclient import IMAPClient
+import PASSWORDS
+from Email2 import Email
+from datetime import datetime
 
-# Здесь задаётся уровень логирования на всё приложение
-log_level = logging.DEBUG
+# Текущая дата для имени лог файла (без %S)
+now = datetime.now().strftime("%Y%m%d%H%M")
 # Логирование производится в папку где лежит скрипт/log
-log_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'log')
-logger = Log.setup_logger('__main__', log_dir, 'gtp_school_friends.log', log_level)
+logger = Log.setup_logger('__main__', config.config['log_dir'], f'gtp_school_friends_{now}.log', config.config['log_level'])
 logger.info('START gtp_school_friends')
 
 
 def main():
-    print(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'log'))
+    with IMAPClient(host="imap.yandex.ru", use_uid=True) as client:
+        client.login(PASSWORDS.logins['ymail_login'], PASSWORDS.logins['ymail_password'])
+        client.select_folder('INBOX')
+        # First sort_mail() execution then go to idle mode
+        email = Email(client, logger)
+        email.sort_mail()
+        client.logout()
+    logger.info('END gtp_school_friends')
 
 
 if __name__ == "__main__":
     main()
-
-
-

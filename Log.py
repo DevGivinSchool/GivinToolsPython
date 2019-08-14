@@ -6,13 +6,15 @@ class Log:
     """Kласс для логирования. log_level передаётся конструктор, по умолчанию logging.INFO"""
 
     @staticmethod
-    def setup_logger(name, log_path, log_name='log.log', level=logging.INFO):
+    def setup_logger(name, log_path=os.path.dirname(os.path.realpath(__file__)), log_name='log.log',
+                     level=logging.INFO):
         """Create custom loggers.
         :param str name: Logger name.
         :param log_path: Directory that create log file.
+        Логирование по умолчанию производится в папку где лежит скрипт/log
         :param str log_name: File that logger writes to.
         :param level: Logging level.
-        :return llogger: The custom logger.
+        :return custom_logger: The custom logger.
         """
         # Если директории для логирования не существует создаём её
         if not os.path.exists(log_path):

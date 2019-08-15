@@ -5,6 +5,7 @@ import time
 import argparse
 import logging
 
+
 class Executor:
     MAX_WORKERS = multiprocessing.cpu_count()
 
@@ -59,13 +60,13 @@ class Executor:
         Finishes when the parent process terminates.
         """
         print("Process {0} started".format(getpid()))
-        #print(type(self.logger))
-        #print(self.logger)
+        # print(type(self.logger))
+        # print(self.logger)
         print(self.__dir__())
         self.logger.debug(f'Process {getpid()} started')
         while True:
             # If queue is not empty, pop the next element and do the work.
-            # If queue is empty, wait indefinitly until an element get in the queue.
+            # If queue is empty, wait indefinitely until an element get in the queue.
             task = self.q.get(block=True, timeout=None)
             print("{0} retrieved: {1}".format(getpid(), task))
             self.logger.debug("{0} retrieved: {1}".format(getpid(), task))

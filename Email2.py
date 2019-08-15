@@ -4,6 +4,38 @@ from Task import Task
 from Log import Log
 import logging
 import config
+import re
+
+
+# def string_normalization(msg):
+#    return msg.strip().lstrip("<").rstrip(">")
+
+
+def get_from(line):
+    """Выбираем только первый почтовый адрес из строки"""
+    match = re.findall(r'[\w\.-]+@[\w\.-]+', line)
+    return match[0]
+
+
+def get_decoded_str(line):
+    """Decode email field - From.
+    :param line: Raw 7-bit message body input e.g. from imaplib.
+    :return: Body of the letter in the desired encoding
+    """
+    lines = decode_header(line)
+    final_text = ""
+    for text, charset in lines:
+        # print(text, charset)
+        if charset is None:
+            # Здесь нет final_text = final_text + ... поэтому в итоге будет только самая последняя строка много
+            # страничного From. Обычно это правильно, т.к. в начале часто ставиться фамилия а затем email.
+            try:
+                final_text = text.decode()
+            except AttributeError:
+                final_text = text
+        else:
+            final_text = text.decode(str(charset), "ignore")
+    return final_text
 
 
 class Email:
@@ -33,40 +65,17 @@ class Email:
             self.work_logger.debug(f"uid={uuid}")
             self.work_logger.debug(f"raw_ffrom=|{email_message.get('From')}|")
             self.work_logger.debug(f"raw_fsubject=|{email_message.get('Subject')}|")
-            ffrom = self.string_normalization(self.get_decoded_str(email_message.get('From')))
+            ffrom = get_from(get_decoded_str(email_message.get('From')))
             # fsubject = email_message.get('Subject')
-            fsubject = self.get_decoded_str(email_message.get('Subject'))
+            fsubject = get_decoded_str(email_message.get('Subject'))
             self.work_logger.debug(f"ffrom={ffrom}")
             self.work_logger.debug(f"fsubject={fsubject}")
             body = self.get_decoded_email_body(email_message)
             self.work_logger.debug(f"body={body}")
             task = Task(uuid, ffrom, fsubject, body, self.work_logger)
-            task.display_task()
+            #task.display_task()
             # self.executor.add_task(task)
-
-    def string_normalization(self, msg):
-        return msg.strip().lstrip("<").rstrip(">")
-
-    def get_decoded_str(self, line):
-        """Decode email field - From.
-        :param line: Raw 7-bit message body input e.g. from imaplib.
-        :return: Body of the letter in the desired encoding
-        """
-        lines = decode_header(line)
-        final_text = ""
-        for text, charset in lines:
-            # print(text, charset)
-            if charset is None:
-                # Здесь нет final_text = final_text + ...
-                # поэтому в итоге будет только самая последняя строка много страничного From.
-                # Обычно это правильно, т.к. в начале часто ставиться фамили а затем email.
-                try:
-                    final_text = text.decode()
-                except AttributeError:
-                    final_text = text
-            else:
-                final_text = text.decode(str(charset), "ignore")
-        return final_text
+            task.run_task()
 
     def get_decoded_email_body(self, msg):
         """Decode email body.

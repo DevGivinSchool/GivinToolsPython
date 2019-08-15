@@ -73,7 +73,7 @@ class Email:
             body = self.get_decoded_email_body(email_message)
             self.work_logger.debug(f"body={body}")
             task = Task(uuid, ffrom, fsubject, body, self.work_logger)
-            #task.display_task()
+            task.display_task()
             # self.executor.add_task(task)
             task.run_task()
 

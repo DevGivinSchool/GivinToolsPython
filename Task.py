@@ -14,8 +14,11 @@ class Task:
         self.logger.debug(f'Task {self.uuid}:\n   from = {self.ffrom}\n   subject = {self.subject}\n')
 
     def run_task(self):
-        if self.ffrom == 'noreply@server.paykeeper.ru' or self.ffrom == 'no-reply@getcourse.ru':
+        if (self.ffrom == 'noreply@server.paykeeper.ru' and self.subject == 'Принята оплата') or \
+           (self.ffrom == 'no-reply@getcourse.ru' and self.subject.startswith("Поступил платеж")):
             self.logger.debug(f'Это письмо от платежных систем - обработать')
+            print(f'Это письмо от платежных систем - обработать')
 
         else:
             self.logger.debug(f'Это письмо НЕ от платежных систем - ничего с ним не делаю, пока...')
+            print(f'Это письмо НЕ от платежных систем - ничего с ним не делаю, пока...')

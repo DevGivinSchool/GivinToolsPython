@@ -1,3 +1,35 @@
+import random
+import re
+import string
+password = 'vbsJuNDaMh'
+print(password)
+if not re.search(r'\d', password):
+    password = password[:2] + random.choice(string.digits) + password[2 + 1:]
+    #s = s[:num] + new_simbol + s[num + 1:]
+    print(password)
+
+
+"""
+import string
+import random
+
+
+def randompassword():
+    chars = string.ascii_uppercase + string.ascii_lowercase + string.digits
+    # size = random.randint(8, 12) # Размер пароля всегда 10 символов
+    size = 10
+    password = ''.join(random.choice(chars) for x in range(size))
+    # Заменить все буквы которые могут быть неправильно поняты пользователями
+    for ch in ['l', 'j', 'i', '0', 'o', 'O']:
+        if ch in password:
+            password = password.replace(ch, random.choice(chars))
+    return password
+
+
+for i in range(15):
+    print(randompassword())
+"""
+
 # import requests
 #
 # r = requests.get('https://newhuman.bitrix24.ru/oauth/authorize/?client_id=local.5d2a0084b949b0.22675909&response_type=code')
@@ -19,9 +51,9 @@
 # print(type(obj1))
 # print(obj1)
 
-import os
-
-print(os.path.realpath(__file__))
-print(os.path.dirname(os.path.realpath(__file__)))
+# import os
+#
+# print(os.path.realpath(__file__))
+# print(os.path.dirname(os.path.realpath(__file__)))
 
 

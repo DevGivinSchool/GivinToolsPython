@@ -3,11 +3,15 @@ from list import list_fio
 
 import transliterate
 import yandex_connect
+import PASSWORDS
+import string
+import random
+import re
 
 # Токен Яндекса, действует год
-token = "AgAAAAAigT1GAAWzDIvhjOnmRE81mGDc2Xk5M2U"
+token = PASSWORDS.logins['token_yandex']
 # Единый пароль для всех создаваемых почт
-mypassword = "HWrqCQR6Wd"
+mypassword = PASSWORDS.logins['default_ymail_password']
 
 api = yandex_connect.YandexConnectDirectory(token, org_id=None)
 
@@ -24,12 +28,33 @@ for line in list_fio.splitlines():
     try:
         # https://yandex.ru/dev/connect/directory/api/concepts/users/add-user-docpage/
         result = api.user_add(nickname=line[2], password=mypassword, department_id=4, secname=line[0],
-                           name=line[1])
+                              name=line[1])
         print(type(result))
         print(result)
+        print(result['email'])
+        print(line[2]+"@givinschool.org")
     except yandex_connect.YandexConnectExceptionY as e:
         # print(e.args[0])
         if e.args[0] == 500:
             print("Unhandled exception: Такой пользователь уже существует")
         else:
             print("ERROR = " + e.__str__())
+
+
+def randompassword():
+    """Пароль для Zoom"""
+    chars = string.ascii_uppercase + string.ascii_lowercase + string.digits
+    # size = random.randint(8, 12) # Размер пароля всегда 10 символов
+    size = 10
+    password = ''.join(random.choice(chars) for x in range(size))
+    # Заменить все буквы которые могут быть неправильно поняты пользователями
+    for ch in ['l', 'j', 'i', '0', 'o', 'O']:
+        if ch in password:
+            password = password.replace(ch, random.choice(chars))
+    # Пароль должен содержать хотя бы одну цифру (Zoom), если цифры нет, подставляем на треью позицию случайню цифру
+    if not re.search(r'\d', password):
+        password = password[:2] + random.choice(string.digits) + password[2 + 1:]
+    return password
+
+
+print(randompassword())

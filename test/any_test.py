@@ -1,4 +1,68 @@
-import random
+# import re
+# sum = "1 990.00 руб."
+# res = sum.split(".")[0].replace(" ","")
+# print(res)
+
+"""from lxml import html
+
+with open(r"paykeeper.html", encoding="utf-8") as file:
+    data = file.read()
+tree = html.fromstring(data)
+# print(tree)
+# Вот такая строка XPath у меня сработала
+# res = tree.xpath("/html/body/table/tbody/tr[2]/td/table/tbody/tr[2]/td/table/tbody/tr/td/table[5]/tbody/tr/td[2]/table")
+tables = tree.xpath('//table[@width="430"]')
+# print(f"res={tables}")
+tr = tables[0].xpath('.//tr')
+# print(f"tr={tr}")
+#print(f"tr2={tr[0].text_content()}")
+td = tr[0].xpath('.//td')
+print(f"td={td}")
+text = td[0].text_content()
+print(f"text={text}")
+text = td[1].text_content().strip()
+print(f"text={text}")
+print("="*45)
+for table in tables:
+     trs = table.xpath('.//tr')
+     print(f"tr={trs}")
+     for td in trs:
+         tds = td.xpath('.//td')
+         print(f"tds={tds}")
+         text = cell.text_content()
+         # for cell in tds:
+         #     print(f"cell={cell}")
+         #     text = cell.text_content()
+         #     print(f"text={text}")
+
+"""
+
+"""from lxml import html
+test = '''
+    <html>
+        <body>
+            <div class="first_level">
+                <h2 align='center'>one</h2>
+                <h2 align='left'>two</h2>
+            </div>
+            <h2>another tag</h2>
+        </body>
+    </html>
+'''
+tree = html.fromstring(test)
+res = tree.xpath('//h2') # все h2 теги
+print(res)
+res = tree.xpath('//h2[@align]') # h2 теги с атрибутом align
+print(res)
+res = tree.xpath('//h2[@align="center"]') # h2 теги с атрибутом align равным "center"
+print(res)
+res = div_node = tree.xpath('//div')[0] # div тег
+print(res)
+res = div_node.xpath('.//h2') # все h2 теги, которые являются дочерними div ноде
+print(res)"""
+
+
+"""import random
 import re
 import string
 password = 'vbsJuNDaMh'
@@ -7,7 +71,7 @@ if not re.search(r'\d', password):
     password = password[:2] + random.choice(string.digits) + password[2 + 1:]
     #s = s[:num] + new_simbol + s[num + 1:]
     print(password)
-
+"""
 
 """
 import string

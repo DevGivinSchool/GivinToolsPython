@@ -20,26 +20,6 @@ api = yandex_connect.YandexConnectDirectory(token, org_id=None)
 # print(department_list)
 # {'id': 4, 'name': '@ДРУЗЬЯ_ШКОЛЫ'}
 
-for line in list_fio.splitlines():
-    # Когда копирю из Google Sheets разделитель = Tab
-    line = line.split('\t')
-    # При транслитерации некоторые буквы переводятся в - ' - это нужно заменить
-    line.append((transliterate.translit(line[0], reversed=True) + "_" + transliterate.translit(line[1], reversed=True)).replace("'", ""))
-    print(line)
-    try:
-        # https://yandex.ru/dev/connect/directory/api/concepts/users/add-user-docpage/
-        result = api.user_add(nickname=line[2], password=mypassword, department_id=4, secname=line[0],
-                              name=line[1])
-        print(result)
-        print(result['email'])
-    except yandex_connect.YandexConnectExceptionY as e:
-        # print(e.args[0])
-        if e.args[0] == 500:
-            print("Unhandled exception: Такой пользователь уже существует")
-        else:
-            print("ERROR = " + e.__str__())
-
-
 def randompassword():
     """Пароль для Zoom"""
     chars = string.ascii_uppercase + string.ascii_lowercase + string.digits
@@ -57,5 +37,22 @@ def randompassword():
     password = password + random.choice(string.ascii_lowercase) + random.choice(string.ascii_lowercase)
     return password
 
-
-print(randompassword())
+for line in list_fio.splitlines():
+    # Когда копирю из Google Sheets разделитель = Tab
+    line = line.split('\t')
+    # При транслитерации некоторые буквы переводятся в - ' - это нужно заменить
+    line.append((transliterate.translit(line[0], reversed=True) + "_" + transliterate.translit(line[1], reversed=True)).replace("'", ""))
+    print(line)
+    try:
+        # https://yandex.ru/dev/connect/directory/api/concepts/users/add-user-docpage/
+        result = api.user_add(nickname=line[2], password=mypassword, department_id=4, secname=line[0],
+                              name=line[1])
+        print(result)
+        print(result['email'])
+        print(randompassword())
+    except yandex_connect.YandexConnectExceptionY as e:
+        # print(e.args[0])
+        if e.args[0] == 500:
+            print("Unhandled exception: Такой пользователь уже существует")
+        else:
+            print("ERROR = " + e.__str__())

@@ -73,7 +73,13 @@ class Email:
             body = self.get_decoded_email_body(email_message)
             task = Task(uuid, ffrom, fsubject, body, self.work_logger)
             # self.executor.add_task(task)
-            task.run_task()
+            # TODO: -----------------------------------------------------------------
+            # TODO: Нужно вместо task.run_task() перенести определение правильности писем и платежей сбда и сразу формировать списки
+            #       paykeeper, paykeeper+это не тот платёж, getcourse и результаты обработки платежа вносить в {}
+            payment = task.run_task()
+            if payment:
+                self.logger.info(f"payment for {ffrom}:\n{payment}")
+            # TODO: -----------------------------------------------------------------
 
     def get_decoded_email_body(self, msg):
         """Decode email body.

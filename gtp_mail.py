@@ -49,10 +49,11 @@ for line in list_fio.splitlines():
                               name=line[1])
         print(result)
         print(result['email'])
-        print(randompassword())
     except yandex_connect.YandexConnectExceptionY as e:
         # print(e.args[0])
         if e.args[0] == 500:
-            print("Unhandled exception: Такой пользователь уже существует")
+            print(f"Unhandled exception: Такой пользователь уже существует: {line[2]+'@givinschool.org'}")
         else:
             print("ERROR = " + e.__str__())
+    # Вывести пароль в любом случае, т.к. он может пригодиться
+    print(randompassword())

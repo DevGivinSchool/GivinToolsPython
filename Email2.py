@@ -1,10 +1,10 @@
 import email
 import re
-from email.header import decode_header
-
 import config
+import Parser
 from Log import Log
 from Task import Task
+from email.header import decode_header
 
 
 # def string_normalization(msg):
@@ -47,11 +47,12 @@ class Email:
         self.work_logger = logger  # Частный логгер для каждого письма а затем и Task
 
     def sort_mail(self):
-        """Sort mail and start work.
-        """
+        """Sort mail and start work """
         self.logger.info("sort_mail")
         messages = self.client.search('ALL')
+        """We go through the cycle in all letters"""
         for uid, message_data in self.client.fetch(messages, 'RFC822').items():
+            """Get main parameters letters"""
             uuid = str(uid)
             self.work_logger = Log.setup_logger(uuid, config.config['log_dir'], f'{uuid}.log',
                                                 config.config['log_level'])
@@ -72,11 +73,42 @@ class Email:
             self.work_logger.info(f"fsubject={fsubject}")
             body = self.get_decoded_email_body(email_message)
             task = Task(uuid, ffrom, fsubject, body, self.work_logger)
-            # self.executor.add_task(task)
-            # TODO: -----------------------------------------------------------------
-            # TODO: Нужно вместо task.run_task() перенести определение правильности писем и платежей сбда и сразу формировать списки
-            #       paykeeper, paykeeper+это не тот платёж, getcourse и результаты обработки платежа вносить в {}
-            payment = task.run_task()
+
+            """Определяем типа письма (платёж / не платёж) и вытаскиваем данные платежа в payment."""
+            payment = {}
+            # TODO: Нужно результаты обработки писем заносить в БД и потом в Email2 получить сводку и отправлять админу.
+            # В PayKeeper могут быть платежи не за ДШ а за что-то другое
+            if self.ffrom == 'noreply@server.paykeeper.ru' and self.subject == 'Принята оплата':
+                self.logger.debug(f'Это письмо от платежной системы - PayKeeper')
+                print(f'Это письмо от платежной системы - PayKeeper')
+                payment = Parser.parse_paykeeper_html(self.body['body_html'])
+                self.logger.debug(f'payment = {payment}')
+                task.payment = payment
+                # Это платёж PayKeeper за ДШ
+                if self.check_school_friends(payment["Наименование услуги"]):
+                    print('Это платёж Друзья Школы')
+                    self.logger.debug('Это платёж Друзья Школы')
+                    # TODO: Процедура обработки payment
+                # Это платёж PayKeeper но НЕ за ДШ
+                else:
+                    print('Это ИНОЙ платёж')
+                    self.logger.debug('Это ИНОЙ платёж')
+                    # TODO: Нужно результаты обработки писем заносить в БД и потом в Email2 получить сводку и отправлять админу.
+            # В Getcourse только платежи за ДШ иного там нет
+            elif self.ffrom == 'no-reply@getcourse.ru' and self.subject.startswith("Поступил платеж"):
+                self.logger.debug(f'Это письмо от платежной системы - GetCourse')
+                print(f'Это письмо от платежной системы - GetCourse')
+                payment = Parser.parse_getcourse_html(self.body['body_html'])
+                self.logger.debug(f'payment = {payment}')
+                task.payment = payment
+                # TODO: Процедура обработки payment
+            # Это письмо вообще не платёж
+            else:
+                self.logger.debug(f'Это письмо НЕ от платежных систем - ничего с ним не делаю, пока...')
+                print(f'Это письмо НЕ от платежных систем - ничего с ним не делаю, пока...')
+                # TODO: Нужно результаты обработки писем заносить в БД и потом в Email2 получить сводку и отправлять админу.
+            print('-' * 45)
+
             if payment:
                 self.logger.info(f"payment for {ffrom}:\n{payment}")
             # TODO: -----------------------------------------------------------------
@@ -134,3 +166,11 @@ class Email:
             raise Exception('Неизвестный формат письма')
 
         return body
+
+    def check_school_friends(self, text):
+        """Проверяем что назначение платежа - Друзья школы"""
+        text_lower = text.lower()
+        list_ofstrs = ['друзья', 'школы']
+        # Check if all strings from the list exists in given string
+        result = all(([True if sub_str in text_lower else False for sub_str in list_ofstrs]))
+        return result

@@ -1,3 +1,22 @@
+import PASSWORDS
+import config
+from DBPostgres import DBPostgres
+
+postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
+                      password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
+                      port=config.config['postgres_port'])
+sql_text = 'select * from test'
+rows = postgres.execute_select(sql_text)
+print(rows)
+sql_text = 'select count(*) from test'
+rows = postgres.execute_select(sql_text)
+print(rows)
+sql_text = "insert into test (name) values ('mama')"
+count = postgres.execute_dml(sql_text)
+print(count)
+postgres.disconnect()
+
+
 # import re
 # sum = "1 990.00 руб."
 # res = sum.split(".")[0].replace(" ","")
@@ -61,7 +80,6 @@ print(res)
 res = div_node.xpath('.//h2') # все h2 теги, которые являются дочерними div ноде
 print(res)"""
 
-
 """import random
 import re
 import string
@@ -119,5 +137,3 @@ for i in range(15):
 #
 # print(os.path.realpath(__file__))
 # print(os.path.dirname(os.path.realpath(__file__)))
-
-

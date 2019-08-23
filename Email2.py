@@ -2,10 +2,11 @@ import email
 import re
 import config
 import Parser
+import PASSWORDS
 from Log import Log
 from Task import Task
 from email.header import decode_header
-
+from DBPostgres import DBPostgres
 
 # def string_normalization(msg):
 #    return msg.strip().lstrip("<").rstrip(">")
@@ -48,7 +49,11 @@ class Email:
 
     def sort_mail(self):
         """Sort mail and start work """
-        self.logger.info("sort_mail")
+        self.logger.info("sort_mail beggin")
+        postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
+                              password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
+                              port=config.config['postgres_port'])
+        sessin_id = postgres.execute_dml_id("INSERT INTO sessions(time_begin) VALUES (NOW()) RETURNING id;")
         messages = self.client.search('ALL')
         """We go through the cycle in all letters"""
         for uid, message_data in self.client.fetch(messages, 'RFC822').items():
@@ -73,15 +78,16 @@ class Email:
             self.work_logger.info(f"fsubject={fsubject}")
             body = self.get_decoded_email_body(email_message)
             task = Task(uuid, ffrom, fsubject, body, self.work_logger)
+            postgres.insert_task(sessin_id, task)
 
             """Определяем типа письма (платёж / не платёж) и вытаскиваем данные платежа в payment."""
             payment = {}
             # TODO: Нужно результаты обработки писем заносить в БД и потом в Email2 получить сводку и отправлять админу.
             # В PayKeeper могут быть платежи не за ДШ а за что-то другое
-            if self.ffrom == 'noreply@server.paykeeper.ru' and self.subject == 'Принята оплата':
+            if ffrom == 'noreply@server.paykeeper.ru' and fsubject == 'Принята оплата':
                 self.logger.debug(f'Это письмо от платежной системы - PayKeeper')
                 print(f'Это письмо от платежной системы - PayKeeper')
-                payment = Parser.parse_paykeeper_html(self.body['body_html'])
+                payment = Parser.parse_paykeeper_html(body['body_html'])
                 self.logger.debug(f'payment = {payment}')
                 task.payment = payment
                 # Это платёж PayKeeper за ДШ
@@ -95,10 +101,10 @@ class Email:
                     self.logger.debug('Это ИНОЙ платёж')
                     # TODO: Нужно результаты обработки писем заносить в БД и потом в Email2 получить сводку и отправлять админу.
             # В Getcourse только платежи за ДШ иного там нет
-            elif self.ffrom == 'no-reply@getcourse.ru' and self.subject.startswith("Поступил платеж"):
+            elif ffrom == 'no-reply@getcourse.ru' and fsubject.startswith("Поступил платеж"):
                 self.logger.debug(f'Это письмо от платежной системы - GetCourse')
                 print(f'Это письмо от платежной системы - GetCourse')
-                payment = Parser.parse_getcourse_html(self.body['body_html'])
+                payment = Parser.parse_getcourse_html(body['body_html'])
                 self.logger.debug(f'payment = {payment}')
                 task.payment = payment
                 # TODO: Процедура обработки payment
@@ -112,6 +118,8 @@ class Email:
             if payment:
                 self.logger.info(f"payment for {ffrom}:\n{payment}")
             # TODO: -----------------------------------------------------------------
+        postgres.execute_dml(f"update public.sessions set time_end=NOW() where id={sessin_id};")
+        self.logger.info("sort_mail end")
 
     def get_decoded_email_body(self, msg):
         """Decode email body.

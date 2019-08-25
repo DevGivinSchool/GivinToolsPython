@@ -36,4 +36,5 @@ class Log:
         custom_logger = logging.getLogger(name)
         custom_logger.setLevel(level)
         custom_logger.addHandler(handler)
+        # print(custom_logger.handlers[0].baseFilename)
         return custom_logger

@@ -53,7 +53,7 @@ class Email:
         postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
                               password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
                               port=config.config['postgres_port'])
-        sessin_id = postgres.execute_dml_id("INSERT INTO sessions(time_begin) VALUES (NOW()) RETURNING id;")
+        sessin_id = postgres.execute_dml_id(f"INSERT INTO sessions(time_begin, log_name) VALUES (NOW(), {self.logger.handlers[0].baseFilename}) RETURNING id;")
         messages = self.client.search('ALL')
         """We go through the cycle in all letters"""
         for uid, message_data in self.client.fetch(messages, 'RFC822').items():

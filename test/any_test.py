@@ -1,3 +1,19 @@
+import requests
+
+url = "https://api.zoom.us/v2/users"
+
+payload = "{\"action\":\"string\",\"user_info\":{\"email\":\"string\",\"type\":\"integer\",\"first_name\":\"string\",\"last_name\":\"string\",\"password\":\"string\"}}"
+headers = {
+    'content-type': "application/json",
+    'authorization': "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6IjdkdHI4Tlk2UTJtOTF1TjBUUW5mZVEiLCJleHAiOjE1NjMyODAwNzgsImlhdCI6MTU2MjY3NTI3OH0.zJ9dghXMZjDydLAOSOW9cbltukYNrrtm4OKhRckPw6o"
+    }
+
+response = requests.request("POST", url, data=payload, headers=headers)
+
+print(response.text)
+
+
+"""
 import PASSWORDS
 import config
 from DBPostgres import DBPostgres
@@ -15,7 +31,7 @@ sql_text = "insert into test (name) values ('mama')"
 count = postgres.execute_dml(sql_text)
 print(count)
 postgres.disconnect()
-
+"""
 
 # import re
 # sum = "1 990.00 руб."

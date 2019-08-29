@@ -53,7 +53,7 @@ class Email:
         postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
                               password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
                               port=config.config['postgres_port'])
-        sessin_id = postgres.execute_dml_id(f"INSERT INTO sessions(time_begin, log_name) VALUES (NOW(), {self.logger.handlers[0].baseFilename}) RETURNING id;")
+        sessin_id = postgres.session_begin()
         messages = self.client.search('ALL')
         """We go through the cycle in all letters"""
         for uid, message_data in self.client.fetch(messages, 'RFC822').items():
@@ -62,7 +62,7 @@ class Email:
             self.work_logger = Log.setup_logger(uuid, config.config['log_dir'], f'{uuid}.log',
                                                 config.config['log_level'])
             email_message = email.message_from_bytes(message_data[b'RFC822'])
-            self.work_logger.info("RAW EMAIL MASSAGE")
+            self.work_logger.info("RAW EMAIL MESSAGE")
             self.work_logger.debug(f"email_message.get_content_charset()={email_message.get_content_charset()}")
             self.work_logger.debug(f"email_message.get_charset()={email_message.get_charset()}")
             self.work_logger.info("=" * 45)
@@ -78,7 +78,7 @@ class Email:
             self.work_logger.info(f"fsubject={fsubject}")
             body = self.get_decoded_email_body(email_message)
             task = Task(uuid, ffrom, fsubject, body, self.work_logger)
-            postgres.insert_task(sessin_id, task)
+            task_id = postgres.create_task(sessin_id, task)
 
             """Определяем типа письма (платёж / не платёж) и вытаскиваем данные платежа в payment."""
             payment = {}
@@ -118,7 +118,7 @@ class Email:
             if payment:
                 self.logger.info(f"payment for {ffrom}:\n{payment}")
             # TODO: -----------------------------------------------------------------
-        postgres.execute_dml(f"update public.sessions set time_end=NOW() where id={sessin_id};")
+        postgres.session_end()
         self.logger.info("sort_mail end")
 
     def get_decoded_email_body(self, msg):

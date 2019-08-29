@@ -49,13 +49,32 @@ class DBPostgres:
         cursor.close()
         return id_
 
-    def insert_task(self, session_id, task):
+    def create_task(self, session_id, task):
         cursor = self.conn.cursor()
         sql_text = """INSERT INTO tasks 
         (time_begin, task_from, task_subject, task_body_type, task_body_html, task_body_text,
-         task_uuid, session_id) VALUES (NOW(), %s, %s, %s, %s, %s, %s, %s);"""
+         task_uuid, session_id) VALUES (NOW(), %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
         values_tuple = (task.ffrom, task.subject, task.body['body_type'], task.body['body_html'],
                         task.body['body_text'], task.uuid, session_id)
+        cursor.execute(sql_text, values_tuple)
+        self.conn.commit()
+        id_ = cursor.fetchone()[0]
+        cursor.close()
+        return id_
+
+    def session_begin(self):
+        cursor = self.conn.cursor()
+        sql_text = """INSERT INTO sessions(time_begin) VALUES (NOW()) RETURNING id;"""
+        cursor.execute(sql_text)
+        self.conn.commit()
+        id_ = cursor.fetchone()[0]
+        cursor.close()
+        return id_
+
+    def session_end(self, session_id):
+        cursor = self.conn.cursor()
+        sql_text = """update sessions set time_end=NOW() where id=%s;"""
+        values_tuple = (session_id,)
         cursor.execute(sql_text, values_tuple)
         self.conn.commit()
         count = cursor.rowcount

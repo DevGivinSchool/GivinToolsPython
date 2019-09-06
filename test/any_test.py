@@ -1,11 +1,14 @@
 import requests
+import PASSWORDS
 
 url = "https://api.zoom.us/v2/users"
 
-payload = "{\"action\":\"string\",\"user_info\":{\"email\":\"string\",\"type\":\"integer\",\"first_name\":\"string\",\"last_name\":\"string\",\"password\":\"string\"}}"
+payload = "{\"action\":\"autoCreate\",\"user_info\":{\"email\":\"test777_test777@givinschool.org\",\"type\":\"1\",\"first_name\":\"Дмитрий\",\"last_name\":\"Салтыков Щедрин\",\"password\":\"ANps11CDkz\"}}"
+print(type(payload))
+payload = payload.encode('utf-8')
 headers = {
     'content-type': "application/json",
-    'authorization': "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6IjdkdHI4Tlk2UTJtOTF1TjBUUW5mZVEiLCJleHAiOjE1NjMyODAwNzgsImlhdCI6MTU2MjY3NTI3OH0.zJ9dghXMZjDydLAOSOW9cbltukYNrrtm4OKhRckPw6o"
+    'authorization': PASSWORDS.logins['zoom_authorization']
     }
 
 response = requests.request("POST", url, data=payload, headers=headers)

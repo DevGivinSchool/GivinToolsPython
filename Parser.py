@@ -11,28 +11,43 @@ import re
 
 def get_clear_payment():
     payment_zero = {"Фамилия": "",
-               "Имя": "",
-               "Фамилия Имя": "",
-               "Электронная почта": "",
-               "Наименование услуги": "",
-               "ID платежа": "",
-               "Оплаченная сумма": "",
-               "Кассовый чек 54-ФЗ": "",
-               "Время проведения": "",
-               "Номер карты": "",
-               "Тип карты": "",
-               "Защита 3-D Secure": "",
-               "Номер транзакции": "",
-               "Код авторизации": ""
-               }
+                    "Имя": "",
+                    "Фамилия Имя": "",
+                    "Электронная почта": "",
+                    "Наименование услуги": "",
+                    "ID платежа": "",
+                    "Оплаченная сумма": "",
+                    "Кассовый чек 54-ФЗ": "",
+                    "Время проведения": "",
+                    "Номер карты": "",
+                    "Тип карты": "",
+                    "Защита 3-D Secure": "",
+                    "Номер транзакции": "",
+                    "Код авторизации": "",
+                    "Платежная система": 0
+                    }
     return payment_zero
+
+
+def payment_normalization(payment):
+    """Bring payment to standard form.
+    Sum = to Integer
+    Last Name, First Name, LN+FN = to UPPER
+    Email = to LOVER
+    """
+    payment["Оплаченная сумма"] = int(payment["Оплаченная сумма"])
+    payment["Фамилия"] = payment["Фамилия"].upper()
+    payment["Имя"] = payment["Имя"].upper()
+    payment["Фамилия Имя"] = payment["Фамилия Имя"].upper()
+    payment["Электронная почта"] = payment["Электронная почта"].lower()
+    return payment
 
 
 def parse_getcourse_html(body_html):
     # TODO: Реализовать отсылку письма админам
-		# TODO: Реализовать аутентификацию на getcourse, чтобы мочь пройти по ссылке в письме на страницу платежа.
-		#       Это можно обойти через вебхуки
-		#       А пока написал на форум - https://stackoverflow.com/questions/57555807/how-to-authenticate-to-this-site-with-python
+    # TODO: Реализовать аутентификацию на getcourse, чтобы мочь пройти по ссылке в письме на страницу платежа.
+    #       Это можно обойти через вебхуки
+    #       А пока написал на форум - https://stackoverflow.com/questions/57555807/how-to-authenticate-to-this-site-with-python
     payment = get_clear_payment()
     tree = html.fromstring(body_html)
     td = tree.xpath('//div/table/tr[1]/td[2]')
@@ -74,10 +89,13 @@ def parse_getcourse_html(body_html):
     fio = payment["Фамилия Имя"].split(" ")
     payment["Фамилия"] = fio[0]
     payment["Имя"] = ''.join(fio[1:])
+    payment["Платежная система"] = 1
+    payment = payment_normalization(payment)
     # print(payment)
     return payment
 
 
+# FOR TEST
 def parse_getcourse_html_test(body_html):
     with open(r"getcourse.html", encoding="utf-8") as file:
         data = file.read()
@@ -138,8 +156,12 @@ def parse_paykeeper_html(body_html):
     fio = payment["Фамилия Имя"].split(" ")
     payment["Фамилия"] = fio[0]
     payment["Имя"] = ''.join(fio[1:])
+    payment["Платежная система"] = 2
+    payment = payment_normalization(payment)
     # print(payment)
     return payment
+
+
 
 
 if __name__ == "__main__":

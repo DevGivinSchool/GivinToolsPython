@@ -53,6 +53,9 @@ class Email:
         postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
                               password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
                               port=config.config['postgres_port'])
+        # TODO: Здесь нужно сделать провеку есть ли незавершенные сесии и если есть отправить письмо админу,
+        #       а в такой сессии после отправки письма проставить признак что отправлено оповещение
+        #       дату отправки проставлять в поле завершения, а признак в поле признака
         sessin_id = postgres.session_begin()
         messages = self.client.search('ALL')
         """We go through the cycle in all letters"""
@@ -77,8 +80,9 @@ class Email:
             self.work_logger.info(f"ffrom={ffrom}")
             self.work_logger.info(f"fsubject={fsubject}")
             body = self.get_decoded_email_body(email_message)
+            # Create Task and insert it to DB
             task = Task(uuid, ffrom, fsubject, body, self.work_logger)
-            task_id = postgres.create_task(sessin_id, task)
+            postgres.create_task(sessin_id, task)
 
             """Определяем типа письма (платёж / не платёж) и вытаскиваем данные платежа в payment."""
             payment = {}
@@ -86,10 +90,12 @@ class Email:
             # В PayKeeper могут быть платежи не за ДШ а за что-то другое
             if ffrom == 'noreply@server.paykeeper.ru' and fsubject == 'Принята оплата':
                 self.logger.debug(f'Это письмо от платежной системы - PayKeeper')
-                print(f'Это письмо от платежной системы - PayKeeper')
+                # print(f'Это письмо от платежной системы - PayKeeper')
                 payment = Parser.parse_paykeeper_html(body['body_html'])
                 self.logger.debug(f'payment = {payment}')
+                # Put in Payment to Task and insert Payment to DB
                 task.payment = payment
+                postgres.create_payment(task)
                 # Это платёж PayKeeper за ДШ
                 if self.check_school_friends(payment["Наименование услуги"]):
                     print('Это платёж Друзья Школы')
@@ -103,10 +109,12 @@ class Email:
             # В Getcourse только платежи за ДШ иного там нет
             elif ffrom == 'no-reply@getcourse.ru' and fsubject.startswith("Поступил платеж"):
                 self.logger.debug(f'Это письмо от платежной системы - GetCourse')
-                print(f'Это письмо от платежной системы - GetCourse')
+                # print(f'Это письмо от платежной системы - GetCourse')
                 payment = Parser.parse_getcourse_html(body['body_html'])
                 self.logger.debug(f'payment = {payment}')
+                # Put in Payment to Task and insert Payment to DB
                 task.payment = payment
+                postgres.create_payment(task)
                 # TODO: Процедура обработки payment
             # Это письмо вообще не платёж
             else:

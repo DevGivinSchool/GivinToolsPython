@@ -76,9 +76,12 @@ def main():
             client.logout()
     except Exception as err:
         print("Unexpected error:", sys.exc_info()[0])
+        print("-"*45)
         print("ERROR:" + err.__str__())
-        print("args:" + err.args)
-        print("args[0]:" + err.args[0])
+        print("-" * 45)
+        print("args:")
+        for arg in err.args:
+            print("args:" + arg)
         # TODO: Реализовать отсылку письма админам
 
     logger.info('END gtp_school_friends')

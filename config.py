@@ -9,6 +9,7 @@ config = dict(
     log_dir=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'log'),
     log_level=logging.DEBUG,
     postgres_dbname='gs',
-    postgres_host='172.26.12.29',
+    # postgres_host='172.26.12.29',
+    postgres_host='localhost',
     postgres_port='5432'
 )

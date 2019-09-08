@@ -15,6 +15,7 @@ mypassword = PASSWORDS.logins['default_ymail_password']
 
 api = yandex_connect.YandexConnectDirectory(token, org_id=None)
 
+
 # Посмотреть список групп
 # department_list = api.department_list_full()
 # print(department_list)
@@ -37,23 +38,54 @@ def randompassword():
     password = password + random.choice(string.ascii_lowercase) + random.choice(string.ascii_lowercase)
     return password
 
-for line in list_fio.splitlines():
-    # Когда копирю из Google Sheets разделитель = Tab
-    line = line.split('\t')
-    # При транслитерации некоторые буквы переводятся в - ' - это нужно заменить
-    line.append((transliterate.translit(line[0], reversed=True) + "_" + transliterate.translit(line[1], reversed=True)).replace("'", ""))
-    print(line)
+
+def create_fio_mail():
+    for line in list_fio.splitlines():
+        # Когда копирю из Google Sheets разделитель = Tab
+        line = line.split('\t')
+        # При транслитерации некоторые буквы переводятся в - ' - это нужно заменить
+        line.append((transliterate.translit(line[0], reversed=True).replace("'", "")
+                     + "_"
+                     + transliterate.translit(line[1], reversed=True)).replace("'", ""))
+        print(line)
+        create_mail(line[2], line[0], line[1])
+        print(randompassword())
+
+
+def create_famaly_mail():
+    for line in list_fio.splitlines():
+        # Когда копирю из Google Sheets разделитель = Tab
+        line = line.split(' ')
+        # При транслитерации некоторые буквы переводятся в - ' - это нужно заменить
+        line.append(transliterate.translit(line[0], reversed=True).replace("'", ""))
+        print(line)
+        password = randompassword()
+        create_mail(line[2], line[0], line[1], password)
+        print(password)
+
+
+def create_mail(nickname_, secname_, name_, password_=mypassword):
+    """
+    Create Yandex mail.
+    :param nickname: Login
+    :param secname: Second Name
+    :param name: First Name
+    """
     try:
         # https://yandex.ru/dev/connect/directory/api/concepts/users/add-user-docpage/
-        result = api.user_add(nickname=line[2], password=mypassword, department_id=4, secname=line[0],
-                              name=line[1])
+        result = api.user_add(nickname=nickname_, password=password_, department_id=4, secname=secname_,
+                              name=name_)
         print(result)
         print(result['email'])
     except yandex_connect.YandexConnectExceptionY as e:
         # print(e.args[0])
         if e.args[0] == 500:
-            print(f"Unhandled exception: Такой пользователь уже существует: {line[2]+'@givinschool.org'}")
+            print(f"Unhandled exception: Такой пользователь уже существует: {nickname_ + '@givinschool.org'}")
         else:
             print("ERROR = " + e.__str__())
     # Вывести пароль в любом случае, т.к. он может пригодиться
-    print(randompassword())
+    # print(password_)
+
+if __name__ == "__main__":
+    create_fio_mail()
+    # create_famaly_mail()

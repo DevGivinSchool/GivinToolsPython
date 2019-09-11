@@ -1,3 +1,14 @@
+
+import string
+import random
+password = "password"
+
+password = password[:-2] + random.choice(string.ascii_lowercase)*2
+print(password)
+
+
+"""
+# Создание пользователя Zoom
 import requests
 import PASSWORDS
 
@@ -14,7 +25,7 @@ headers = {
 response = requests.request("POST", url, data=payload, headers=headers)
 
 print(response.text)
-
+"""
 
 """
 import PASSWORDS

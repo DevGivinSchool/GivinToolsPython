@@ -55,3 +55,8 @@ body2=b'\xc8\xe2\xe0\xed\xee\xe2 \xc8\xe2\xe0\xed\r\n\xcf\xe5\xf2\xf0\xee\xe2 \x
 
 pip freeze > c:\MyGit\GivinToolsPython\requirements.txt
 pip install -r c:\MyGit\GivinToolsPython\requirements.txt
+
+# Модули
+IMAPClient:
+    Github - https://github.com/mjs/imapclient
+    Doc - https://imapclient.readthedocs.io/en/2.1.0/

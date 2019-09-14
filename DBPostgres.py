@@ -56,19 +56,18 @@ class DBPostgres:
          task_uuid, session_id) VALUES (NOW(), %s, %s, %s, %s, %s, %s, %s) RETURNING task_uuid;"""
         values_tuple = (task.ffrom, task.subject, task.body['body_type'], task.body['body_html'],
                         task.body['body_text'], task.uuid, session_id)
+        # cursor.execute(sql_text, values_tuple)
+
         try:
             cursor.execute(sql_text, values_tuple)
-        except psycopg2.Error as e:
+        except psycopg2.errors.UniqueViolation as e:
             print("="*45)
             print("psycopg2.Error::")
             print(e.pgerror)
             print(e.diag.message_detail)
+            raise
 
-            if e.pgcode=="23506":
-                pass
-            else:
-                raise Exception(f'Error database:') from e
-            print("=" * 45)
+
 
 
         self.conn.commit()

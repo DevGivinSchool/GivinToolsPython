@@ -86,7 +86,7 @@ def create_login_mail():
 
 
 def create_ftp_login():
-    """ English login (для технических почт)"""
+    """ FTP login (для ftp сервера)"""
     for line in list_fio.splitlines():
         line = line.split(' ')
         print(transliterate.translit(line[0], reversed=True).replace("'", "").lower())

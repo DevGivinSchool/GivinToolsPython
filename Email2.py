@@ -3,6 +3,7 @@ import re
 import config
 import Parser
 import PASSWORDS
+import traceback
 from Log import Log
 from Task import Task
 from email.header import decode_header
@@ -50,9 +51,13 @@ class Email:
     def sort_mail(self):
         """Sort mail and start work """
         self.logger.info("sort_mail beggin")
-        postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
+        try:
+            postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
                               password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
                               port=config.config['postgres_port'])
+        except Exception as err:
+            print("MAIN ERROR (Postgres):\n" + traceback.format_exc())
+
         # TODO: Здесь нужно сделать провеку есть ли незавершенные сесии и если есть отправить письмо админу,
         #       а в такой сессии после отправки письма проставить признак что отправлено оповещение
         #       дату отправки проставлять в поле завершения, а признак в поле признака

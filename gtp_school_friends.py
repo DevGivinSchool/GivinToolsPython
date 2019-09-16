@@ -59,6 +59,7 @@ import Email2
 import traceback
 from datetime import datetime
 from imapclient import IMAPClient
+from Email2 import Email
 
 # Текущая дата для имени лог файла (без %S)
 now = datetime.now().strftime("%Y%m%d%H%M")
@@ -72,6 +73,7 @@ def main():
         client = IMAPClient(host="imap.yandex.ru", use_uid=True)
         client.login(PASSWORDS.logins['ymail_login'], PASSWORDS.logins['ymail_password'])
         client.select_folder('INBOX')
+        logger.info('Connect Yandex server successful')
     except Exception as err:
         # print("Unexpected error:", sys.exc_info()[0])
         # print("-"*45)
@@ -80,12 +82,12 @@ def main():
         # print("args:")
         # for arg in err.args:
         #     print("args:" + arg)
-        print("MAIN ERROR:\n" + traceback.format_exc())
+        print("MAIN ERROR (Yandex mail):\n" + traceback.format_exc())
         # TODO: Реализовать отсылку письма админам
     finally:
         client.logout()
     # First sort_mail() execution then go to idle mode
-    email = Email2.Email(client, logger)
+    email = Email(client, logger)
     email.sort_mail()
     client.logout()
 

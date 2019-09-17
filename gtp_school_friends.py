@@ -55,11 +55,13 @@ DB: Закрываю сессию работы
 from Log import Log
 import config
 import PASSWORDS
-import Email2
 import traceback
+import sys
 from datetime import datetime
 from imapclient import IMAPClient
 from Email2 import Email
+from alert_to_mail import send_mail
+
 
 # Текущая дата для имени лог файла (без %S)
 now = datetime.now().strftime("%Y%m%d%H%M")
@@ -74,26 +76,25 @@ def main():
         client.login(PASSWORDS.logins['ymail_login'], PASSWORDS.logins['ymail_password'])
         client.select_folder('INBOX')
         logger.info('Connect Yandex server successful')
-    except Exception as err:
+    except Exception as e:
+        client.logout()
         # print("Unexpected error:", sys.exc_info()[0])
         # print("-"*45)
-        # print("ERROR:" + err.__str__())
+        # print("ERROR:" + e.__str__())
         # print("-" * 45)
         # print("args:")
-        # for arg in err.args:
+        # for arg in e.args:
         #     print("args:" + arg)
-        print("MAIN ERROR (Yandex mail):\n" + traceback.format_exc())
-        # TODO: Реализовать отсылку письма админам
-    finally:
-        client.logout()
+        error_text = "MAIN ERROR (Yandex mail):\n" + traceback.format_exc()
+        print(error_text)
+        send_mail(PASSWORDS.logins['admin_emails'], error_text)
+        sys.exit(1)
     # First sort_mail() execution then go to idle mode
     email = Email(client, logger)
     email.sort_mail()
     client.logout()
+    logger.info('END gtp_school_friends')
 
-
-
-logger.info('END gtp_school_friends')
 
 if __name__ == "__main__":
     main()

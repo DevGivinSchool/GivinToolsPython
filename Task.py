@@ -24,5 +24,19 @@ class Task:
         print(f'Task {self.uuid}:\n   from = {self.ffrom}\n   subject = {self.subject}\n')
         self.logger.debug(f'Task {self.uuid}:\n   from = {self.ffrom}\n   subject = {self.subject}\n')
 
-    def run_task(self):
-        pass
+    def task_run(self):
+        """
+        Обработка платежа, пока без обработки шагов
+        :return:
+        """
+        self.logger.info('Payment processing begin')
+        self.logger.info(f'task_run payment = {self.payment}')
+        if self.payment["participant_id"] is None:
+            # This is new participant
+            # TODO Здесь нужно завести нового пользователя
+            pass
+        else:
+            # TODO Здесь нужно проставить отметку уже существующему участнику
+            pass
+
+        self.logger.info('Payment processing end')

@@ -10,22 +10,27 @@ import re
 
 
 def get_clear_payment():
-    payment_zero = {"Фамилия": "",
-                    "Имя": "",
-                    "Фамилия Имя": "",
-                    "Электронная почта": "",
-                    "Наименование услуги": "",
-                    "ID платежа": "",
-                    "Оплаченная сумма": "",
-                    "Кассовый чек 54-ФЗ": "",
-                    "Время проведения": "",
-                    "Номер карты": "",
-                    "Тип карты": "",
-                    "Защита 3-D Secure": "",
-                    "Номер транзакции": "",
-                    "Код авторизации": "",
-                    "Платежная система": 0
-                    }
+    payment_zero = {
+        "payment_id": "",
+        "participant_id": "",
+        "number_of_days": 30,
+        "deadline": "",
+        "Фамилия": "",
+        "Имя": "",
+        "Фамилия Имя": "",
+        "Электронная почта": "",
+        "Наименование услуги": "",
+        "ID платежа": "",
+        "Оплаченная сумма": "",
+        "Кассовый чек 54-ФЗ": "",
+        "Время проведения": "",
+        "Номер карты": "",
+        "Тип карты": "",
+        "Защита 3-D Secure": "",
+        "Номер транзакции": "",
+        "Код авторизации": "",
+        "Платежная система": 0
+    }
     return payment_zero
 
 
@@ -43,11 +48,21 @@ def payment_normalization(payment):
     return payment
 
 
+def payment_computation(payment):
+    # По сумме оплаты вычислить за сколько месяцев оплачено
+    if payment["Оплаченная сумма"] > 10000:
+        payment["number_of_days"] = 180
+    elif payment["Оплаченная сумма"] > 5000:  # от 5000 до 10000
+        payment["number_of_days"] = 90
+
+    return payment
+
+
 def parse_getcourse_html(body_html):
-    # TODO: Реализовать отсылку письма админам
     # TODO: Реализовать аутентификацию на getcourse, чтобы мочь пройти по ссылке в письме на страницу платежа.
     #       Это можно обойти через вебхуки
-    #       А пока написал на форум - https://stackoverflow.com/questions/57555807/how-to-authenticate-to-this-site-with-python
+    #       А пока написал на форум
+    #       https://stackoverflow.com/questions/57555807/how-to-authenticate-to-this-site-with-python
     payment = get_clear_payment()
     tree = html.fromstring(body_html)
     td = tree.xpath('//div/table/tr[1]/td[2]')
@@ -75,6 +90,7 @@ def parse_getcourse_html(body_html):
                 # print(link)
             elif line.startswith('Клиент:'):
                 payment["Фамилия Имя"] = line.split(':')[1].strip()
+                # print(f'1:{payment["Фамилия Имя"]}')
                 # client = line.split(':')[1].strip()
                 # print(client)
             elif line.startswith('Состав заказа:'):
@@ -87,10 +103,17 @@ def parse_getcourse_html(body_html):
     # print(order_list)
     # print("=" * 45)
     fio = payment["Фамилия Имя"].split(" ")
-    payment["Фамилия"] = fio[0]
-    payment["Имя"] = ''.join(fio[1:])
+    # print(f'2:{fio}')
+    payment["Имя"] = fio[0]
+    payment["Фамилия"] = ''.join(fio[1:])
+    # В письме идет сначало имя а потом фамилия
+    payment["Фамилия Имя"] = payment["Фамилия"] + " " + payment["Имя"]
+    # print(f'3:{payment["Фамилия"]}')
+    # print(f'4:{payment["Имя"]}')
+    # print(f'5:{payment["Фамилия Имя"]}')
     payment["Платежная система"] = 1
     payment = payment_normalization(payment)
+    payment = payment_computation(payment)
     # print(payment)
     return payment
 
@@ -133,7 +156,9 @@ def parse_paykeeper_html(body_html):
     payment = get_clear_payment()
     tree = html.fromstring(body_html)
     # print(tree)
-    # Вот такая строка XPath у меня сработала res = tree.xpath("/html/body/table/tbody/tr[2]/td/table/tbody/tr[2]/td/table/tbody/tr/td/table[5]/tbody/tr/td[2]/table")
+    # Вот такая строка XPath у меня сработала
+    # res =
+    # tree.xpath("/html/body/table/tbody/tr[2]/td/table/tbody/tr[2]/td/table/tbody/tr/td/table[5]/tbody/tr/td[2]/table")
     tables = tree.xpath('//table[@width="430"]')
     # print(f"res={tables}")
     for table in tables:
@@ -160,8 +185,6 @@ def parse_paykeeper_html(body_html):
     payment = payment_normalization(payment)
     # print(payment)
     return payment
-
-
 
 
 if __name__ == "__main__":

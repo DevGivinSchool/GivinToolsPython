@@ -1,58 +1,29 @@
+import yandex_mail
+import password_generator
+import yandex_connect
 # На вход подаються строки: Фамилия;Имя (пока из list.py)
 from list import list_fio
 
-import transliterate
-import yandex_connect
-import PASSWORDS
-import string
-import random
-import re
 
-# Токен Яндекса, действует год
-token = PASSWORDS.logins['token_yandex']
-# Единый пароль для всех создаваемых почт
-mypassword = PASSWORDS.logins['default_ymail_password']
-
-api = yandex_connect.YandexConnectDirectory(token, org_id=None)
-
-
-def randompassword(strong=False, long=8):
-    """Генератор пароля для Zoom"""
-    chars = string.ascii_uppercase + string.ascii_lowercase + string.digits
-    if strong:
-        chars = chars + "@#$&"
-    password = ''.join(random.choice(chars) for x in range(long))
-    # Заменить все буквы которые могут быть неправильно поняты пользователями
-    for ch in ['l', 'j', 'i', '0', 'o', 'O']:
-        if ch in password:
-            password = password.replace(ch, random.choice(chars))
-    # Пароль должен содержать хотя бы одну цифру (Zoom), если цифры нет, подставляем на третью позицию случайню цифру
-    if not re.search(r'\d', password):
-        password = password[:2] + random.choice(string.digits) + password[2 + 1:]
-    # В сложном пароле должны быть и спецсимволы, если нет, подставляем на третью позицию
-    chars = set('@#$&', )
-    if not any((c in chars) for c in password):
-        password = password[:2] + random.choice(['@', '#', '$', '&']) + password[2 + 1:]
-    # (Только для Zoom (strong=False)) Два последних символа - два маленькие буквы, так удобнее потом дописывать 55
-    if not strong:
-        password = password[:-2] + random.choice(string.ascii_lowercase) + random.choice(string.ascii_lowercase)
-    return password
-
-
-def create_fio_mail():
+def from_list_create_sf_mails():
     """ Русские Имя и Фамилия (для Друзей Школы)"""
     for line in list_fio.splitlines():
-        # Когда копирю из Google Sheets разделитель = Tab
-        # Бликс	Ирина
+        # Когда копирую из Google Sheets разделитель = Tab
+        # Иванов	Иван
         line = line.split('\t')
         # При транслитерации некоторые буквы переводятся в - ' - это нужно заменить
-        line.append((transliterate.translit(line[0], reversed=True).replace("'", "")
-                     + "_"
-                     + transliterate.translit(line[1], reversed=True)).replace("'", ""))
         print(line)
-        # ['Бликс', 'Ирина', 'Bliks_Irina']
-        create_mail(line[2], line[0], line[1], 4)  # Отдел 4 = @ДРУЗЬЯ_ШКОЛЫ
-        print(randompassword())
+        # ['Иванов', 'Иван']
+        try:
+            yandex_mail.create_yandex_mail(line[0], line[1], department_id_=4)  # Отдел 4 = @ДРУЗЬЯ_ШКОЛЫ
+        except yandex_connect.YandexConnectExceptionY as e:
+            # print(e.args[0])
+            if e.args[0] == 500:
+                print(f"Unhandled exception: Такой пользователь уже существует: {login_ + '@givinschool.org'}")
+            else:
+                print("ERROR = " + e.__str__())
+        # Для почты стандартный пароль, это пароль для Zoom
+        print(password_generator.randompassword(strong=True))
 
 
 def create_femaly_mail():
@@ -63,26 +34,25 @@ def create_femaly_mail():
         # При транслитерации некоторые буквы переводятся в - ' - это нужно заменить
         line.append(transliterate.translit(line[0], reversed=True).replace("'", ""))
         print(line)
-        password = randompassword()
-        create_mail(line[2], line[0], line[1], 1, password)  # Отдел 1 = Все сотрудники
+        password = password_generator.randompassword()
+        # Отдел 1 = Все сотрудники
+        yandex_mail.create_yandex_mail(line[2], line[0], line[1], password, department_id_=1)
         print(password)
 
 
 def create_login_mail():
     """ English login (для технических почт)"""
     for line in list_fio.splitlines():
-        # Когда копирю из Google Sheets разделитель = Tab
-        # Zoom 05	zoom05
-        line = line.split('\t')
-        # <class 'list'>: ['Zoom 05', 'zoom05']
-        # Первое слово пойдет в Имя остальное в Фамилия
+        line = line.split('\t')  # Когда копирю из Google Sheets разделитель = Tab
+        # Первое слово пойдет в Фамилия остальное в Имя
         line.append(line[0].split(' ', maxsplit=1))
-        print(line)
-        # ['Zoom 05', 'zoom05', ['Zoom', '05']]
-        password = randompassword()
-        print(line[1], line[2][1], line[2][0])
-        create_mail(line[1], line[2][1], line[2][0], 3, password)  # Отдел 3 = @СПЕЦПОЧТЫ
-        print(password)
+        print(line)  #
+        password = password_generator.randompassword()
+        print(line[1], line[2][1], line[2][0])  # ['Яцуненко', 'Роман', 'Jatsunenko']
+        # Отдел 3 = @СПЕЦПОЧТЫ
+        yandex_mail.create_yandex_mail(line[1], line[2][1], line[2][0], password, department_id_=3)
+        print(line[2][0].lower())  # login
+        print(password)  # password
 
 
 def create_ftp_login():
@@ -90,37 +60,12 @@ def create_ftp_login():
     for line in list_fio.splitlines():
         line = line.split(' ')
         print(transliterate.translit(line[0], reversed=True).replace("'", "").lower())
-        print(randompassword(strong=True, long=12))
-
-
-def create_mail(nickname_, secname_, name_, department_id_=1, password_=mypassword):
-    """
-    Create Yandex mail.
-    :param nickname_: Login
-    :param secname_: Second Name
-    :param name_: First Name
-    :param department_id_: Номер отдела ID (4 - это Друзья Школы)
-    :param password_: Пароль (у Друзей Школы почтовый пароль один на всех)
-    """
-    try:
-        # https://yandex.ru/dev/connect/directory/api/concepts/users/add-user-docpage/
-        result = api.user_add(nickname=nickname_, password=password_, department_id=department_id_, secname=secname_,
-                              name=name_)
-        print(result)
-        print(result['email'])
-    except yandex_connect.YandexConnectExceptionY as e:
-        # print(e.args[0])
-        if e.args[0] == 500:
-            print(f"Unhandled exception: Такой пользователь уже существует: {nickname_ + '@givinschool.org'}")
-        else:
-            print("ERROR = " + e.__str__())
-    # Вывести пароль в любом случае, т.к. он может пригодиться
-    # print(password_)
+        print(password_generator.randompassword(strong=True, long=12))
 
 
 def show_groups():
     """ Посмотреть список групп"""
-    department_list = api.department_list_full()
+    department_list = yandex_mail.show_groups()
     print(department_list)
     # [{'id': 1, 'name': 'Все сотрудники'}, {'id': 3, 'name': '@СПЕЦПОЧТЫ'}, {'id': 4, 'name': '@ДРУЗЬЯ_ШКОЛЫ'}]
 
@@ -135,7 +80,7 @@ def exit_fn():
 
 if __name__ == "__main__":
     # Русские Имя и Фамилия (для Друзей Школы)
-    # create_fio_mail()
+    # from_list_create_sf_mails()
     # Русские только Фамилия (для почт тех кто в команде)
     # create_femaly_mail()
     # English login (для технических почт)
@@ -143,7 +88,7 @@ if __name__ == "__main__":
     # Посмотреть список групп
     # show_groups()
     # while True:
-    menu = {"1": ("Создание учёток для Друзей Школы", create_fio_mail),
+    menu = {"1": ("Создание учёток для Друзей Школы", from_list_create_sf_mails),
             "2": ("Создание учёток для членов комманды", create_femaly_mail),
             "3": ("Создание технических учёток", create_login_mail),
             "4": ("Логин для FTP", create_ftp_login),

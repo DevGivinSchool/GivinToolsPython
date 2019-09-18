@@ -1,3 +1,7 @@
+import yandex_mail
+import yandex_connect
+
+
 class Task:
     """Kласс для задачи"""
 
@@ -33,10 +37,26 @@ class Task:
         self.logger.info(f'task_run payment = {self.payment}')
         if self.payment["participant_id"] is None:
             # This is new participant
-            # TODO Здесь нужно завести нового пользователя
+            # TODO ОТМЕТИТЬ ОПЛАТУ В БД
             pass
+            # TODO Создать почту
+            try:
+                yandex_mail.create_yandex_mail(line[0], line[1], department_id_=4)  # Отдел 4 = @ДРУЗЬЯ_ШКОЛЫ
+            except yandex_connect.YandexConnectExceptionY as e:
+                # print(e.args[0])
+                if e.args[0] == 500:
+                    print(f"Unhandled exception: Такой пользователь уже существует: {login_ + '@givinschool.org'}")
+                else:
+                    print("ERROR = " + e.__str__())
+            # Для почты стандартный пароль, это пароль для Zoom
+            print(password_generator.randompassword(strong=True))
+            # TODO Написать письмо пользователю
+            # TODO Написать письмо админу чтобы создал Zoom учётку.
         else:
-            # TODO Здесь нужно проставить отметку уже существующему участнику
+            # TODO ОТМЕТИТЬ ОПЛАТУ В БД
+            # TODO Если пользователь был заблокированным, тогда:
+                # TODO Написать письмо пользователю
+                # TODO Написать письмо админу чтобы разблокировал Zoom учётку.
             pass
 
         self.logger.info('Payment processing end')

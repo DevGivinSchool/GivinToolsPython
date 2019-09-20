@@ -148,6 +148,7 @@ class Email:
         self.logger.info("sort_mail end")
 
     def create_payment(self, payment, postgres, task):
+        self.logger.info("create_payment begin")
         self.logger.info(f'payment = {payment}')
         # Put in Payment to Task and insert Payment to DB
         task.payment = payment
@@ -155,6 +156,7 @@ class Email:
         task.payment["payment_id"] = payment_id
         task.payment["participant_id"] = participant_id
         self.logger.info(f"Payment {payment_id} for participant {participant_id} created")
+        self.logger.info("create_payment end")
 
     def get_decoded_email_body(self, msg):
         """Decode email body.

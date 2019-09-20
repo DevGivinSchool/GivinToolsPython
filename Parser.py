@@ -1,6 +1,7 @@
+import datetime
 import requests
-from lxml import html
 import re
+from lxml import html
 
 
 # For debug
@@ -54,7 +55,9 @@ def payment_computation(payment):
         payment["number_of_days"] = 180
     elif payment["Оплаченная сумма"] > 5000:  # от 5000 до 10000
         payment["number_of_days"] = 90
-
+    # Вычисляем до какой даты произведена оплата
+    if isinstance(payment["Время проведения"], datetime.datetime):
+        payment["deadline"] = payment["Время проведения"] + + datetime.timedelta(days=payment["number_of_days"])
     return payment
 
 
@@ -111,7 +114,47 @@ def parse_getcourse_html(body_html):
     # print(f'3:{payment["Фамилия"]}')
     # print(f'4:{payment["Имя"]}')
     # print(f'5:{payment["Фамилия Имя"]}')
+    # У GetCourse в письме дата не указана, поэтому ставлю текущую
+    # TODO Получать дату оплаты для GetCourse по дате и времени самого письма
+    payment["Время проведения"] = datetime.datetime.now()
     payment["Платежная система"] = 1
+    payment = payment_normalization(payment)
+    payment = payment_computation(payment)
+    # print(payment)
+    return payment
+
+
+def parse_paykeeper_html(body_html):
+    payment = get_clear_payment()
+    tree = html.fromstring(body_html)
+    # print(tree)
+    # Вот такая строка XPath у меня сработала
+    # res =
+    # tree.xpath("/html/body/table/tbody/tr[2]/td/table/tbody/tr[2]/td/table/tbody/tr/td/table[5]/tbody/tr/td[2]/table")
+    tables = tree.xpath('//table[@width="430"]')
+    # print(f"res={tables}")
+    for table in tables:
+        trs = table.xpath('.//tr')
+        # print(f"tr={trs}")
+        for td in trs:
+            tds = td.xpath('.//td')
+            # print(f"tds={tds}")
+            text1 = tds[0].text_content()
+            text2 = tds[1].text_content()
+            # print(f"text={text1}|{text2}")
+            # print(f'"{text1}": "",')
+            payment[text1] = text2
+            # print(payment)
+    link = tree.xpath('//a[text()="Ссылка на чек"]/@href')
+    # print(link[0])
+    payment["Кассовый чек 54-ФЗ"] = link[0]
+    payment["Фамилия Имя"] = payment["Фамилия Имя"].strip()
+    payment["Оплаченная сумма"] = payment["Оплаченная сумма"].split(".")[0].replace(" ", "")
+    fio = payment["Фамилия Имя"].split(" ")
+    payment["Фамилия"] = fio[0]
+    payment["Имя"] = ''.join(fio[1:])
+    payment["Время проведения"] = datetime.datetime.strptime(payment["Время проведения"], '%Y-%m-%d %H:%M:%S')
+    payment["Платежная система"] = 2
     payment = payment_normalization(payment)
     payment = payment_computation(payment)
     # print(payment)
@@ -150,41 +193,6 @@ def parse_getcourse_html_test(body_html):
     h1 = tree2.xpath('//h1')
     # print(h1)
     # print(h1.text_content())
-
-
-def parse_paykeeper_html(body_html):
-    payment = get_clear_payment()
-    tree = html.fromstring(body_html)
-    # print(tree)
-    # Вот такая строка XPath у меня сработала
-    # res =
-    # tree.xpath("/html/body/table/tbody/tr[2]/td/table/tbody/tr[2]/td/table/tbody/tr/td/table[5]/tbody/tr/td[2]/table")
-    tables = tree.xpath('//table[@width="430"]')
-    # print(f"res={tables}")
-    for table in tables:
-        trs = table.xpath('.//tr')
-        # print(f"tr={trs}")
-        for td in trs:
-            tds = td.xpath('.//td')
-            # print(f"tds={tds}")
-            text1 = tds[0].text_content()
-            text2 = tds[1].text_content()
-            # print(f"text={text1}|{text2}")
-            # print(f'"{text1}": "",')
-            payment[text1] = text2
-            # print(payment)
-    link = tree.xpath('//a[text()="Ссылка на чек"]/@href')
-    # print(link[0])
-    payment["Кассовый чек 54-ФЗ"] = link[0]
-    payment["Фамилия Имя"] = payment["Фамилия Имя"].strip()
-    payment["Оплаченная сумма"] = payment["Оплаченная сумма"].split(".")[0].replace(" ", "")
-    fio = payment["Фамилия Имя"].split(" ")
-    payment["Фамилия"] = fio[0]
-    payment["Имя"] = ''.join(fio[1:])
-    payment["Платежная система"] = 2
-    payment = payment_normalization(payment)
-    # print(payment)
-    return payment
 
 
 if __name__ == "__main__":

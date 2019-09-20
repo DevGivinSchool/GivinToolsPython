@@ -1,11 +1,51 @@
+tab = {'about': None,
+       'name': {'last': 'МИРОНЮК', 'first': 'НАТАЛЬЯ'},
+       'language': 'ru',
+       'contacts': [{'synthetic': True, 'alias': False, 'main': False, 'type': 'staff', 'value': 'https://staff.yandex.ru/mironjuk_natalja'}, {'synthetic': True, 'alias': False, 'main': True, 'type': 'email', 'value': 'mironjuk_natalja@givinschool.org'}],
+       'gender': 'male',
+       'id': 1130000039994353,
+       'user_type': 'user',
+       'email': 'mironjuk_natalja@givinschool.org',
+       'service_slug': None,
+       'nickname': 'mironjuk_natalja',
+       'birthday': None,
+       'role': 'user',
+       'groups': [],
+       'position': None,
+       'department': {'members_count': 261, 'description': 'Здесь находятся все созданные аккаунты для Друзей Школы. Пароли от почт: HWrqCQR6Wd', 'name': '@ДРУЗЬЯ_ШКОЛЫ', 'created': '2019-05-27T08:28:30.839880Z', 'heads_group_id': 13, 'org_id': 2520809, 'label': 'fr_sc', 'parent_id': 1, 'maillist_type': 'inbox', 'path': '1.4', 'removed': False, 'external_id': None, 'id': 4, 'aliases': []},
+       'timezone': 'Europe/Moscow',
+       'is_dismissed': False,
+       'external_id': None,
+       'is_robot': False,
+       'aliases': []
+       }
+print(tab['email'])
 
+"""
+import datetime
+
+today = datetime.datetime.now()
+print(today)
+print(today + datetime.timedelta(days=30))
+print(today + datetime.timedelta(days=90))
+print(today + datetime.timedelta(days=180))
+today2 = datetime.datetime.strptime('2019-09-11 21:05:45', '%Y-%m-%d %H:%M:%S')
+print(today2)
+print(type(today2))
+print(today2 + datetime.timedelta(days=30))
+print(today2 + datetime.timedelta(days=90))
+print(today2 + datetime.timedelta(days=180))
+"""
+
+
+"""
 import string
 import random
 password = "password"
 
 password = password[:-2] + random.choice(string.ascii_lowercase)*2
 print(password)
-
+"""
 
 """
 # Создание пользователя Zoom

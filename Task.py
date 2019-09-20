@@ -1,6 +1,6 @@
 import yandex_mail
 import yandex_connect
-
+import password_generator
 
 class Task:
     """Kласс для задачи"""
@@ -33,22 +33,31 @@ class Task:
         Обработка платежа, пока без обработки шагов
         :return:
         """
-        self.logger.info('Payment processing begin')
+        self.logger.info('Task_run begin')
         self.logger.info(f'task_run payment = {self.payment}')
         if self.payment["participant_id"] is None:
             # This is new participant
+            # TODO ЗАВЕСТИ НОВОГО ПОЛЬЗОВАТЕЛЯ В БД
+
             # TODO ОТМЕТИТЬ ОПЛАТУ В БД
             pass
             # TODO Создать почту
             try:
-                yandex_mail.create_yandex_mail(line[0], line[1], department_id_=4)  # Отдел 4 = @ДРУЗЬЯ_ШКОЛЫ
+                result = yandex_mail.create_yandex_mail(self.payment["Фамилия"], self.payment["Имя"], department_id_=4)
+                print(f"Email created:{result['email']}")
+                self.logger.info(f"Email created:{result['email']}")
+                # Отдел 4 = @ДРУЗЬЯ_ШКОЛЫ
             except yandex_connect.YandexConnectExceptionY as e:
                 # print(e.args[0])
                 if e.args[0] == 500:
-                    print(f"Unhandled exception: Такой пользователь уже существует: {login_ + '@givinschool.org'}")
+                    print(f'Unhandled exception: Такая почта уже существует: '
+                          f'{self.payment["Фамилия"] + "_" + self.payment["Имя"] + "@givinschool.org"}')
+                    self.logger.info(f'Unhandled exception: Такая почта уже существует: '
+                                     f'{self.payment["Фамилия"] + "_" + self.payment["Имя"] + "@givinschool.org"}')
                 else:
-                    print("ERROR = " + e.__str__())
+                    raise
             # Для почты стандартный пароль, это пароль для Zoom
+            # TODO Вместо этого нужно занести пароль в БД
             print(password_generator.randompassword(strong=True))
             # TODO Написать письмо пользователю
             # TODO Написать письмо админу чтобы создал Zoom учётку.
@@ -59,4 +68,4 @@ class Task:
                 # TODO Написать письмо админу чтобы разблокировал Zoom учётку.
             pass
 
-        self.logger.info('Payment processing end')
+        self.logger.info('Task_run end')

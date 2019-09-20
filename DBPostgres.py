@@ -134,7 +134,7 @@ class DBPostgres:
         cursor = self.conn.cursor()
         sql_text = """INSERT INTO payments(task_uuid, name_of_service, payment_id, amount, participant_id, 
         sales_slip, card_number, card_type, payment_purpose, last_name, first_name, fio, email, payment_system) 
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING payment_id;"""
         values_tuple = (task.uuid, task.payment["Наименование услуги"], task.payment["ID платежа"],
                         task.payment["Оплаченная сумма"], participant_id, task.payment["Кассовый чек 54-ФЗ"],
                         task.payment["Номер карты"], task.payment["Тип карты"], 1, task.payment["Фамилия"],
@@ -239,5 +239,5 @@ if __name__ == "__main__":
 
     # id2 = postgres.find_participant_test("sa_azarov@mail.ru")
     # id2 = postgres.find_participant_test("@azarov_sa")
-    id2 = postgres.find_participant_test("АЗАРОВ СЕРГЕЙ")
-    print(id2)
+    # id2 = postgres.find_participant_test("АЗАРОВ СЕРГЕЙ")
+    # print(id2)

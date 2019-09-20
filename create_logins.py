@@ -3,6 +3,7 @@ import password_generator
 import yandex_connect
 # На вход подаються строки: Фамилия;Имя (пока из list.py)
 from list import list_fio
+from stuff import translit_name
 
 
 def from_list_create_sf_mails():
@@ -19,7 +20,8 @@ def from_list_create_sf_mails():
         except yandex_connect.YandexConnectExceptionY as e:
             # print(e.args[0])
             if e.args[0] == 500:
-                print(f"Unhandled exception: Такой пользователь уже существует: {login_ + '@givinschool.org'}")
+                print(f"Unhandled exception: Такой пользователь уже существует: "
+                      f"{translit_name(line[0]) + '_' + translit_name(line[1]) + '@givinschool.org'}")
             else:
                 print("ERROR = " + e.__str__())
         # Для почты стандартный пароль, это пароль для Zoom
@@ -32,7 +34,7 @@ def create_femaly_mail():
         # Когда копирю из Google Sheets разделитель = Tab
         line = line.split(' ')
         # При транслитерации некоторые буквы переводятся в - ' - это нужно заменить
-        line.append(transliterate.translit(line[0], reversed=True).replace("'", ""))
+        line.append(translit_name(line[0]))
         print(line)
         password = password_generator.randompassword()
         # Отдел 1 = Все сотрудники
@@ -59,7 +61,7 @@ def create_ftp_login():
     """ FTP login (для ftp сервера)"""
     for line in list_fio.splitlines():
         line = line.split(' ')
-        print(transliterate.translit(line[0], reversed=True).replace("'", "").lower())
+        print(translit_name(line[0]))
         print(password_generator.randompassword(strong=True, long=12))
 
 

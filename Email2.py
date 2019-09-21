@@ -68,6 +68,7 @@ class Email:
         #       а в такой сессии после отправки письма проставить признак что отправлено оповещение
         #       дату отправки проставлять в поле завершения, а признак в поле признака
         sessin_id = postgres.session_begin()
+        self.logger.info('=' * 45)
         self.logger.info(f'Start session = {sessin_id}')
         messages = self.client.search('ALL')
         """We go through the cycle in all letters"""
@@ -93,7 +94,7 @@ class Email:
             self.logger.debug(f"fsubject={fsubject}")
             body = self.get_decoded_email_body(email_message)
             # Create Task and insert it to DB
-            task = Task(uuid, ffrom, fsubject, body, self.logger)
+            task = Task(uuid, ffrom, fsubject, body, postgres, self.logger)
             task_is_new = postgres.create_task(sessin_id, task)
             self.logger.info(f"Task {sessin_id}:{uuid}:{task_is_new} begin")
             if task_is_new:
@@ -130,9 +131,9 @@ class Email:
                     # if payment:
                     #    self.logger.info(f"payment for {ffrom}:\n{payment}")
                 except Exception as e:
-                    error_text = "PAYMENT ERROR:\n" + traceback.format_exc()
-                    # print(error_text)
-                    postgres.task_error()
+                    error_text = "TASK ERROR:\n" + traceback.format_exc()
+                    # print(uuid, error_text)
+                    postgres.task_error(error_text, uuid)
                     self.logger.error(error_text)
                     self.logger.info('-' * 45)
                     continue
@@ -144,8 +145,9 @@ class Email:
             # -----------------------------------------------------------------
         postgres.session_end(sessin_id)
         self.logger.info(f'End session = {sessin_id}')
-        # TODO: Нужно результаты обработки писем заносить в БД и потом в Email2 получить сводку и отправлять админу.
+        self.logger.info('=' * 45)
         self.logger.info("sort_mail end")
+        # TODO: Нужно результаты обработки писем заносить в БД и потом в Email2 получить сводку и отправлять админу.
 
     def create_payment(self, payment, postgres, task):
         self.logger.info("create_payment begin")

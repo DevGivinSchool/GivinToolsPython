@@ -24,17 +24,18 @@ class DBPostgres:
         records = cursor.fetchall()
         cursor.close()
         return records
-
-    def execute_dml(self, sql_text):
+    # TODO Переписать все функции в этом файле через execute_dml
+    def execute_dml(self, sql_text, values_tuple):
         """Execute DML operations
+                   :param values_tuple: Values
                    :param sql_text: Query text.
-                   :return: Count rows"""
+                   :return result: (Rows count, ID)"""
         cursor = self.conn.cursor()
-        cursor.execute(sql_text)
+        cursor.execute(sql_text, values_tuple)
         self.conn.commit()
-        count = cursor.rowcount
+        result = (cursor.rowcount, cursor.fetchone()[0])
         cursor.close()
-        return count
+        return result
 
     def execute_dml_id(self, sql_text):
         """Execute DML operations
@@ -99,16 +100,17 @@ class DBPostgres:
         cursor.close()
         return id_
 
-    def task_error(self, error_text):
+    def task_error(self, error_text, task_uuid):
         """
         Log Task error
+        :param task_uuid:
         :param error_text:
         :return:
         """
         cursor = self.conn.cursor()
-        sql_text = """UPDATE task set task_error=%s;"""
-        values_tuple = (error_text,)
-        cursor.execute(sql_text)
+        sql_text = """UPDATE tasks SET task_error=%s WHERE task_uuid=%s;"""
+        values_tuple = (error_text, task_uuid)
+        cursor.execute(sql_text, values_tuple)
         self.conn.commit()
         cursor.close()
 

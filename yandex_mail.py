@@ -3,7 +3,6 @@ import PASSWORDS
 import logging
 from stuff import translit_name
 
-
 logger = logging.getLogger('DBPostgres')
 
 
@@ -19,18 +18,72 @@ def create_yandex_mail(familia_, name_, login_=None, password_=None, department_
     api = get_api()
     # Если пароль пустой то пароль будет стандартный для ДЩ
     if password_ is None:
-        password_ = PASSWORDS.logins['default_ymail_password']  # Единый пароль для всех создаваемых почт для ДШ
-    print(password_)
+        # Единый пароль для всех создаваемых почт для ДШ
+        password_ = PASSWORDS.logins['default_ymail_password']
+    # print(password_)
     logger.debug(f"password_={password_}")
     # Если логин не задан, тогда делаем его вида familia_name
     if login_ is None:
         login_ = translit_name(familia_) + "_" + translit_name(name_)
-    print(login_)
+    # print(login_)
     logger.debug(f"login_={login_}")
     # https://yandex.ru/dev/connect/directory/api/concepts/users/add-user-docpage/
     result = api.user_add(nickname=login_, password=password_, department_id=department_id_, secname=familia_,
                           name=name_)
-    print(result)
+    """
+    result = {
+    'about': None, 
+    'name': {
+        'last': 'Ремнев', 
+        'first': 'Сергей'}, 
+    'language': 'ru', 
+    'contacts': [
+        {'synthetic': True, 
+        'alias': False, 
+        'main': False, 
+        'type': 'staff', 
+        'value': 'https://staff.yandex.ru/remnev_sergej'}, 
+        {'synthetic': True, 
+        'alias': False, 
+        'main': True, 
+        'type': 'email', 
+        'value': 'remnev_sergej@givinschool.org'}
+        ], 
+    'gender': 'male', 
+    'id': 1130000040012028, 
+    'user_type': 'user', 
+    'email': 'remnev_sergej@givinschool.org', 
+    'service_slug': None, 
+    'nickname': 'remnev_sergej', 
+    'birthday': None, 
+    'role': 'user', 
+    'groups': [], 
+    'position': None, 
+    'department': {
+        'members_count': 262, 
+        'description': 'Здесь находятся все созданные аккаунты для Друзей Школы. Пароли от почт: XXX', 
+        'name': '@ДРУЗЬЯ_ШКОЛЫ', 
+        'created': '2019-05-27T08:28:30.839880Z', 
+        'heads_group_id': 13, 
+        'org_id': 2520809, 
+        'label': 'fr_sc', 
+        'parent_id': 1, 
+        'maillist_type': 'inbox', 
+        'path': '1.4', 
+        'removed': False, 
+        'external_id': None, 
+        'id': 4, 
+        'aliases': []}, 
+    'timezone': 'Europe/Moscow', 
+    'is_dismissed': False, 
+    'external_id': None, 
+    'is_robot': False, 
+    'aliases': []
+    }"""
+    # Добавить в возвращаемый словарь логин и пароль
+    result.update({'login_': login_})
+    result.update({'password_': password_})
+    # print(result)
     logger.debug(f"result={result}")
     return result
 

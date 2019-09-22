@@ -76,22 +76,21 @@ def main():
         client.login(PASSWORDS.logins['ymail_login'], PASSWORDS.logins['ymail_password'])
         client.select_folder('INBOX')
         logger.info('Connect Yandex server successful')
-    except Exception as e:
+    except Exception:
         client.logout()
-        # print("Unexpected error:", sys.exc_info()[0])
-        # print("-"*45)
-        # print("ERROR:" + e.__str__())
-        # print("-" * 45)
-        # print("args:")
-        # for arg in e.args:
-        #     print("args:" + arg)
+        # TODO Вынести процедуру опопвещения MAIN ERROR в отдельную процедуру
         error_text = "MAIN ERROR (Yandex mail):\n" + traceback.format_exc()
         print(error_text)
-        send_mail(PASSWORDS.logins['admin_emails'], error_text)
+        logger.error(error_text)
+        logger.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
+        send_mail(PASSWORDS.logins['admin_emails'], "MAIN ERROR (Yandex mail)", error_text)
+        logger.error("Exit with error")
         sys.exit(1)
     # First sort_mail() execution then go to idle mode
     email = Email(client, logger)
     email.sort_mail()
+    # TODO Процедура выявления и оповещения должников.  За 7 и 3 дня отправлять оповещения о необходимости оплаты.
+    # TODO Процедура чистки: 1) Удалять всех заблокированных пользователей больше года
     client.logout()
     logger.info('END gtp_school_friends')
 

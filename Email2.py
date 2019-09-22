@@ -1,19 +1,15 @@
 import email
 import re
-import config
-import Parser
-import PASSWORDS
-import traceback
 import sys
-from Log import Log
-from Task import Task
+import traceback
 from email.header import decode_header
+
+import PASSWORDS
+import Parser
+import config
 from DBPostgres import DBPostgres
+from Task import Task
 from alert_to_mail import send_mail
-
-
-# def string_normalization(msg):
-#    return msg.strip().lstrip("<").rstrip(">")
 
 
 def get_from(line):
@@ -55,13 +51,18 @@ class Email:
         """Sort mail and start work """
         self.logger.info("sort_mail beggin")
         try:
+            self.logger.info("Try connect to DB")
             postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
                                   password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
                                   port=config.config['postgres_port'])
-        except Exception as err:
+        except Exception:
+            # TODO Вынести процедуру опопвещения MAIN ERROR в отдельную процедуру
             error_text = "MAIN ERROR (Postgres):\n" + traceback.format_exc()
             print(error_text)
-            send_mail(PASSWORDS.logins['admin_emails'], error_text)
+            self.logger.error(error_text)
+            self.logger.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
+            send_mail(PASSWORDS.logins['admin_emails'], "MAIN ERROR (Postgres)", error_text)
+            self.logger.error("Exit with error")
             sys.exit(1)
 
         # TODO: Здесь нужно сделать провеку есть ли незавершенные сесии и если есть отправить письмо админу,

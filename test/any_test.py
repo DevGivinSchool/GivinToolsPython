@@ -166,7 +166,7 @@ import string
 import random
 
 
-def randompassword():
+def random_password():
     chars = string.ascii_uppercase + string.ascii_lowercase + string.digits
     # size = random.randint(8, 12) # Размер пароля всегда 10 символов
     size = 10
@@ -179,7 +179,7 @@ def randompassword():
 
 
 for i in range(15):
-    print(randompassword())
+    print(random_password())
 """
 
 # import requests

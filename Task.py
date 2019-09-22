@@ -57,13 +57,13 @@ class Task:
             values_tuple = (self.payment["Фамилия"], self.payment["Имя"],
                             self.payment["Фамилия Имя"], self.payment["Электронная почта"])
             participants_create_result = self.data.execute_dml(self, sql_text, values_tuple)
-            # TODO ОТМЕТИТЬ ОПЛАТУ В БД
-            pass
-            # Создаём почту нововму пользователю в домене @givinschool.org
+            # Отмечаем оплату в БД
+            self.mark_payment_into_db()
+            # Создаём почту новому пользователю в домене @givinschool.org
             try:
                 result = yandex_mail.create_yandex_mail(self.payment["Фамилия"], self.payment["Имя"], department_id_=4)
                 # print(f"Email created:{result['email']}")
-                self.login_ = result['email'];
+                self.login_ = result['email']
                 self.logger.info(f"Email created:{self.login_}")
                 # Отдел 4 = @ДРУЗЬЯ_ШКОЛЫ
             except yandex_connect.YandexConnectExceptionY as e:
@@ -76,7 +76,7 @@ class Task:
                 else:
                     raise
             # Генерация пароля для Zoom (для всех почт пароль одинаковый)
-            self.password_ = password_generator.randompassword(strong=True)
+            self.password_ = password_generator.random_password(strong=True)
             self.logger.info(f"Password:{self.password_}")
             sql_text = """UPDATE participants SET login=%s, password=%s WHERE id=%s;"""
             values_tuple = (self.login_, self.password_, participants_create_result[1])
@@ -84,10 +84,21 @@ class Task:
             # TODO Написать письмо пользователю
             # TODO Написать письмо админу чтобы создал Zoom учётку.
         else:
-            # TODO ОТМЕТИТЬ ОПЛАТУ В БД
+            # Отмечаем оплату в БД
+            self.mark_payment_into_db()
             # TODO Если пользователь был заблокированным, тогда:
                 # TODO Написать письмо пользователю
                 # TODO Написать письмо админу чтобы разблокировал Zoom учётку.
             pass
 
         self.logger.info('Task_run end')
+
+    def mark_payment_into_db(self):
+        self.logger.info("Отмечаем оплату в БД")
+        sql_text = """UPDATE participants 
+        SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=%s, isblocked=false 
+        WHERE id=%s;"""
+        values_tuple = (self.payment["Время проведения"], self.payment["number_of_days"],
+                        self.payment["deadline"], self.payment["until_date"],
+                        self.payment["participant_id"])
+        self.data.execute_dml(self, sql_text, values_tuple)

@@ -33,15 +33,15 @@ def from_list_create_sf_mails():
 def create_femaly_mail():
     """ Русские только Фамилия (для почт тех кто в команде)"""
     for line in list_fio.splitlines():
-        # Когда копирю из Google Sheets разделитель = Tab
         line = line.split(' ')
-        # При транслитерации некоторые буквы переводятся в - ' - это нужно заменить
-        line.append(translit_name(line[0]))
-        print(line)
-        password = password_generator.random_password()
+        # print(line)
+        password = password_generator.random_password(strong=True, long=8)
         # Отдел 1 = Все сотрудники
-        yandex_mail.create_yandex_mail(line[2], line[0], line[1], password, department_id_=1)
-        print(password)
+        result = yandex_mail.create_yandex_mail(line[0], line[1], translit_name(line[0]), password, department_id_=1)
+        # print(password)
+        print(f"Для: {result['name']['last']} {result['name']['first']}")
+        print(f"Создана почта: {result['email']}")
+        print(f"Пароль: {result['password_']}")
 
 
 def create_login_mail():
@@ -63,8 +63,9 @@ def create_ftp_login():
     """ FTP login (для ftp сервера)"""
     for line in list_fio.splitlines():
         line = line.split(' ')
-        print(translit_name(line[0]))
-        print(password_generator.random_password(strong=True, long=12))
+        print(f"Login: {translit_name(line[0]).lower()}")
+        print(f"Password: {password_generator.randompassword(strong=True, long=12)}")
+        print("-"*45)
 
 
 def show_groups():

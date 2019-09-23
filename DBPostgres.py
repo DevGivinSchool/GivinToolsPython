@@ -24,6 +24,7 @@ class DBPostgres:
         records = cursor.fetchall()
         cursor.close()
         return records
+
     # TODO Переписать все функции в этом файле через execute_dml
     def execute_dml(self, sql_text, values_tuple):
         """Execute DML operations
@@ -33,9 +34,9 @@ class DBPostgres:
         cursor = self.conn.cursor()
         cursor.execute(sql_text, values_tuple)
         self.conn.commit()
-        result = (cursor.rowcount, cursor.fetchone()[0])
+        # count = cursor.rowcount
         cursor.close()
-        return result
+        return cursor.rowcount
 
     def execute_dml_id(self, sql_text):
         """Execute DML operations

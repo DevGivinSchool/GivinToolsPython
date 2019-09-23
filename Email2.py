@@ -95,7 +95,7 @@ class Email:
             self.logger.debug(f"fsubject={fsubject}")
             body = self.get_decoded_email_body(email_message)
             # Create Task and insert it to DB
-            task = Task(uuid, ffrom, fsubject, body, postgres, self.logger)
+            task = Task(uuid, ffrom, fsubject, body, self.logger, postgres)
             task_is_new = postgres.create_task(sessin_id, task)
             self.logger.info(f"Task {sessin_id}:{uuid}:{task_is_new} begin")
             if task_is_new:

@@ -74,6 +74,7 @@ def main():
     try:
         client = IMAPClient(host="imap.yandex.ru", use_uid=True)
         client.login(PASSWORDS.logins['ymail_login'], PASSWORDS.logins['ymail_password'])
+        print(client.list_folders())
         client.select_folder('INBOX')
         logger.info('Connect Yandex server successful')
     except Exception:

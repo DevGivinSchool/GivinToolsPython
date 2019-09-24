@@ -60,6 +60,9 @@ class Task:
             print(type(participants_create_result))
             print(participants_create_result)
             print(participants_create_result[1])
+            self.logger.info(type(participants_create_result))
+            self.logger.info(participants_create_result)
+            self.logger.info(participants_create_result[1])
             # Отмечаем оплату в БД
             self.mark_payment_into_db()
             # Создаём почту новому пользователю в домене @givinschool.org

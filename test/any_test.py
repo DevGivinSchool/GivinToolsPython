@@ -2,13 +2,15 @@ from imapclient import IMAPClient
 import PASSWORDS
 
 
-def move_email(server, emailid, dest_folder):
-    output = []
-    result = server.uid('COPY', emailid, "")
-    output.append(result)
-    if result[0] == 'OK':
-        result = mov, data = server.uid('STORE', emailid, '+FLAGS', '(\Deleted Items)')
-        server.expunge()
+def move_email_to_trash(server, emailid):
+    # output = []
+    # result = server.uid('MOVE', emailid, "Trash")
+    result = server.move(emailid, "Trash")
+    print(result)
+    #output.append(result)
+    #if result[0] == 'OK':
+    #    result = mov, data = server.uid('STORE', emailid, '+FLAGS', '(\Deleted Items)')
+    #    server.expunge()
 
 
 client = IMAPClient(host="imap.yandex.ru", use_uid=True)
@@ -18,8 +20,11 @@ messages = client.search('ALL')
 print(messages)
 # [260, 263, 271, 276, 280, 285]
 """We go through the cycle in all letters"""
-for uid, message_data in client.fetch(messages, 'RFC822').items():
-    pass
+#for uid, message_data in client.fetch(messages, 'RFC822').items():
+#    pass
+move_email_to_trash(client, 260)
+#result = client.get_flags(263)
+print(result)
 
 """
 tab = {'about': None,

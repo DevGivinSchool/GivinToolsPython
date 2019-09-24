@@ -47,6 +47,10 @@ class Email:
         self.logger = logger  # Общий logger для всей программы
         # self.work_logger = logger  # Частный логгер для каждого письма а затем и Task
 
+    def delete_mail(self, uuid):
+        self.logger.info(f"Удаляю сообщение: {uuid}")
+        self.clent.delete_messages(uuid)
+
     def sort_mail(self):
         """Sort mail and start work """
         self.logger.info("sort_mail beggin")
@@ -118,6 +122,7 @@ class Email:
                         else:
                             # print('Это ИНОЙ платёж')
                             self.logger.info('Это ИНОЙ платёж')
+                            self.delete_mail(self, uuid)
                     # В Getcourse только платежи за ДШ иного там нет
                     elif ffrom == 'no-reply@getcourse.ru' and fsubject.startswith("Поступил платеж"):
                         self.logger.info(f'Это письмо от платежной системы - GetCourse')
@@ -129,6 +134,9 @@ class Email:
                     else:
                         self.logger.info(f'Это письмо НЕ от платежных систем - ничего с ним не делаю, пока...')
                         # print(f'Это письмо НЕ от платежных систем - ничего с ним не делаю, пока...')
+                        # Если в тема письма начинается на # значит это команда иначе удалить
+                        if not fsubject.startswith("#"):
+                            self.delete_mail(self, uuid)
                     # if payment:
                     #    self.logger.info(f"payment for {ffrom}:\n{payment}")
                 except Exception as e:

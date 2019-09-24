@@ -74,7 +74,17 @@ def main():
     try:
         client = IMAPClient(host="imap.yandex.ru", use_uid=True)
         client.login(PASSWORDS.logins['ymail_login'], PASSWORDS.logins['ymail_password'])
-        print(client.list_folders())
+        # Список папко
+        # print(client.list_folders())
+        """
+        [((b'\\Unmarked', b'\\HasNoChildren', b'\\Drafts'), b'|', 'Drafts'),
+        ((b'\\Unmarked', b'\\NoInferiors'), b'|', 'INBOX'),
+        ((b'\\Unmarked', b'\\HasNoChildren'), b'|', 'Outbox'),
+        ((b'\\Unmarked', b'\\HasNoChildren'), b'|', 'Queue'),
+        ((b'\\Unmarked', b'\\HasNoChildren', b'\\Sent'), b'|', 'Sent'),
+        ((b'\\Unmarked', b'\\HasNoChildren', b'\\Junk'), b'|', 'Spam'),
+        ((b'\\Unmarked', b'\\HasNoChildren', b'\\Trash'), b'|', 'Trash')]
+        """
         client.select_folder('INBOX')
         logger.info('Connect Yandex server successful')
     except Exception:

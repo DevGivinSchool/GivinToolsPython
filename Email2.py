@@ -49,7 +49,7 @@ class Email:
 
     def delete_mail(self, uuid):
         self.logger.info(f"Удаляю сообщение: {uuid}")
-        self.clent.delete_messages(uuid)
+        self.client.delete_messages(uuid)
 
     def sort_mail(self):
         """Sort mail and start work """
@@ -122,7 +122,7 @@ class Email:
                         else:
                             # print('Это ИНОЙ платёж')
                             self.logger.info('Это ИНОЙ платёж')
-                            self.delete_mail(self, uuid)
+                            self.delete_mail(uuid)
                     # В Getcourse только платежи за ДШ иного там нет
                     elif ffrom == 'no-reply@getcourse.ru' and fsubject.startswith("Поступил платеж"):
                         self.logger.info(f'Это письмо от платежной системы - GetCourse')
@@ -136,7 +136,7 @@ class Email:
                         # print(f'Это письмо НЕ от платежных систем - ничего с ним не делаю, пока...')
                         # Если в тема письма начинается на # значит это команда иначе удалить
                         if not fsubject.startswith("#"):
-                            self.delete_mail(self, uuid)
+                            self.delete_mail(uuid)
                     # if payment:
                     #    self.logger.info(f"payment for {ffrom}:\n{payment}")
                 except Exception as e:
@@ -152,6 +152,7 @@ class Email:
             # print('-' * 45)
             self.logger.info('-' * 45)
             # -----------------------------------------------------------------
+        self.client.expunge()
         postgres.session_end(sessin_id)
         self.logger.info(f'End session = {sessin_id}')
         self.logger.info('=' * 45)

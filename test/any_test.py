@@ -1,3 +1,27 @@
+from imapclient import IMAPClient
+import PASSWORDS
+
+
+def move_email(server, emailid, dest_folder):
+    output = []
+    result = server.uid('COPY', emailid, "")
+    output.append(result)
+    if result[0] == 'OK':
+        result = mov, data = server.uid('STORE', emailid, '+FLAGS', '(\Deleted Items)')
+        server.expunge()
+
+
+client = IMAPClient(host="imap.yandex.ru", use_uid=True)
+client.login(PASSWORDS.logins['ymail_login'], PASSWORDS.logins['ymail_password'])
+client.select_folder('INBOX')
+messages = client.search('ALL')
+print(messages)
+# [260, 263, 271, 276, 280, 285]
+"""We go through the cycle in all letters"""
+for uid, message_data in client.fetch(messages, 'RFC822').items():
+    pass
+
+"""
 tab = {'about': None,
        'name': {'last': 'МИРОНЮК', 'first': 'НАТАЛЬЯ'},
        'language': 'ru',
@@ -20,6 +44,7 @@ tab = {'about': None,
        'aliases': []
        }
 print(tab['email'])
+"""
 
 """
 import datetime
@@ -36,7 +61,6 @@ print(today2 + datetime.timedelta(days=30))
 print(today2 + datetime.timedelta(days=90))
 print(today2 + datetime.timedelta(days=180))
 """
-
 
 """
 import string

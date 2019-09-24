@@ -57,7 +57,7 @@ def payment_computation(payment):
         payment["number_of_days"] = 90
     # Вычисляем до какой даты произведена оплата
     if isinstance(payment["Время проведения"], datetime.datetime):
-        payment["deadline"] = payment["Время проведения"] + + datetime.timedelta(days=payment["number_of_days"])
+        payment["deadline"] = payment["Время проведения"] + datetime.timedelta(days=payment["number_of_days"])
     return payment
 
 

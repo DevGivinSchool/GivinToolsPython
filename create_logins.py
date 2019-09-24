@@ -26,45 +26,46 @@ def from_list_create_sf_mails():
             else:
                 print("ERROR = " + e.__str__())
         # Для почты стандартный пароль, это пароль для Zoom
-        print(f"Создана почта: {result['email']}")
+        print(create_info_str(result))
         print(f"Пароль для Zoom: {password_generator.random_password(strong=True, zoom=True)}")
 
 
 def create_femaly_mail():
     """ Русские только Фамилия (для почт тех кто в команде)"""
     for line in list_fio.splitlines():
-        # Когда копирю из Google Sheets разделитель = Tab
         line = line.split(' ')
-        # При транслитерации некоторые буквы переводятся в - ' - это нужно заменить
-        line.append(translit_name(line[0]))
-        print(line)
-        password = password_generator.random_password()
+        # print(line)
+        password = password_generator.random_password(strong=True, long=8)
         # Отдел 1 = Все сотрудники
-        yandex_mail.create_yandex_mail(line[2], line[0], line[1], password, department_id_=1)
-        print(password)
+        result = yandex_mail.create_yandex_mail(line[0], line[1], translit_name(line[0]), password, department_id_=1)
+        # print(password)
+        print(create_info_str(result))
 
 
 def create_login_mail():
     """ English login (для технических почт)"""
     for line in list_fio.splitlines():
+        # Отдел Кадров	hr
         line = line.split('\t')  # Когда копирю из Google Sheets разделитель = Tab
-        # Первое слово пойдет в Фамилия остальное в Имя
-        line.append(line[0].split(' ', maxsplit=1))
-        print(line)  #
-        password = password_generator.random_password()
-        print(line[1], line[2][1], line[2][0])  # ['Яцуненко', 'Роман', 'Jatsunenko']
+        print(line)
+        login = line[1].lower()
+        line = line[0].split(' ', maxsplit=1)
+        familia = line[0]
+        name = line[1]
+        password = password_generator.random_password(strong=True, long=8)
+        print(familia, name, login)
         # Отдел 3 = @СПЕЦПОЧТЫ
-        yandex_mail.create_yandex_mail(line[1], line[2][1], line[2][0], password, department_id_=3)
-        print(line[2][0].lower())  # login
-        print(password)  # password
+        result = yandex_mail.create_yandex_mail(familia, name, login, password, department_id_=3)
+        print(create_info_str(result))
 
 
 def create_ftp_login():
     """ FTP login (для ftp сервера)"""
     for line in list_fio.splitlines():
         line = line.split(' ')
-        print(translit_name(line[0]))
-        print(password_generator.random_password(strong=True, long=12))
+        print(f"Login: {translit_name(line[0]).lower()}")
+        print(f"Password: {password_generator.randompassword(strong=True, long=12)}")
+        print("-"*45)
 
 
 def show_groups():
@@ -72,6 +73,14 @@ def show_groups():
     department_list = yandex_mail.show_groups()
     print(department_list)
     # [{'id': 1, 'name': 'Все сотрудники'}, {'id': 3, 'name': '@СПЕЦПОЧТЫ'}, {'id': 4, 'name': '@ДРУЗЬЯ_ШКОЛЫ'}]
+
+
+def create_info_str(result):
+    print(f"Для: {result['name']['last']} {result['name']['first']}")
+    print(f"Создана почта: {result['email']}")
+    print(f"Пароль: {result['password_']}")
+    return f"Привет {result['name']['last']} {result['name']['first']}. Твоя почта в Школе Гивина (Яндека.Почта - " \
+           f"https://mail.yandex.ru). Для входа используй имя - {result['email']} и пароль - {result['password_']} "
 
 
 def invalid():

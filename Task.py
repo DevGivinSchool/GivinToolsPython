@@ -56,7 +56,13 @@ class Task:
             sql_text = """INSERT INTO participants(last_name, first_name, fio, email) VALUES (%s, %s, %s, %s);"""
             values_tuple = (self.payment["Фамилия"], self.payment["Имя"],
                             self.payment["Фамилия Имя"], self.payment["Электронная почта"])
-            participants_create_result = self.data.execute_dml(self, sql_text, values_tuple)
+            participants_create_result = self.database.execute_dml(self, sql_text, values_tuple)
+            print(type(participants_create_result))
+            print(participants_create_result)
+            print(participants_create_result[1])
+            self.logger.info(type(participants_create_result))
+            self.logger.info(participants_create_result)
+            self.logger.info(participants_create_result[1])
             # Отмечаем оплату в БД
             self.mark_payment_into_db()
             # Создаём почту новому пользователю в домене @givinschool.org
@@ -80,7 +86,7 @@ class Task:
             self.logger.info(f"Password:{self.password_}")
             sql_text = """UPDATE participants SET login=%s, password=%s WHERE id=%s;"""
             values_tuple = (self.login_, self.password_, participants_create_result[1])
-            self.data.execute_dml(self, sql_text, values_tuple)
+            self.database.execute_dml(sql_text, values_tuple)
             # TODO Написать письмо пользователю
             # TODO Написать письмо админу чтобы создал Zoom учётку.
         else:
@@ -94,11 +100,15 @@ class Task:
         self.logger.info('Task_run end')
 
     def mark_payment_into_db(self):
+        """
+        Отмечаем оплату в БД. Поле until_date (отсрочка до) обнуляется.
+        :return:
+        """
         self.logger.info("Отмечаем оплату в БД")
         sql_text = """UPDATE participants 
         SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=%s, isblocked=false 
         WHERE id=%s;"""
         values_tuple = (self.payment["Время проведения"], self.payment["number_of_days"],
-                        self.payment["deadline"], self.payment["until_date"],
+                        self.payment["deadline"], None,
                         self.payment["participant_id"])
-        self.data.execute_dml(self, sql_text, values_tuple)
+        self.database.execute_dml(sql_text, values_tuple)

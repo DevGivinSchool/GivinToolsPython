@@ -47,6 +47,10 @@ class Email:
         self.logger = logger  # Общий logger для всей программы
         # self.work_logger = logger  # Частный логгер для каждого письма а затем и Task
 
+    def delete_mail(self, uuid):
+        self.logger.info(f"Удаляю сообщение: {uuid}")
+        self.client.delete_messages(uuid)
+
     def sort_mail(self):
         """Sort mail and start work """
         self.logger.info("sort_mail beggin")
@@ -95,7 +99,7 @@ class Email:
             self.logger.debug(f"fsubject={fsubject}")
             body = self.get_decoded_email_body(email_message)
             # Create Task and insert it to DB
-            task = Task(uuid, ffrom, fsubject, body, postgres, self.logger)
+            task = Task(uuid, ffrom, fsubject, body, self.logger, postgres)
             task_is_new = postgres.create_task(sessin_id, task)
             self.logger.info(f"Task {sessin_id}:{uuid}:{task_is_new} begin")
             if task_is_new:
@@ -118,6 +122,7 @@ class Email:
                         else:
                             # print('Это ИНОЙ платёж')
                             self.logger.info('Это ИНОЙ платёж')
+                            self.delete_mail(uuid)
                     # В Getcourse только платежи за ДШ иного там нет
                     elif ffrom == 'no-reply@getcourse.ru' and fsubject.startswith("Поступил платеж"):
                         self.logger.info(f'Это письмо от платежной системы - GetCourse')
@@ -129,6 +134,9 @@ class Email:
                     else:
                         self.logger.info(f'Это письмо НЕ от платежных систем - ничего с ним не делаю, пока...')
                         # print(f'Это письмо НЕ от платежных систем - ничего с ним не делаю, пока...')
+                        # Если в тема письма начинается на # значит это команда иначе удалить
+                        if not fsubject.startswith("#"):
+                            self.delete_mail(uuid)
                     # if payment:
                     #    self.logger.info(f"payment for {ffrom}:\n{payment}")
                 except Exception as e:
@@ -144,6 +152,7 @@ class Email:
             # print('-' * 45)
             self.logger.info('-' * 45)
             # -----------------------------------------------------------------
+        self.client.expunge()
         postgres.session_end(sessin_id)
         self.logger.info(f'End session = {sessin_id}')
         self.logger.info('=' * 45)

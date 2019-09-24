@@ -47,9 +47,9 @@ class Email:
         self.logger = logger  # Общий logger для всей программы
         # self.work_logger = logger  # Частный логгер для каждого письма а затем и Task
 
-    def delete_mail(self, uuid):
+    def move_email_to_trash(self, uuid):
         self.logger.info(f"Удаляю сообщение: {uuid}")
-        self.client.delete_messages(uuid)
+        self.client.move(uuid, "Trash")
 
     def sort_mail(self):
         """Sort mail and start work """
@@ -61,20 +61,20 @@ class Email:
                                   port=config.config['postgres_port'])
         except Exception:
             # TODO Вынести процедуру опопвещения MAIN ERROR в отдельную процедуру
-            error_text = "MAIN ERROR (Postgres):\n" + traceback.format_exc()
+            error_text = \
+                f"MAIN ERROR (Postgres):\n{traceback.format_exc()}"
             print(error_text)
             self.logger.error(error_text)
             self.logger.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
             send_mail(PASSWORDS.logins['admin_emails'], "MAIN ERROR (Postgres)", error_text)
             self.logger.error("Exit with error")
             sys.exit(1)
-
         # TODO: Здесь нужно сделать провеку есть ли незавершенные сесии и если есть отправить письмо админу,
-        #       а в такой сессии после отправки письма проставить признак что отправлено оповещение
-        #       дату отправки проставлять в поле завершения, а признак в поле признака
-        sessin_id = postgres.session_begin()
+        #  а в такой сессии после отправки письма проставить признак что отправлено оповещение дату отправки
+        #  проставлять в поле завершения, а признак в поле признака
+        session_id = postgres.session_begin()
         self.logger.info('=' * 45)
-        self.logger.info(f'Start session = {sessin_id}')
+        self.logger.info(f'Start session = {session_id}')
         messages = self.client.search('ALL')
         """We go through the cycle in all letters"""
         for uid, message_data in self.client.fetch(messages, 'RFC822').items():
@@ -100,8 +100,8 @@ class Email:
             body = self.get_decoded_email_body(email_message)
             # Create Task and insert it to DB
             task = Task(uuid, ffrom, fsubject, body, self.logger, postgres)
-            task_is_new = postgres.create_task(sessin_id, task)
-            self.logger.info(f"Task {sessin_id}:{uuid}:{task_is_new} begin")
+            task_is_new = postgres.create_task(session_id, task)
+            self.logger.info(f"Task {session_id}:{uuid}:{task_is_new} begin")
             if task_is_new:
                 try:
                     """Определяем типа письма (платёж / не платёж) и вытаскиваем данные платежа в payment."""
@@ -118,11 +118,12 @@ class Email:
                             self.logger.info('Это платёж Друзья Школы')
                             self.create_payment(payment, postgres, task)
                             task.task_run()
+                            self.move_email_to_trash(uuid)
                         # Это платёж PayKeeper но НЕ за ДШ
                         else:
                             # print('Это ИНОЙ платёж')
                             self.logger.info('Это ИНОЙ платёж')
-                            self.delete_mail(uuid)
+                            self.move_email_to_trash(uuid)
                     # В Getcourse только платежи за ДШ иного там нет
                     elif ffrom == 'no-reply@getcourse.ru' and fsubject.startswith("Поступил платеж"):
                         self.logger.info(f'Это письмо от платежной системы - GetCourse')
@@ -130,34 +131,50 @@ class Email:
                         payment = Parser.parse_getcourse_html(body['body_html'])
                         self.create_payment(payment, postgres, task)
                         task.task_run()
+                        self.move_email_to_trash(uuid)
                     # Это письмо вообще не платёж
                     else:
                         self.logger.info(f'Это письмо НЕ от платежных систем - ничего с ним не делаю, пока...')
                         # print(f'Это письмо НЕ от платежных систем - ничего с ним не делаю, пока...')
-                        # Если в тема письма начинается на # значит это команда иначе удалить
+                        # Если в тема письма начинается на #
+                        # значит это команда иначе удалить
                         if not fsubject.startswith("#"):
-                            self.delete_mail(uuid)
+                            self.move_email_to_trash(uuid)
                     # if payment:
                     #    self.logger.info(f"payment for {ffrom}:\n{payment}")
-                except Exception as e:
+                except Exception:
                     error_text = "TASK ERROR:\n" + traceback.format_exc()
                     # print(uuid, error_text)
                     postgres.task_error(error_text, uuid)
                     self.logger.error(error_text)
+                    if uuid is not None:
+                        self.logger.error(f"UUID: {uuid}")
+                    if ffrom is not None:
+                        self.logger.error(f"FROM: {ffrom}")
+                    if fsubject is not None:
+                        self.logger.error(f"SUBJECT: {fsubject}")
+                    if body is not None:
+                        if body['body_type'] == 'mix':
+                            self.logger.error(f"BODY\n: {body['body_text']}")
+                        elif body['body_type'] == 'html':
+                            self.logger.error(f"BODY\n: {body['body_html']}")
+                        else:
+                            self.logger.error(f"BODY\n: {body['body_text']}")
                     self.logger.info('-' * 45)
                     continue
             else:
-                self.logger.info(f"Это письмо уже обрабатывалось")
-            self.logger.info(f"Task {sessin_id}:{uuid}:{task_is_new} end")
+                self.logger.warning(f"ВНИМАНИЕ: Это письмо уже обрабатывалось!")
+            self.logger.info(f"Task {session_id}:{uuid}:{task_is_new} end")
             # print('-' * 45)
             self.logger.info('-' * 45)
             # -----------------------------------------------------------------
         self.client.expunge()
-        postgres.session_end(sessin_id)
-        self.logger.info(f'End session = {sessin_id}')
+        postgres.session_end(session_id)
+        self.logger.info(f'End session = {session_id}')
         self.logger.info('=' * 45)
         self.logger.info("sort_mail end")
-        # TODO: Нужно результаты обработки писем заносить в БД и потом в Email2 получить сводку и отправлять админу.
+        # TODO: Сводка не нужна. Если всё хорошо то мне об этом и знать не нужно,
+        #  нужны только ошибки и оповещения о работа которые мне нужно выполнить
 
     def create_payment(self, payment, postgres, task):
         self.logger.info("create_payment begin")

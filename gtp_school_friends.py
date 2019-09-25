@@ -1,18 +1,24 @@
-# Получение списка должников и его отправка (можно пока вручную - Как???)
-# TODO Отметить все + удалить все письма
 # TODO Занести в БД таблицу
 # TODO Запускать робота и смотреть чего да как
 
-# Отправлять ошибки выполнения Task на почту админов
+# TODO Отправлять ошибки выполнения каждой Task на почту админов
 
 # TODO Сделать почтового бота. How to Make a Python Email Bot -
 #  https://repl.it/talk/learn/How-to-Make-a-Python-Email-Bot/8194/20686
 
-# Оповещение пользователей по почте
-# Оповещение админов о работах по почте
+# TODO Оповещение пользователей по почте
+# TODO Оповещение админов о работах по почте
 
-
-
+# TODO Получение списка должников и его отправка (пока вручную запросом и потом через выгрузку в TXT и в Excel)
+"""
+SELECT
+id, last_name, first_name, fio, email, telegram, time_begin, time_end, login, password,
+payment_date, number_of_days, deadline, comment, days_until_deadline, until_date, isblocked
+FROM public.participants
+WHERE deadline - CURRENT_TIMESTAMP < INTERVAL '0 days'
+      and isblocked = false
+order by payment_date;
+"""
 
 # Оповещение пользователей в Телеграм
 # Оповещение админов о работах в Телеграм

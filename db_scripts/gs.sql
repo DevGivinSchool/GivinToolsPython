@@ -53,7 +53,7 @@ CREATE TABLE public.participants (
     number_of_days integer,
     deadline date,
     comment character varying(4000),
-    until_date timestamp with time zone,
+    until_date date,
     isblocked boolean DEFAULT false NOT NULL
 );
 

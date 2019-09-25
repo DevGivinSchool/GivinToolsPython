@@ -4,12 +4,6 @@ import re
 from lxml import html
 
 
-# For debug
-# with open(r"getcourse.html", encoding="utf-8") as file:
-#     data = file.read()
-#     tree = html.fromstring(data)
-
-
 def get_clear_payment():
     payment_zero = {
         "payment_id": "",

@@ -240,7 +240,7 @@ if __name__ == "__main__":
                           password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
                           port=config.config['postgres_port'])
 
-    # id2 = postgres.find_participant_test("sa_azarov@mail.ru")
-    # id2 = postgres.find_participant_test("@azarov_sa")
-    # id2 = postgres.find_participant_test("АЗАРОВ СЕРГЕЙ")
+    # id2 = postgres.find_participant_test("ivan@mail.ru")
+    # id2 = postgres.find_participant_test("@ivan")
+    # id2 = postgres.find_participant_test("ИВАНОВ ИВАН")
     # print(id2)

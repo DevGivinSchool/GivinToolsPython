@@ -105,10 +105,10 @@ class Task:
         :return:
         """
         self.logger.info("Отмечаем оплату в БД")
+        # Коментарий и поле отсрочки обнуляются
         sql_text = """UPDATE participants 
-        SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=%s, isblocked=false 
+        SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, isblocked=false 
         WHERE id=%s;"""
         values_tuple = (self.payment["Время проведения"], self.payment["number_of_days"],
-                        self.payment["deadline"], None,
-                        self.payment["participant_id"])
+                        self.payment["deadline"], self.payment["participant_id"])
         self.database.execute_dml(sql_text, values_tuple)

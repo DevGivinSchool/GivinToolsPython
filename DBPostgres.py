@@ -219,7 +219,7 @@ class DBPostgres:
         if data is not None:
             id_ = data[0]
             return id_
-        # Find by FIO (even a complete match cannot guarantee reliability, because may be namesakes)
+        # Find by Family+Name (even a complete match cannot guarantee reliability, because may be namesakes)
         sql_text = """select id from participants where fio=%s;"""
         values_tuple = (value,)
         cursor.execute(sql_text, values_tuple)
@@ -228,6 +228,16 @@ class DBPostgres:
             if data is not None:
                 id_ = data[0]
                 return id_
+        # TODO Поиск по FI IF F  и с учётом буквы Ё
+        # # Find by only Family (even a complete match cannot guarantee reliability, because may be namesakes)
+        # sql_text = """select id from participants where fio=%s;"""
+        # values_tuple = (value,)
+        # cursor.execute(sql_text, values_tuple)
+        # if cursor.rowcount == 1:
+        #     data = cursor.fetchone()
+        #     if data is not None:
+        #         id_ = data[0]
+        #         return id_
         cursor.close()
         return id_
 

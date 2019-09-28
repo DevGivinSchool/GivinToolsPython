@@ -24,10 +24,10 @@ def random_password(strong=False, long=10, zoom=False):
     if not re.search(r'\d', password):
         password = password[:2] + random.choice(string.digits) + password[2 + 1:]
     # В сложном пароле должны быть и спецсимволы, если нет,
-    # подставляем на третью позицию
+    # подставляем на четвёртую позицию
     chars = set('@#$&', )
     if not any((c in chars) for c in password):
-        password = password[:2] + random.choice(['@', '#', '$', '&']) + password[2 + 1:]
+        password = password[:3] + random.choice(['@', '#', '$', '&']) + password[3 + 1:]
     # (Только для Zoom (zoom=True) Два последних символа - два маленькие буквы,
     # так удобнее потом дописывать 55
     if zoom:

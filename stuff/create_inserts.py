@@ -1,11 +1,12 @@
 def main():
-    f = open(r"d:\!SAVE\table\gs.csv", "r", encoding="utf-8")
+    f = open(r"d:\!SAVE\table\2.tsv", "r", encoding="utf-8")
     f1 = f.readlines()
     f1 = f1[1:]
     result = []
     for line in f1:
         # print(line)
-        line2 = line.split(",")
+        line2 = line.split("\t")
+        # line2 = line.split(",")
         if line2[3] == "":
             telegram = "NULL"
         else:
@@ -34,7 +35,7 @@ def main():
                       f"{comment});")
     # for x in result:
     #    print(x)
-    with open(r'd:\!SAVE\table\inserts.sql', 'w') as filehandle:
+    with open(r'd:\!SAVE\table\inserts2.sql', 'w') as filehandle:
         filehandle.writelines("%s\n" % place for place in result)
 
 

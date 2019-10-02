@@ -1,4 +1,13 @@
+-- Получение списка должников
+SELECT
+last_name as "Фамилия", first_name as "Имя", email, telegram, 
+payment_date "Дата оплаты", number_of_days as "Дней", deadline "Оплачено до", until_date as "Отсрочка до", comment
+FROM public.participants
+WHERE deadline - CURRENT_TIMESTAMP < INTERVAL '0 days'
+      and isblocked = false
+order by last_name;
 
+-- ===============================================================
 -- Проставить дату оплаты
 --select * from participants where fio='КИСЕЛЕВ МИХАИЛ';
 --UPDATE participants SET payment_date=NOW(), number_of_days=30, deadline=payment_date+number_of_days, comment=NULL, isblocked=false WHERE id=xxx;

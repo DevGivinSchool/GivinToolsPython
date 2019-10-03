@@ -1,5 +1,5 @@
 def main():
-    f = open(r"d:\!SAVE\table\2.tsv", "r", encoding="utf-8")
+    f = open(r"d:\!SAVE\table\1.tsv", "r", encoding="utf-8")
     f1 = f.readlines()
     f1 = f1[1:]
     result = []
@@ -7,6 +7,7 @@ def main():
         # print(line)
         line2 = line.split("\t")
         # line2 = line.split(",")
+        # print(line2)
         if line2[3] == "":
             telegram = "NULL"
         else:
@@ -23,19 +24,21 @@ def main():
         result.append(f"INSERT INTO participants"
                       f"(last_name, first_name,"
                       f" fio,"
-                      f" email, telegram, login, password,"
+                      f" email, telegram, login,"
+                      f" password,"
                       f" payment_date, number_of_days,"
                       f" deadline, until_date,"
-                      f" comment)"
-                      f" VALUES ('{line2[0].upper()}', '{line2[1].upper()}', "
-                      f"'{line2[0].upper() + ' ' + line2[1].upper()}',"
-                      f" '{line2[2]}', {telegram}, '{line2[4]}', '{line2[5]}',"
+                      f" comment, type)"
+                      f" VALUES ('{line2[0].upper().strip()}', '{line2[1].upper().strip()}', "
+                      f"'{(line2[0].upper() + ' ' + line2[1].upper()).strip()}',"
+                      f" '{line2[2].lower().strip()}', {telegram.lower().strip()}, '{line2[4].lower().strip()}',"
+                      f" '{line2[5].strip()}',"
                       f" to_date('{line2[6]}', 'DD.MM.YYYY'), {line2[7]},"
                       f" to_date('{line2[8]}', 'DD.MM.YYYY'), {until_date}, "
-                      f"{comment});")
+                      f"{comment.strip()}, '{line2[12].strip()}');")
     # for x in result:
     #    print(x)
-    with open(r'd:\!SAVE\table\inserts2.sql', 'w') as filehandle:
+    with open(r'd:\!SAVE\table\inserts1.sql', 'w') as filehandle:
         filehandle.writelines("%s\n" % place for place in result)
 
 

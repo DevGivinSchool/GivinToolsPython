@@ -63,9 +63,11 @@ def create_ftp_login():
     """ FTP login (для ftp сервера)"""
     for line in list_fio.splitlines():
         line = line.split(' ')
-        print(f"Login: {translit_name(line[0]).lower()}")
-        print(f"Password: {password_generator.randompassword(strong=True, long=12)}")
-        print("-"*45)
+        # print(f"Login: {translit_name(line[0]).lower()}")
+        # print(f"Password: {password_generator.random_password(strong=True, long=12)}")
+        # print("-"*45)
+        # Так удобнее сразу копировать в таблицу
+        print(translit_name(line[0]).lower() + "\t" + password_generator.random_password(strong=True, long=12))
 
 
 def show_groups():

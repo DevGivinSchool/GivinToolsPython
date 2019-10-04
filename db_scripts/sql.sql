@@ -1,10 +1,16 @@
 -- Получение списка должников
 SELECT
-last_name as "Фамилия", first_name as "Имя", email, telegram, 
-payment_date "Дата оплаты", number_of_days as "Дней", deadline "Оплачено до", until_date as "Отсрочка до", comment
+--deadline, until_date,
+--CURRENT_TIMESTAMP,
+--deadline - CURRENT_TIMESTAMP as "INTERVAL",
+--until_date - CURRENT_TIMESTAMP as "INTERVAL2",
+last_name as "Фамилия", first_name as "Имя", email, telegram,
+payment_date "Дата оплаты", number_of_days as "Дней", deadline "Оплачено до",
+until_date as "Отсрочка до", comment
 FROM public.participants
-WHERE deadline - CURRENT_TIMESTAMP < INTERVAL '0 days'
-      and isblocked = false
+WHERE type = 'P'
+and ((deadline - CURRENT_TIMESTAMP < INTERVAL '0 days' and until_date is NULL)
+or (until_date - CURRENT_TIMESTAMP < INTERVAL '0 days' and until_date is not NULL))
 order by last_name;
 
 -- ===============================================================

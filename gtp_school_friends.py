@@ -9,15 +9,6 @@
 # TODO Оповещение админов о работах по почте
 
 # TODO Получение списка должников и его отправка (пока вручную запросом и потом через выгрузку в TXT и в Excel)
-"""
-SELECT
-id, last_name, first_name, fio, email, telegram, time_begin, time_end, login, password,
-payment_date, number_of_days, deadline, comment, days_until_deadline, until_date, isblocked
-FROM public.participants
-WHERE deadline - CURRENT_TIMESTAMP < INTERVAL '0 days'
-      and isblocked = false
-order by payment_date;
-"""
 
 # Оповещение пользователей в Телеграм
 # Оповещение админов о работах в Телеграм

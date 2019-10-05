@@ -123,6 +123,19 @@ class Email:
                         else:
                             # print('Это ИНОЙ платёж')
                             self.logger.info('Это ИНОЙ платёж')
+                            if uuid is not None:
+                                self.logger.info(f"UUID: {uuid}")
+                            if ffrom is not None:
+                                self.logger.info(f"FROM: {ffrom}")
+                            if fsubject is not None:
+                                self.logger.info(f"SUBJECT: {fsubject}")
+                            if body is not None:
+                                if body['body_type'] == 'mix':
+                                    self.logger.info(f"BODY\n: {body['body_text']}")
+                                elif body['body_type'] == 'html':
+                                    self.logger.info(f"BODY\n: {body['body_html']}")
+                                else:
+                                    self.logger.info(f"BODY\n: {body['body_text']}")
                             self.move_email_to_trash(uuid)
                     # В Getcourse только платежи за ДШ иного там нет
                     elif ffrom == 'no-reply@getcourse.ru' and fsubject.startswith("Поступил платеж"):
@@ -139,6 +152,19 @@ class Email:
                         # Если в тема письма начинается на #
                         # значит это команда иначе удалить
                         if not fsubject.startswith("#"):
+                            if uuid is not None:
+                                self.logger.info(f"UUID: {uuid}")
+                            if ffrom is not None:
+                                self.logger.info(f"FROM: {ffrom}")
+                            if fsubject is not None:
+                                self.logger.info(f"SUBJECT: {fsubject}")
+                            if body is not None:
+                                if body['body_type'] == 'mix':
+                                    self.logger.info(f"BODY\n: {body['body_text']}")
+                                elif body['body_type'] == 'html':
+                                    self.logger.info(f"BODY\n: {body['body_html']}")
+                                else:
+                                    self.logger.info(f"BODY\n: {body['body_text']}")
                             self.move_email_to_trash(uuid)
                     # if payment:
                     #    self.logger.info(f"payment for {ffrom}:\n{payment}")

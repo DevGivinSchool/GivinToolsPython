@@ -111,4 +111,5 @@ class Task:
         WHERE id=%s;"""
         values_tuple = (self.payment["Время проведения"], self.payment["number_of_days"],
                         self.payment["deadline"], self.payment["participant_id"])
+        self.logger.info(sql_text % values_tuple)
         self.database.execute_dml(sql_text, values_tuple)

@@ -15,12 +15,13 @@ class DBPostgres:
         self.conn = psycopg2.connect(dbname=self.dbname, user=self.user, password=self.password,
                                      host=self.host, port=self.port)
 
-    def execute_select(self, sql_text):
+    def execute_select(self, sql_text, values_tuple):
         """Execute selects
+           :param values_tuple:
            :param sql_text: Query text.
            :return: List of tuples = List of strings"""
         cursor = self.conn.cursor()
-        cursor.execute(sql_text)
+        cursor.execute(sql_text, values_tuple)
         records = cursor.fetchall()
         cursor.close()
         return records

@@ -1,3 +1,28 @@
+import PASSWORDS
+import config
+from DBPostgres import DBPostgres
+
+postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
+                      password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
+                      port=config.config['postgres_port'])
+sql_text = 'SELECT * FROM participants where id=%s;'
+values_tuple = ('1182')
+rows = postgres.execute_select(sql_text, values_tuple)
+print(rows)
+postgres.disconnect()
+
+
+
+
+"""
+sql_text = "UPDATE participants 
+        SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type='P' 
+        WHERE id=%s;"
+values_tuple = ('one', 'two', '3333', '4444')
+print(sql_text % values_tuple)
+"""
+
+"""
 from imapclient import IMAPClient
 import PASSWORDS
 
@@ -19,12 +44,14 @@ client.select_folder('INBOX')
 messages = client.search('ALL')
 print(messages)
 # [260, 263, 271, 276, 280, 285]
-"""We go through the cycle in all letters"""
+# We go through the cycle in all letters
 #for uid, message_data in client.fetch(messages, 'RFC822').items():
 #    pass
 move_email_to_trash(client, 260)
 #result = client.get_flags(263)
 print(result)
+"""
+
 
 """
 tab = {'about': None,
@@ -94,26 +121,6 @@ headers = {
 response = requests.request("POST", url, data=payload, headers=headers)
 
 print(response.text)
-"""
-
-"""
-import PASSWORDS
-import config
-from DBPostgres import DBPostgres
-
-postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
-                      password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
-                      port=config.config['postgres_port'])
-sql_text = 'select * from test'
-rows = postgres.execute_select(sql_text)
-print(rows)
-sql_text = 'select count(*) from test'
-rows = postgres.execute_select(sql_text)
-print(rows)
-sql_text = "insert into test (name) values ('mama')"
-count = postgres.execute_dml(sql_text)
-print(count)
-postgres.disconnect()
 """
 
 # import re

@@ -13,7 +13,7 @@ def from_list_create_sf_mails():
         # Иванов	Иван
         line = line.split('\t')
         # При транслитерации некоторые буквы переводятся в - ' - это нужно заменить
-        print(line)
+        # print(line)
         # ['Иванов', 'Иван']
         try:
             result = yandex_mail.create_yandex_mail(line[0], line[1], department_id_=4)
@@ -26,7 +26,7 @@ def from_list_create_sf_mails():
             else:
                 print("ERROR = " + e.__str__())
         # Для почты стандартный пароль, это пароль для Zoom
-        print(create_info_str(result))
+        print(create_info_str(result, password=False, welcome=False))
         print(f"Пароль для Zoom: {password_generator.random_password(strong=True, zoom=True)}")
 
 
@@ -77,12 +77,17 @@ def show_groups():
     # [{'id': 1, 'name': 'Все сотрудники'}, {'id': 3, 'name': '@СПЕЦПОЧТЫ'}, {'id': 4, 'name': '@ДРУЗЬЯ_ШКОЛЫ'}]
 
 
-def create_info_str(result):
-    print(f"Для: {result['name']['last']} {result['name']['first']}")
-    print(f"Создана почта: {result['email']}")
-    print(f"Пароль: {result['password_']}")
-    return f"Привет {result['name']['last']} {result['name']['first']}. Твоя почта в Школе Гивина (Яндека.Почта - " \
-           f"https://mail.yandex.ru). Для входа используй имя - {result['email']} и пароль - {result['password_']} "
+def create_info_str(result, password=True, welcome=True):
+    text = ""
+    text = text + f"Для: {result['name']['last']} {result['name']['first']}\n"
+    text = text + f"Создана почта: {result['email']}\n"
+    if password:
+        text = text + f"Пароль: {result['password_']}\n"
+    if welcome:
+        text = text + f"Привет {result['name']['last']} {result['name']['first']}. " \
+                  f"Твоя почта в Школе Гивина (Яндека.Почта - https://mail.yandex.ru)." \
+                  f" Для входа используй имя - {result['email']} и пароль - {result['password_']}\n"
+    return text
 
 
 def invalid():

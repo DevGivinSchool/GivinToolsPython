@@ -130,6 +130,7 @@ class Email:
                             if fsubject is not None:
                                 self.logger.info(f"SUBJECT: {fsubject}")
                             if body is not None:
+                                self.logger.info(f"body_type: {body['body_type']}")
                                 if body['body_type'] == 'mix':
                                     self.logger.info(f"BODY\n: {body['body_text']}")
                                 elif body['body_type'] == 'html':
@@ -159,6 +160,7 @@ class Email:
                             if fsubject is not None:
                                 self.logger.info(f"SUBJECT: {fsubject}")
                             if body is not None:
+                                self.logger.info(f"body_type: {body['body_type']}")
                                 if body['body_type'] == 'mix':
                                     self.logger.info(f"BODY\n: {body['body_text']}")
                                 elif body['body_type'] == 'html':

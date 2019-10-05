@@ -15,11 +15,11 @@ order by last_name;
 
 -- ===============================================================
 -- Проставить дату оплаты
---select * from participants where fio='КОЗЛОВА СВЕТЛАНА';
---UPDATE participants SET payment_date=NOW(), number_of_days=30, deadline=NOW()+interval '1' day * number_of_days, comment=NULL, type='P' WHERE id=1182;
---UPDATE participants SET payment_date=to_date('25.09.2019', 'DD.MM.YYYY'), number_of_days=30, deadline=payment_date+interval '1' day * number_of_days, comment=NULL, type='P' WHERE id=xxx;
+--select * from participants where fio='ЛАНДЕНОК АННА';
+--UPDATE participants SET payment_date=NOW(), number_of_days=30, deadline=NOW()+interval '1' day * number_of_days, comment=NULL, type='P' WHERE id=XXX;
+--UPDATE participants SET payment_date=to_date('04.10.2019', 'DD.MM.YYYY'), number_of_days=30, deadline=to_date('04.10.2019', 'DD.MM.YYYY')+interval '1' day * number_of_days, comment=NULL, type='P' WHERE id=XXX;
 --commit;
---select * from participants where fio='КОЗЛОВА СВЕТЛАНА';
+--select * from participants where fio='ЛАНДЕНОК АННА';
 
 -- ===============================================================
 -- Кто сегодня оплатил

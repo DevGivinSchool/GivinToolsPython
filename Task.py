@@ -105,11 +105,22 @@ class Task:
         :return:
         """
         self.logger.info("Отмечаем оплату в БД")
+        # Состояние участника до отметки
+        self.logger.info(self.select_participant(self.payment["participant_id"]))
         # Коментарий и поле отсрочки обнуляются
         sql_text = """UPDATE participants 
         SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type='P' 
         WHERE id=%s;"""
         values_tuple = (self.payment["Время проведения"], self.payment["number_of_days"],
                         self.payment["deadline"], self.payment["participant_id"])
-        self.logger.info(sql_text % values_tuple)
+        # self.logger.info(sql_text % values_tuple)
         self.database.execute_dml(sql_text, values_tuple)
+        # Состояние участника после отметки
+        self.logger.info(self.select_participant(self.payment["participant_id"]))
+
+    def select_participant(self, participant_id):
+        sql_text = 'SELECT * FROM participants where id=%s;'
+        values_tuple = (participant_id,)
+        rows = self.database.execute_select(sql_text, values_tuple)
+        return rows
+

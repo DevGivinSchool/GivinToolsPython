@@ -6,7 +6,7 @@ postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.lo
                       password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
                       port=config.config['postgres_port'])
 sql_text = 'SELECT * FROM participants where id=%s;'
-values_tuple = ('1182')
+values_tuple = ('1182',)
 rows = postgres.execute_select(sql_text, values_tuple)
 print(rows)
 postgres.disconnect()

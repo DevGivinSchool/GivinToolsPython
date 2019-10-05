@@ -107,7 +107,7 @@ class Task:
         self.logger.info("Отмечаем оплату в БД")
         # Коментарий и поле отсрочки обнуляются
         sql_text = """UPDATE participants 
-        SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, isblocked=false 
+        SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type='P' 
         WHERE id=%s;"""
         values_tuple = (self.payment["Время проведения"], self.payment["number_of_days"],
                         self.payment["deadline"], self.payment["participant_id"])

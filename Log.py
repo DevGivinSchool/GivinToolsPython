@@ -31,7 +31,7 @@ class Log:
             exit(1)
 
         log_formatter = logging.Formatter('%(asctime)s|%(levelname)s|%(name)s|%(process)d:%(thread)d - %(message)s')
-        handler = logging.FileHandler(log_file, mode='w')
+        handler = logging.FileHandler(log_file, mode='w', encoding='utf-8')
         handler.setFormatter(log_formatter)
         custom_logger = logging.getLogger(name)
         custom_logger.setLevel(level)

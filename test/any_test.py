@@ -3,25 +3,52 @@ import PASSWORDS
 import config
 from DBPostgres import DBPostgres
 
-payment = {'payment_id': 392, 'participant_id': None, 'number_of_days': 30, 'deadline': datetime.datetime(2019, 11, 4, 10, 39, 53, 287883), 'Фамилия': 'ВАСИЛЬЕВА', 'Имя': 'НАТАЛЬЯ', 'Фамилия Имя': 'ВАСИЛЬЕВА НАТАЛЬЯ', 'Электронная почта': '', 'Наименование услуги': '1. Друзья Школы - 1 месяц (1 990 руб.)', 'ID платежа': '0786', 'Оплаченная сумма': 2060, 'Кассовый чек 54-ФЗ': 'https://givinschoolru.getcourse.ru/sales/control/deal/update/id/20897375', 'Время проведения': datetime.datetime(2019, 10, 5, 10, 39, 53, 287883), 'Номер карты': '', 'Тип карты': '', 'Защита 3-D Secure': '', 'Номер транзакции': '', 'Код авторизации': '', 'Платежная система': 1}
+payment = {'payment_id': 389, 'participant_id': None, 'number_of_days': 30, 'deadline': datetime.datetime(2019, 11, 4, 10, 37, 56, 738229), 'Фамилия': 'ОТБОЕВА', 'Имя': 'ЛАРИСА', 'Фамилия Имя': 'ОТБОЕВА ЛАРИСА', 'Электронная почта': '', 'Наименование услуги': '1. Друзья Школы - 1 месяц (1 990 руб.)', 'ID платежа': '0784', 'Оплаченная сумма': 2060, 'Кассовый чек 54-ФЗ': 'https://givinschoolru.getcourse.ru/sales/control/deal/update/id/20876010', 'Время проведения': datetime.datetime(2019, 10, 5, 10, 37, 56, 738229), 'Номер карты': '', 'Тип карты': '', 'Защита 3-D Secure': '', 'Номер транзакции': '', 'Код авторизации': '', 'Платежная система': 1}
+text = """Отбоева	Лариса	Otboevalarisa2016@gmail.com		otboeva_larisa@givinschool.org	xmX&htd4vb"""
+text = text.split("\t")
+print(text)
+if text[2]:
+    email = text[2].lower()
+else:
+    email = None
+if text[3]:
+    telegram = text[3].lower()
+else:
+    telegram = None
+login = text[4]
+password = text[5]
+if payment["Электронная почта"] is None:
+    payment["Электронная почта"] = email
+
+print(f'email={email}; email2={payment["Электронная почта"]}; telegram={telegram}; login={login}; password={password}')
+
+# Подключение к БД
 postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
                       password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
                       port=config.config['postgres_port'])
-# Создаём нового пользователя в БД
-sql_text = """INSERT INTO participants(last_name, first_name, fio, email, type) 
-            VALUES (%s, %s, %s, %s, %s);"""
+
+# Создаём нового пользователя в БД (оплата сразу отмечается и type='N')
+sql_text = """INSERT INTO participants(last_name, first_name, fio, email, type, payment_date, number_of_days, deadline,
+              telegram, login, password) 
+              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
 values_tuple = (payment["Фамилия"], payment["Имя"],
-                payment["Фамилия Имя"], payment["Электронная почта"], 'N')
+                payment["Фамилия Имя"], payment["Электронная почта"], 'N',
+                payment["Время проведения"], payment["number_of_days"],
+                payment["deadline"]
+                , telegram, login, password)
 payment["participant_id"] = postgres.execute_dml_id(sql_text, values_tuple)
 print(payment["participant_id"])
+
+# Прикрепить участника к платежу
+sql_text = """UPDATE payments SET participant_id=%s WHERE task_uuid=%s;"""
+values_tuple = (payment["participant_id"], payment["payment_id"])
+postgres.execute_dml(sql_text, values_tuple)
+
+# Состояние участник
 sql_text = 'SELECT * FROM participants where id=%s;'
 values_tuple = (payment["participant_id"],)
 rows = postgres.execute_select(sql_text, values_tuple)
 print(rows)
-# Прикрепить участника к платежу
-sql_text = """UPDATE payments SET participant_id=%s WHERE id=%s;"""
-values_tuple = (payment["payment_id"], payment["participant_id"])
-postgres.execute_dml(sql_text, values_tuple)
 
 postgres.disconnect()
 

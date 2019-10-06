@@ -210,7 +210,7 @@ class Email:
         # Put in Payment to Task and insert Payment to DB
         task.payment = payment
         payment_id, participant_id = postgres.create_payment(task)
-        task.payment["payment_id"] = payment_id
+        task.payment["task_uuid"] = payment_id
         task.payment["participant_id"] = participant_id
         self.logger.info(f"Payment {payment_id} for participant {participant_id} created")
         self.logger.info("create_payment end")

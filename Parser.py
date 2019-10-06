@@ -6,7 +6,7 @@ from lxml import html
 
 def get_clear_payment():
     payment_zero = {
-        "payment_id": "",
+        "task_uuid": "",
         "participant_id": "",
         "number_of_days": 30,
         "deadline": "",

@@ -49,7 +49,7 @@ class Email:
 
     def move_email_to_trash(self, uuid):
         self.logger.info(f"Удаляю сообщение: {uuid}")
-        self.client.move(uuid, "Trash")
+        self.client.move(uuid, "Archive")
 
     def sort_mail(self):
         """Sort mail and start work """

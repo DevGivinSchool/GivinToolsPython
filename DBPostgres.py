@@ -39,12 +39,13 @@ class DBPostgres:
         cursor.close()
         return cursor.rowcount
 
-    def execute_dml_id(self, sql_text):
+    def execute_dml_id(self, sql_text, values_tuple):
         """Execute DML operations
+                   :param values_tuple:
                    :param sql_text: Query text.
                    :return: Count ID"""
         cursor = self.conn.cursor()
-        cursor.execute(sql_text)
+        cursor.execute(sql_text, values_tuple)
         self.conn.commit()
         id_ = cursor.fetchone()[0]
         cursor.close()

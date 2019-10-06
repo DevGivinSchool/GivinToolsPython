@@ -1,3 +1,33 @@
+import datetime
+import PASSWORDS
+import config
+from DBPostgres import DBPostgres
+
+payment = {'payment_id': 392, 'participant_id': None, 'number_of_days': 30, 'deadline': datetime.datetime(2019, 11, 4, 10, 39, 53, 287883), 'Фамилия': 'ВАСИЛЬЕВА', 'Имя': 'НАТАЛЬЯ', 'Фамилия Имя': 'ВАСИЛЬЕВА НАТАЛЬЯ', 'Электронная почта': '', 'Наименование услуги': '1. Друзья Школы - 1 месяц (1 990 руб.)', 'ID платежа': '0786', 'Оплаченная сумма': 2060, 'Кассовый чек 54-ФЗ': 'https://givinschoolru.getcourse.ru/sales/control/deal/update/id/20897375', 'Время проведения': datetime.datetime(2019, 10, 5, 10, 39, 53, 287883), 'Номер карты': '', 'Тип карты': '', 'Защита 3-D Secure': '', 'Номер транзакции': '', 'Код авторизации': '', 'Платежная система': 1}
+postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
+                      password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
+                      port=config.config['postgres_port'])
+# Создаём нового пользователя в БД
+sql_text = """INSERT INTO participants(last_name, first_name, fio, email, type) 
+            VALUES (%s, %s, %s, %s, %s);"""
+values_tuple = (payment["Фамилия"], payment["Имя"],
+                payment["Фамилия Имя"], payment["Электронная почта"], 'N')
+payment["participant_id"] = postgres.execute_dml_id(sql_text, values_tuple)
+print(payment["participant_id"])
+sql_text = 'SELECT * FROM participants where id=%s;'
+values_tuple = (payment["participant_id"],)
+rows = postgres.execute_select(sql_text, values_tuple)
+print(rows)
+# Прикрепить участника к платежу
+sql_text = """UPDATE payments SET participant_id=%s WHERE id=%s;"""
+values_tuple = (payment["payment_id"], payment["participant_id"])
+postgres.execute_dml(sql_text, values_tuple)
+
+postgres.disconnect()
+
+
+"""
+# Посмотреть как что возвращает select, в какой форме
 import PASSWORDS
 import config
 from DBPostgres import DBPostgres
@@ -9,12 +39,13 @@ sql_text = 'SELECT * FROM participants where id=%s;'
 values_tuple = ('1182',)
 rows = postgres.execute_select(sql_text, values_tuple)
 print(rows)
+# [(1182, 'КОЗЛОВА', 'СВЕТЛАНА', 'КОЗЛОВА СВЕТЛАНА', '89098169809@mail.ru', '@89098169809', datetime.datetime(2019, 10, 3, 17, 2, 18, 282109, tzinfo=psycopg2.tz.FixedOffsetTimezone(offset=180, name=None)), None, 'kozlova_svetlana@givinschool.org', 'dC22kH615u', datetime.date(2019, 10, 5), 30, datetime.date(2019, 11, 4), None, None, 'P')]
 postgres.disconnect()
-
-
+"""
 
 
 """
+# Получить текскт sql запроса для логирования
 sql_text = "UPDATE participants 
         SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type='P' 
         WHERE id=%s;"
@@ -23,6 +54,7 @@ print(sql_text % values_tuple)
 """
 
 """
+# Перемещение письма в почте в другую папку
 from imapclient import IMAPClient
 import PASSWORDS
 

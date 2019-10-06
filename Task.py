@@ -54,21 +54,28 @@ class Task:
                 self.logger.error("+++++++++++++++++++++++++++++++++++++++")
                 self.logger.error("The participant must have a Email!!!")
                 self.logger.error("+++++++++++++++++++++++++++++++++++++++")
-                raise Exception("The participant must have a Email")
+                # raise Exception("The participant must have a Email")
+
             # Создаём нового пользователя в БД
-            sql_text = """INSERT INTO participants(last_name, first_name, fio, email) VALUES (%s, %s, %s, %s);"""
+            sql_text = """INSERT INTO participants(last_name, first_name, fio, email, type) 
+            VALUES (%s, %s, %s, %s, %s);"""
             values_tuple = (self.payment["Фамилия"], self.payment["Имя"],
-                            self.payment["Фамилия Имя"], self.payment["Электронная почта"])
-            participants_create_result = self.database.execute_dml(self, sql_text, values_tuple)
-            print(type(participants_create_result))
-            print(participants_create_result)
-            print(participants_create_result[1])
-            self.logger.info(type(participants_create_result))
-            self.logger.info(participants_create_result)
-            self.logger.info(participants_create_result[1])
-            # Отмечаем оплату в БД
+                            self.payment["Фамилия Имя"], self.payment["Электронная почта"], 'N')
+            self.payment["participant_id"] = self.database.execute_dml_id(self, sql_text, values_tuple)
+            print(type(self.payment["participant_id"]))
+            print(self.payment["participant_id"])
+            # print(participants_create_result[1])
+            self.logger.info(type(self.payment["participant_id"]))
+            self.logger.info(self.payment["participant_id"])
+            # self.logger.info(participants_create_result[1])
+            self.logger.info(self.select_participant(self.payment["participant_id"]))
+
+            # Отмечаем оплату в БД этому участнику
             self.mark_payment_into_db()
-            # Создаём почту новому пользователю в домене @givinschool.org
+
+            # Прикрепить участника к платежу
+
+            # Создаём почту новому участнику в домене @givinschool.org
             try:
                 result = yandex_mail.create_yandex_mail(self.payment["Фамилия"], self.payment["Имя"], department_id_=4)
                 # print(f"Email created:{result['email']}")
@@ -88,10 +95,12 @@ class Task:
             self.password_ = password_generator.random_password(strong=True)
             self.logger.info(f"Password:{self.password_}")
             sql_text = """UPDATE participants SET login=%s, password=%s WHERE id=%s;"""
-            values_tuple = (self.login_, self.password_, participants_create_result[1])
+            values_tuple = (self.login_, self.password_, participant_id)
             self.database.execute_dml(sql_text, values_tuple)
             # TODO Написать письмо пользователю
-            # TODO Написать письмо админу чтобы создал Zoom учётку.
+            self.logger.warning("+++++++++++++++++++++++++++++++++++++++")
+            self.logger.warning("Create ZOOM                         !!!")
+            self.logger.warning("+++++++++++++++++++++++++++++++++++++++")
         else:
             # Отмечаем оплату в БД
             self.mark_payment_into_db()

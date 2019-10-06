@@ -1,10 +1,40 @@
+# процедура блокировки пользователя
+import datetime
+import PASSWORDS
+import config
+from DBPostgres import DBPostgres
+
+telegram = '@misterpak'.lower()
+# Подключение к БД
+postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
+                      password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
+                      port=config.config['postgres_port'])
+
+# Создаём нового пользователя в БД (оплата сразу отмечается и type='N')
+sql_text = """UPDATE participants SET type='B', password=password||'55' where telegram=%s RETURNING id;"""
+values_tuple = (telegram,)
+id_ = postgres.execute_dml_id(sql_text, values_tuple)
+print(id_)
+
+# Состояние участник
+sql_text = 'SELECT fio, login, password, type FROM participants where id=%s;'
+values_tuple = (id_,)
+rows = postgres.execute_select(sql_text, values_tuple)
+print(rows)
+
+postgres.disconnect()
+
+
+
+"""
+# процедура создания нового участника
 import datetime
 import PASSWORDS
 import config
 from DBPostgres import DBPostgres
 
 payment = {'payment_id': 389, 'participant_id': None, 'number_of_days': 30, 'deadline': datetime.datetime(2019, 11, 4, 10, 37, 56, 738229), 'Фамилия': 'ОТБОЕВА', 'Имя': 'ЛАРИСА', 'Фамилия Имя': 'ОТБОЕВА ЛАРИСА', 'Электронная почта': '', 'Наименование услуги': '1. Друзья Школы - 1 месяц (1 990 руб.)', 'ID платежа': '0784', 'Оплаченная сумма': 2060, 'Кассовый чек 54-ФЗ': 'https://givinschoolru.getcourse.ru/sales/control/deal/update/id/20876010', 'Время проведения': datetime.datetime(2019, 10, 5, 10, 37, 56, 738229), 'Номер карты': '', 'Тип карты': '', 'Защита 3-D Secure': '', 'Номер транзакции': '', 'Код авторизации': '', 'Платежная система': 1}
-text = """Отбоева	Лариса	Otboevalarisa2016@gmail.com		otboeva_larisa@givinschool.org	xmX&htd4vb"""
+text = "Отбоева	Лариса	Otboevalarisa2016@gmail.com		otboeva_larisa@givinschool.org	xmX&htd4vb"
 text = text.split("\t")
 print(text)
 if text[2]:
@@ -28,9 +58,9 @@ postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.lo
                       port=config.config['postgres_port'])
 
 # Создаём нового пользователя в БД (оплата сразу отмечается и type='N')
-sql_text = """INSERT INTO participants(last_name, first_name, fio, email, type, payment_date, number_of_days, deadline,
+sql_text = "INSERT INTO participants(last_name, first_name, fio, email, type, payment_date, number_of_days, deadline,
               telegram, login, password) 
-              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
+              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"
 values_tuple = (payment["Фамилия"], payment["Имя"],
                 payment["Фамилия Имя"], payment["Электронная почта"], 'N',
                 payment["Время проведения"], payment["number_of_days"],
@@ -40,7 +70,7 @@ payment["participant_id"] = postgres.execute_dml_id(sql_text, values_tuple)
 print(payment["participant_id"])
 
 # Прикрепить участника к платежу
-sql_text = """UPDATE payments SET participant_id=%s WHERE task_uuid=%s;"""
+sql_text = "UPDATE payments SET participant_id=%s WHERE task_uuid=%s;"
 values_tuple = (payment["participant_id"], payment["payment_id"])
 postgres.execute_dml(sql_text, values_tuple)
 
@@ -51,7 +81,7 @@ rows = postgres.execute_select(sql_text, values_tuple)
 print(rows)
 
 postgres.disconnect()
-
+"""
 
 """
 # Посмотреть как что возвращает select, в какой форме

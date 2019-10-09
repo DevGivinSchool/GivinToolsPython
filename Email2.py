@@ -129,6 +129,9 @@ class Email:
                                 self.logger.info(f"FROM: {ffrom}")
                             if fsubject is not None:
                                 self.logger.info(f"SUBJECT: {fsubject}")
+                            if fsubject is not None:
+                                self.logger.info(f'PAYMENT: {payment}')
+                            """
                             if body is not None:
                                 self.logger.info(f"body_type: {body['body_type']}")
                                 if body['body_type'] == 'mix':
@@ -137,6 +140,7 @@ class Email:
                                     self.logger.info(f"BODY\n: {body['body_html']}")
                                 else:
                                     self.logger.info(f"BODY\n: {body['body_text']}")
+                            """
                             self.move_email_to_trash(uuid)
                     # В Getcourse только платежи за ДШ иного там нет
                     elif ffrom == 'no-reply@getcourse.ru' and fsubject.startswith("Поступил платеж"):
@@ -168,6 +172,9 @@ class Email:
                                 else:
                                     self.logger.info(f"BODY\n: {body['body_text']}")
                             self.move_email_to_trash(uuid)
+                        else:
+                            # TODO Процедура обработки писем с командами (fsubject.startswith("#"))
+                            pass
                     # if payment:
                     #    self.logger.info(f"payment for {ffrom}:\n{payment}")
                 except Exception:

@@ -1,8 +1,6 @@
 import psycopg2
 import logging
 
-logger = logging.getLogger('DBPostgres')
-
 
 class DBPostgres:
 
@@ -14,6 +12,7 @@ class DBPostgres:
         self.password = password
         self.conn = psycopg2.connect(dbname=self.dbname, user=self.user, password=self.password,
                                      host=self.host, port=self.port)
+        self.logger = logging.getLogger('DBPostgres')
 
     def execute_select(self, sql_text, values_tuple):
         """Execute selects
@@ -21,8 +20,10 @@ class DBPostgres:
            :param sql_text: Query text.
            :return: List of tuples = List of strings"""
         cursor = self.conn.cursor()
+        # print(cursor.mogrify(sql_text, values_tuple))
         cursor.execute(sql_text, values_tuple)
         records = cursor.fetchall()
+        # print(cursor.rowcount)
         cursor.close()
         return records
 
@@ -33,9 +34,10 @@ class DBPostgres:
                    :param sql_text: Query text.
                    :return result: (Rows count, ID)"""
         cursor = self.conn.cursor()
+        # print(cursor.mogrify(sql_text, values_tuple))
         cursor.execute(sql_text, values_tuple)
         self.conn.commit()
-        # count = cursor.rowcount
+        # print(cursor.rowcount)
         cursor.close()
         return cursor.rowcount
 
@@ -45,9 +47,14 @@ class DBPostgres:
                    :param sql_text: Query text.
                    :return: Count ID"""
         cursor = self.conn.cursor()
+        # print(cursor.mogrify(sql_text, values_tuple))
         cursor.execute(sql_text, values_tuple)
         self.conn.commit()
-        id_ = cursor.fetchone()[0]
+        # print(cursor.rowcount)
+        if cursor.rowcount == 0:
+            id_ = None
+        else:
+            id_ = cursor.fetchone()[0]
         cursor.close()
         return id_
 
@@ -133,8 +140,8 @@ class DBPostgres:
         :param task:
         :return:
         """
-        participant_id = self.find_participant(task)
-        if participant_id == 0:
+        participant_id = self.find_participant(task.payment["Электронная почта"], task.payment["Фамилия Имя"])
+        if participant_id is None:
             participant_id = None
         cursor = self.conn.cursor()
         sql_text = """INSERT INTO payments(task_uuid, name_of_service, payment_id, amount, participant_id, 
@@ -146,30 +153,35 @@ class DBPostgres:
                         task.payment["Имя"], task.payment["Фамилия Имя"], task.payment["Электронная почта"],
                         task.payment["Платежная система"])
         # print(values_tuple)
-        logger.debug(f'values_tuple={values_tuple}')
+        self.logger.debug(f'values_tuple={values_tuple}')
         cursor.execute(sql_text, values_tuple)
         self.conn.commit()
         id_ = cursor.fetchone()[0]
         cursor.close()
         return id_, participant_id
 
-    def find_participant(self, task):
+    def find_participant(self, email, fio):
         """Find participant by email and FIO"""
         # print("-"*45)
         # print(f"task = {task}")
         cursor = self.conn.cursor()
         # Find by email
-        sql_text = """select id from participants where email=%s;"""
-        values_tuple = (task.payment["Электронная почта"],)
-        # print(f"sql_text = {sql_text}")
-        # print(f"values_tuple = {values_tuple}")
-        cursor.execute(sql_text, values_tuple)
-        data = cursor.fetchone()
-        # print(f"data = {data}")
-        id_ = 0
-        if data is not None:
-            id_ = data[0]
-            # print(f"id_ = {id_}")
+        if email is None or not email:
+            self.logger.info("Email отсутствует. Поиск по email невозможен")
+        else:
+            sql_text = """select id from participants where email=%s;"""
+            values_tuple = (email,)
+            # print(cursor.mogrify(sql_text, values_tuple))
+            cursor.execute(sql_text, values_tuple)
+            if cursor.rowcount > 1:
+                self.logger.error(f"ERROR:{cursor.mogrify(sql_text, values_tuple)}")
+                raise (f"Поиск участника по email {email} "
+                       f"возвращает больше одной строки. Возможно дублирование.")
+            elif cursor.rowcount == 0:
+                id_ = None
+            else:
+                id_ = cursor.fetchone()[0]
+            cursor.close()
             return id_
         """
         # Find by Telegram (in task is not telegram)
@@ -182,66 +194,34 @@ class DBPostgres:
             return id_
         """
         # Find by FIO (even a complete match cannot guarantee reliability, because may be namesakes)
-        sql_text = """select id from participants where fio=%s;"""
-        values_tuple = (task.payment["Фамилия Имя"],)
-        cursor.execute(sql_text, values_tuple)
-        # print(f"sql_text2 = {sql_text}")
-        # print(f"values_tuple2 = {values_tuple}")
-        if cursor.rowcount == 1:
-            data = cursor.fetchone()
-            # print(f"data2 = {data}")
-            if data is not None:
-                id_ = data[0]
-                # print(f"id_2 = {id_}")
-                return id_
+        if fio is None or not fio:
+            self.logger.info("Фамилия Имя отсутствуют")
+        else:
+            sql_text = """select id from participants where fio=%s;"""
+            values_tuple = (fio,)
+            # print(cursor.mogrify(sql_text, values_tuple))
+            cursor.execute(sql_text, values_tuple)
+            if cursor.rowcount > 1:
+                self.logger.error(f"ERROR:{cursor.mogrify(sql_text, values_tuple)}")
+                raise (f"Поиск участника по Фамилия Имя {fio} "
+                       f"возвращает больше одной строки. Возможно дублирование.")
+            elif cursor.rowcount == 1:
+                id_ = cursor.fetchone()[0]
+            elif cursor.rowcount == 0:
+                id_ = None
+            cursor.close()
+            return id_
+        # Сюда навряд ли дойдет, это какой-то непредвиденный случай
+        self.logger.error(f"Поиск по email {fio} "
+                          f"или фио {fio} ничего не нашёл. "
+                          f"Нужно рассмотреть этот случай подробнее!")
         cursor.close()
         # print(f"id_3 = {id_}")
-        return id_
+        # Если ничего не нашлось возвращаем ноль.
+        return None
 
     def disconnect(self):
         self.conn.close()
-
-    def find_participant_test(self, value):
-        """"""
-        cursor = self.conn.cursor()
-        # Find by email
-        sql_text = """select id from participants where email=%s;"""
-        values_tuple = (value,)
-        cursor.execute(sql_text, values_tuple)
-        data = cursor.fetchone()
-        id_ = 0
-        if data is not None:
-            id_ = data[0]
-            return id_
-        # Find by Telegram
-        sql_text = """select id from participants where telegram=%s;"""
-        values_tuple = (value,)
-        cursor.execute(sql_text, values_tuple)
-        data = cursor.fetchone()
-        if data is not None:
-            id_ = data[0]
-            return id_
-        # Find by Family+Name (even a complete match cannot guarantee reliability, because may be namesakes)
-        sql_text = """select id from participants where fio=%s;"""
-        values_tuple = (value,)
-        cursor.execute(sql_text, values_tuple)
-        if cursor.rowcount == 1:
-            data = cursor.fetchone()
-            if data is not None:
-                id_ = data[0]
-                return id_
-        # TODO Поиск по FI IF F  и с учётом буквы Ё
-        # # Find by only Family (even a complete match cannot guarantee reliability, because may be namesakes)
-        # sql_text = """select id from participants where fio=%s;"""
-        # values_tuple = (value,)
-        # cursor.execute(sql_text, values_tuple)
-        # if cursor.rowcount == 1:
-        #     data = cursor.fetchone()
-        #     if data is not None:
-        #         id_ = data[0]
-        #         return id_
-        cursor.close()
-        return id_
 
 
 if __name__ == "__main__":

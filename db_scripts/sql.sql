@@ -1,3 +1,22 @@
+-- Блокировка участника (= ПОМЕНЯТЬ ПАРОЛЬ ZOOM)
+UPDATE participants SET type='B', password=password||'55'
+where
+--telegram=lower('@M505058')
+last_name=upper('Абдуллаева')
+;
+
+-- ===============================================================
+-- Поиск участника
+SELECT
+*
+--id, last_name, first_name, fio, email, telegram, time_begin, time_end, login, password, payment_date, number_of_days, deadline, comment, until_date, type
+FROM public.participants
+where
+--telegram=lower('@M505058')
+last_name=upper('Абдуллаева')
+;
+
+-- ===============================================================
 --Получение списка участников (как регулярных так и заблокированных)
 SELECT id, last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, until_date, comment
 	FROM public.participants

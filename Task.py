@@ -57,25 +57,31 @@ class Task:
                 # raise Exception("The participant must have a Email")
 
             # Создаём нового пользователя в БД
+            self.logger.info("Создаём нового пользователя в БД")
             sql_text = """INSERT INTO participants(last_name, first_name, fio, email, type) 
-            VALUES (%s, %s, %s, %s, %s);"""
+            VALUES (%s, %s, %s, %s, %s) RETURNING id;"""
             values_tuple = (self.payment["Фамилия"], self.payment["Имя"],
                             self.payment["Фамилия Имя"], self.payment["Электронная почта"], 'N')
-            self.payment["participant_id"] = self.database.execute_dml_id(self, sql_text, values_tuple)
-            print(type(self.payment["participant_id"]))
-            print(self.payment["participant_id"])
+            self.payment["participant_id"] = self.database.execute_dml_id(sql_text, values_tuple)
+            # print(type(self.payment["participant_id"]))
+            # print(self.payment["participant_id"])
             # print(participants_create_result[1])
-            self.logger.info(type(self.payment["participant_id"]))
-            self.logger.info(self.payment["participant_id"])
+            # self.logger.info(type(self.payment["participant_id"]))
+            # self.logger.info(self.payment["participant_id"])
             # self.logger.info(participants_create_result[1])
             self.logger.info(self.select_participant(self.payment["participant_id"]))
 
             # Отмечаем оплату в БД этому участнику
-            self.mark_payment_into_db()
+            self.mark_payment_into_db(participant_type='N')
 
             # Прикрепить участника к платежу
+            sql_text = """UPDATE payments SET participant_id=%s WHERE task_uuid=%s;"""
+            values_tuple = (self.payment["participant_id"], self.payment["task_uuid"])
+            self.database.execute_dml(sql_text, values_tuple)
+            self.logger.info(self.select_payment(self.payment["task_uuid"]))
 
             # Создаём почту новому участнику в домене @givinschool.org
+            self.logger.info("Создаём почту новому участнику в домене @givinschool.org")
             try:
                 result = yandex_mail.create_yandex_mail(self.payment["Фамилия"], self.payment["Имя"], department_id_=4)
                 # print(f"Email created:{result['email']}")
@@ -88,15 +94,18 @@ class Task:
                     print(f'Unhandled exception: Такая почта уже существует: '
                           f'{self.payment["Фамилия"] + "_" + self.payment["Имя"] + "@givinschool.org"}')
                     self.logger.info(f'Unhandled exception: Такая почта уже существует: '
-                                     f'{self.payment["Фамилия"] + "_" + self.payment["Имя"] + "@givinschool.org"}')
+                                     f'{result["login_"] + "@givinschool.org"}')
                 else:
                     raise
             # Генерация пароля для Zoom (для всех почт пароль одинаковый)
-            self.password_ = password_generator.random_password(strong=True)
+            self.password_ = password_generator.random_password(strong=True, zoom=True)
             self.logger.info(f"Password:{self.password_}")
+            self.logger.info("Обновляем участнику логин и пароль в БД")
             sql_text = """UPDATE participants SET login=%s, password=%s WHERE id=%s;"""
-            values_tuple = (self.login_, self.password_, participant_id)
+            values_tuple = (self.login_, self.password_, self.payment["participant_id"])
             self.database.execute_dml(sql_text, values_tuple)
+            self.logger.info(self.select_participant(self.payment["participant_id"]))
+            self.logger.info("TODO: Отправляем участнику оповещение по почте")
             # TODO Написать письмо пользователю
             self.logger.warning("+++++++++++++++++++++++++++++++++++++++")
             self.logger.warning("Create ZOOM                         !!!")
@@ -111,7 +120,7 @@ class Task:
 
         self.logger.info('Task_run end')
 
-    def mark_payment_into_db(self):
+    def mark_payment_into_db(self, participant_type='P'):
         """
         Отмечаем оплату в БД. Поле until_date (отсрочка до) обнуляется.
         :return:
@@ -121,10 +130,10 @@ class Task:
         self.logger.info(self.select_participant(self.payment["participant_id"]))
         # Коментарий и поле отсрочки обнуляются
         sql_text = """UPDATE participants 
-        SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type='P' 
+        SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s 
         WHERE id=%s;"""
         values_tuple = (self.payment["Время проведения"], self.payment["number_of_days"],
-                        self.payment["deadline"], self.payment["participant_id"])
+                        self.payment["deadline"], participant_type, self.payment["participant_id"])
         # self.logger.info(sql_text % values_tuple)
         self.database.execute_dml(sql_text, values_tuple)
         # Состояние участника после отметки
@@ -133,6 +142,12 @@ class Task:
     def select_participant(self, participant_id):
         sql_text = 'SELECT * FROM participants where id=%s;'
         values_tuple = (participant_id,)
+        rows = self.database.execute_select(sql_text, values_tuple)
+        return rows
+
+    def select_payment(self, task_uuid):
+        sql_text = 'SELECT * FROM payments where task_uuid=%s;'
+        values_tuple = (task_uuid,)
         rows = self.database.execute_select(sql_text, values_tuple)
         return rows
 

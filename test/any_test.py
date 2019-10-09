@@ -1,30 +1,60 @@
+"""
+import datetime
+
+print(datetime.date(2019, 10, 4) + datetime.timedelta(days=30))
+"""
+
 # процедура блокировки пользователя
 import datetime
 import PASSWORDS
 import config
 from DBPostgres import DBPostgres
 
-telegram = '@misterpak'.lower()
+email = []
+telegram = ['@Rikitikishik'.lower()]
+fio = []
+
+if len(telegram) > 0:
+    telegram_ = True
+    listp = telegram
+    sql_in = 'telegram'
+elif len(fio) > 0:
+    fio_ = True
+    listp = fio
+    sql_in = 'fio'
+elif len(email) > 0:
+    email_ = True
+    listp = email
+    sql_in = 'email'
+
+if telegram_ + fio_ + email_ > 1:
+    raise Exception("ERROR: Нужно использовать что-то одно email/telegram/fio!!!")
+    exit(1)
+
 # Подключение к БД
 postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
                       password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
                       port=config.config['postgres_port'])
-
-# Создаём нового пользователя в БД (оплата сразу отмечается и type='N')
-sql_text = """UPDATE participants SET type='B', password=password||'55' where telegram=%s RETURNING id;"""
-values_tuple = (telegram,)
-id_ = postgres.execute_dml_id(sql_text, values_tuple)
-print(id_)
-
-# Состояние участник
-sql_text = 'SELECT fio, login, password, type FROM participants where id=%s;'
-values_tuple = (id_,)
-rows = postgres.execute_select(sql_text, values_tuple)
-print(rows)
-
+for p in listp:
+    # Выполняем поиск участника
+    if telegram_:
+        participant_id = postgres.find_participant(task.payment["Электронная почта"], task.payment["Фамилия Имя"])
+    if participant_id is None:
+        participant_id = None
+    # Блокируем пользователя
+    sql_text = "UPDATE participants SET type='B', password=password||'55' where telegram=%s RETURNING id;"
+    values_tuple = (telegram,)
+    id_ = postgres.execute_dml_id(sql_text, values_tuple)
+    if id_ is None:
+        print(f"Нет участника с Telegram {telegram}")
+    else:
+        print(f"Заблокировани участник ID={id_}")
+        # Состояние участник
+        sql_text = 'SELECT fio, login, password, type FROM participants where id=%s;'
+        values_tuple = (id_,)
+        rows = postgres.execute_select(sql_text, values_tuple)
+        print(rows)
 postgres.disconnect()
-
-
 
 """
 # процедура создания нового участника
@@ -100,7 +130,6 @@ print(rows)
 postgres.disconnect()
 """
 
-
 """
 # Получить текскт sql запроса для логирования
 sql_text = "UPDATE participants 
@@ -140,7 +169,6 @@ move_email_to_trash(client, 260)
 #result = client.get_flags(263)
 print(result)
 """
-
 
 """
 tab = {'about': None,

@@ -25,14 +25,22 @@ def random_password(strong=False, long=10, zoom=False):
         .replace("i", "") \
         .replace("o", "")
     print(f"ascii_lowercase_chars={ascii_lowercase_chars}")
+    letters = ascii_uppercase_chars + digits_chars + ascii_lowercase_chars
+    print(f"letters={letters}")
     chars = ascii_uppercase_chars + digits_chars + ascii_lowercase_chars
     print(f"chars1={chars}")
     if strong:
         chars = chars + "@#$&"
     print(f"chars2={chars}")
-    if zoom:  # Для zoom в самом конце пароля добавляются две маленькие буквы для удобства
+    if zoom:
+        # Для zoom в самом конце пароля добавляются две маленькие буквы для удобства,
+        # поэтому генерим его значально короче на 2 буквы
         long = long - 2
     password = ''.join(random.choice(chars) for _ in range(long))
+    print(f"password 0={password}")
+    # Пароль должне начинаться с буквы
+    if not password[0].isalpha():
+        password = random.choice(letters) + password[1:]
     print(f"password 1={password}")
     # Пароль должен содержать хотя бы одну цифру (Zoom), если цифры нет, подставляем на третью позицию случайню цифру
     if not re.search(r'\d', password):

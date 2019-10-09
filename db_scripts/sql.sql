@@ -1,3 +1,11 @@
+--Получение списка участников (как регулярных так и заблокированных)
+SELECT id, last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, until_date, comment
+	FROM public.participants
+	where type='P'
+	--where type='B'
+order by last_name;
+
+-- ===============================================================
 -- Получение списка должников
 SELECT
 --deadline, until_date,
@@ -25,6 +33,44 @@ order by last_name;
 -- Кто сегодня оплатил
 select * from participants where payment_date=to_date('05.10.2019', 'dd.mm.yyyy');
 
+-- ===============================================================
+-- Выявление дублей участников
+--delete from participants where id in (
+select
+--p.id
+--p.*
+p.id, p.last_name, p.first_name, p.type
+from participants as "p",
+(SELECT last_name, first_name, count(last_name) as "ct"
+FROM participants
+group by last_name, first_name
+having count(last_name)>1
+order by last_name) as "tab1"
+where
+p.last_name = tab1.last_name and p.first_name=tab1.first_name
+and p.type='B'
+order by p.last_name
+--)
+;
+
+-- Удаление дублей которые TYPE='B'
+delete from participants where id in (
+select
+p.id
+--p.*
+--p.id, p.last_name, p.first_name, p.type
+from participants as "p",
+(SELECT last_name, first_name, count(last_name) as "ct"
+FROM participants
+group by last_name, first_name
+having count(last_name)>1
+order by last_name) as "tab1"
+where
+p.last_name = tab1.last_name and p.first_name=tab1.first_name
+and p.type='B'
+order by p.last_name
+)
+;
 
 -- ===============================================================
 -- Windows

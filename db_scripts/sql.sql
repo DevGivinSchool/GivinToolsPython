@@ -1,3 +1,28 @@
+-- Создать пользователя
+INSERT INTO public.participants(
+	last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, type)
+	VALUES ('МАССОЛЬД', 'МАРИНА', 'МАССОЛЬД МАРИНА', 'mmassold@gmx.de', '@marinamassold1975', 'massold_marina@givinschool.org', 'rkP&Q8Sxfq', to_date('15.10.2019', 'dd.mm.yyyy'), 37, to_date('15.10.2019', 'dd.mm.yyyy') + INTERVAL '37 day', 'N');
+
+-- Обновить пользователя
+UPDATE participants SET
+email=lower('Vivocom@mail.ru')
+where
+--telegram=lower('@M505058')
+last_name=upper('пинчук')
+;
+
+-- Добавить дней пользователю
+UPDATE participants SET
+payment_date = to_date('10.10.2019', 'dd.mm.yyyy'),
+number_of_days = 97,
+deadline = to_date('10.10.2019', 'dd.mm.yyyy') + INTERVAL '97 day'
+where
+--telegram=lower('@M505058')
+last_name=upper('фридман')
+;
+
+
+
 -- Блокировка участника (= ПОМЕНЯТЬ ПАРОЛЬ ZOOM)
 UPDATE participants SET type='B', password=password||'55'
 where

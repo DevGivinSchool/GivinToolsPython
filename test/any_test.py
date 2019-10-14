@@ -1,8 +1,9 @@
 """
 import datetime
 
-print(datetime.date(2019, 10, 4) + datetime.timedelta(days=30))
+print(datetime.date(2019, 10, 10) + datetime.timedelta(days=97))
 """
+
 
 # процедура блокировки пользователя
 import datetime
@@ -11,7 +12,7 @@ import config
 from DBPostgres import DBPostgres
 
 email = []
-telegram = ['@Rikitikishik'.lower()]
+telegram = ['@aleksandr80kamensk'.lower()]
 fio = []
 
 if len(telegram) > 0:
@@ -55,6 +56,7 @@ for p in listp:
         rows = postgres.execute_select(sql_text, values_tuple)
         print(rows)
 postgres.disconnect()
+
 
 """
 # процедура создания нового участника

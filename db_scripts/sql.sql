@@ -5,10 +5,12 @@ INSERT INTO public.participants(
 
 -- Обновить пользователя
 UPDATE participants SET
-email=lower('Vivocom@mail.ru')
+email=lower('@')
+,telegram=lower('@')
 where
---telegram=lower('@M505058')
-last_name=upper('пинчук')
+--telegram=lower('@')
+--last_name=upper('СМИРНОВ')
+id=1294
 ;
 
 -- Добавить дней пользователю
@@ -37,8 +39,9 @@ SELECT
 --id, last_name, first_name, fio, email, telegram, time_begin, time_end, login, password, payment_date, number_of_days, deadline, comment, until_date, type
 FROM public.participants
 where
---telegram=lower('@M505058')
-last_name=upper('Абдуллаева')
+--telegram=lower('@')
+--last_name=upper('СМИРНОВ')
+id=1294
 ;
 
 -- ===============================================================

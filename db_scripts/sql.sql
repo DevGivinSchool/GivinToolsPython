@@ -1,7 +1,7 @@
 -- Создать пользователя
 INSERT INTO public.participants(
 	last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, type)
-	VALUES ('МАССОЛЬД', 'МАРИНА', 'МАССОЛЬД МАРИНА', 'mmassold@gmx.de', '@marinamassold1975', 'massold_marina@givinschool.org', 'rkP&Q8Sxfq', to_date('15.10.2019', 'dd.mm.yyyy'), 37, to_date('15.10.2019', 'dd.mm.yyyy') + INTERVAL '37 day', 'N');
+	VALUES (upper('МАССОЛЬД'), upper('МАРИНА'), upper('МАССОЛЬД МАРИНА'), lower('mmassold@gmx.de'), lower('@marinamassold1975'), 'massold_marina@givinschool.org', 'rkP&Q8Sxfq', to_date('15.10.2019', 'dd.mm.yyyy'), 30, to_date('15.10.2019', 'dd.mm.yyyy') + INTERVAL '30 day', 'N');
 
 -- Обновить пользователя
 UPDATE participants SET
@@ -64,6 +64,7 @@ payment_date "Дата оплаты", number_of_days as "Дней", deadline "О
 until_date as "Отсрочка до", comment
 FROM public.participants
 WHERE type = 'P'
+--and number_of_days <> 45
 and ((deadline - CURRENT_TIMESTAMP < INTERVAL '0 days' and until_date is NULL)
 or (until_date - CURRENT_TIMESTAMP < INTERVAL '0 days' and until_date is not NULL))
 order by last_name;
@@ -79,6 +80,15 @@ order by last_name;
 -- ===============================================================
 -- Кто сегодня оплатил
 select * from participants where payment_date=to_date('05.10.2019', 'dd.mm.yyyy');
+
+-- ===============================================================
+-- Нормализация БД
+UPDATE public.participants
+	SET last_name=trim(upper(last_name)), first_name=trim(upper(first_name)),
+	    fio=trim(upper(fio)), email=trim(lower(email)),
+	    telegram=trim(lower(telegram)), login=trim(lower(login)),
+	    last_name_eng=trim(upper(last_name_eng)), first_name_eng=trim(upper(first_name_eng)),
+	    fio_eng=trim(upper(fio_eng))
 
 -- ===============================================================
 -- Выявление дублей участников

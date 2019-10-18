@@ -102,7 +102,8 @@ def parse_getcourse_html(body_html):
     fio = payment["Фамилия Имя"].split(" ")
     # print(f'2:{fio}')
     payment["Имя"] = fio[0]
-    payment["Фамилия"] = ''.join(fio[1:])
+    # У некоторых фамили и имена сложные = несколько слов через пробел, поэтому пробел заменяю на подчёркивание
+    payment["Фамилия"] = ' '.join(fio[1:]).strip()
     # В письме идет сначало имя а потом фамилия
     payment["Фамилия Имя"] = payment["Фамилия"] + " " + payment["Имя"]
     # print(f'3:{payment["Фамилия"]}')
@@ -146,48 +147,14 @@ def parse_paykeeper_html(body_html):
     payment["Оплаченная сумма"] = payment["Оплаченная сумма"].split(".")[0].replace(" ", "")
     fio = payment["Фамилия Имя"].split(" ")
     payment["Фамилия"] = fio[0]
-    payment["Имя"] = ''.join(fio[1:])
+    # У некоторых фамили и имена сложные = несколько слов через пробел, поэтому пробел заменяю на подчёркивание
+    payment["Имя"] = ' '.join(fio[1:]).strip()
     payment["Время проведения"] = datetime.datetime.strptime(payment["Время проведения"], '%Y-%m-%d %H:%M:%S')
     payment["Платежная система"] = 2
     payment = payment_normalization(payment)
     payment = payment_computation(payment)
     # print(payment)
     return payment
-
-
-# FOR TEST
-def parse_getcourse_html_test(body_html):
-    with open(r"getcourse.html", encoding="utf-8") as file:
-        data = file.read()
-    tree = html.fromstring(data)
-    # tree = html.fromstring(body_html)
-    link = tree.xpath('//a/@href')[0]
-    print(link)
-    # establishing session
-    s = requests.Session()
-    s.headers.update({
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36',
-        'referer': 'https://givinschoolru.getcourse.ru/cms/system/login?required=true'})
-    s.auth = ('ministrbob777@gmail.com', 'Jager777Z7')
-    payload = {
-        "email": 'ministrbob777@gmail.com',
-        "password": 'Jager777Z7'
-    }
-    r = s.post(r"https://givinschoolru.getcourse.ru/cms/system/login?required=true", data=payload)
-    print(r)
-    r = s.get(
-        r"http://givinschoolru.getcourse.ru/g/2709590526/446cb0e2?v=Y1DOxkjM4EzLkl2LlRXYkBXdvwWYlR2Ls9mc052bj9yclxWYz9Sdy5SZzJXdvNGdldmL1JHbv9GajNnbpZXan9yL6MHc0RHa")
-    # r = s.get(link)
-
-    # r = requests.get(link, headers=headers)
-    print(r)
-    print(r.text)
-    # print(r.content.decode())
-    tree2 = html.fromstring(r.content.decode())
-    h1 = tree2.xpath('//h1')
-    # print(h1)
-    # print(h1.text_content())
-
 
 if __name__ == "__main__":
     parse_getcourse_html("aaaa")

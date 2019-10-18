@@ -24,7 +24,8 @@ def create_yandex_mail(familia_, name_, login_=None, password_=None, department_
     logger.debug(f"password_={password_}")
     # Если логин не задан, тогда делаем его вида familia_name
     if login_ is None:
-        login_ = translit_name(familia_) + "_" + translit_name(name_)
+        # У некоторых фамили и имена сложные = несколько слов через пробел, поэтому пробел заменяю на подчёркивание
+        login_ = translit_name(familia_).replace(' ', '_') + "_" + translit_name(name_).replace(' ', '_')
     # print(login_)
     logger.debug(f"login_={login_}")
     # https://yandex.ru/dev/connect/directory/api/concepts/users/add-user-docpage/

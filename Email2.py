@@ -53,7 +53,7 @@ class Email:
 
     def sort_mail(self):
         """Sort mail and start work """
-        self.logger.info("sort_mail beggin")
+        self.logger.info("sort_mail begin")
         try:
             self.logger.info("Try connect to DB")
             postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],

@@ -25,7 +25,7 @@ def from_list_create_sf_mails():
                       f"{translit_name(line[0]) + '_' + translit_name(line[1]) + '@givinschool.org'}")
             else:
                 print("ERROR = " + e.__str__())
-        # Для почты стандартный пароль, это пароль для Zoom
+        # Для почты стандартный пароль, а это пароль для Zoom
         print(create_info_str(result, password=False, welcome=False))
         print(f"Пароль для Zoom: {password_generator.random_password(strong=True, zoom=True)}")
 

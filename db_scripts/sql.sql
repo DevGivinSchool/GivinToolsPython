@@ -63,7 +63,7 @@ last_name as "Фамилия", first_name as "Имя", email, telegram,
 payment_date "Дата оплаты", number_of_days as "Дней", deadline "Оплачено до",
 until_date as "Отсрочка до", comment
 FROM public.participants
-WHERE type = 'P'
+WHERE type in ('P', 'N')
 --and number_of_days <> 45
 and ((deadline - CURRENT_TIMESTAMP < INTERVAL '0 days' and until_date is NULL)
 or (until_date - CURRENT_TIMESTAMP < INTERVAL '0 days' and until_date is not NULL))

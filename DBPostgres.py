@@ -58,6 +58,8 @@ class DBPostgres:
         cursor.close()
         return id_
 
+    ###########################################################################
+
     def create_task(self, session_id, task):
         """
         Create new task. If the task already exist, then increase attempt count.
@@ -140,9 +142,13 @@ class DBPostgres:
         :param task:
         :return:
         """
-        participant_id = self.find_participant(task.payment["Электронная почта"], task.payment["Фамилия Имя"])
+        # participant_id = self.find_participant(task.payment["Электронная почта"], task.payment["Фамилия Имя"])
+        # TODO Реализовать поиск по fio_eng
+        # Ищем участника сначала по email
+        participant_id = self.find_participant_by(dict(type='email', value=task.payment["Электронная почта"]))
         if participant_id is None:
-            participant_id = None
+            # Ищем по fio
+            participant_id = self.find_participant_by(dict(type='email', value=task.payment["Фамилия Имя"]))
         cursor = self.conn.cursor()
         sql_text = """INSERT INTO payments(task_uuid, name_of_service, payment_id, amount, participant_id, 
         sales_slip, card_number, card_type, payment_purpose, last_name, first_name, fio, email, payment_system) 
@@ -160,65 +166,30 @@ class DBPostgres:
         cursor.close()
         return id_, participant_id
 
-    def find_participant(self, email, fio):
-        """Find participant by email and FIO"""
-        # print("-"*45)
-        # print(f"task = {task}")
-        cursor = self.conn.cursor()
-        # Find by email
-        if email is None or not email:
-            self.logger.info("Email отсутствует. Поиск по email невозможен")
+    ################################################################
+
+    def find_participant_by(self, ip):
+        """
+        Find participant by email or telegram or fio or fio_eng
+        :param ip: Type and value for search {'type', '', 'value', ''}
+        :return: None - if search nothing or ID participant
+        """
+        if ip['value'] is None or not ip['value']:
+            self.logger.warning(f"{ip['type']} отсутствует. Поиск по {ip['type']} невозможен")
+            return None
         else:
-            sql_text = """select id from participants where email=%s;"""
-            values_tuple = (email,)
-            # print(cursor.mogrify(sql_text, values_tuple))
-            cursor.execute(sql_text, values_tuple)
-            if cursor.rowcount > 1:
-                self.logger.error(f"ERROR:{cursor.mogrify(sql_text, values_tuple)}")
-                raise (f"Поиск участника по email {email} "
+            self.logger.info(f"Осуществляем поиск участника по {ip['type']}={ip['value']}")
+            sql_text = f"""select id from participants where {ip['type']}=%s;"""
+            values_tuple = (ip['value'],)
+            records = self.execute_select(sql_text, values_tuple)
+            if len(records) > 1:
+                raise (f"Поиск участника по {ip['type']}={ip['value']} "
                        f"возвращает больше одной строки. Возможно дублирование.")
-            elif cursor.rowcount == 0:
+            elif len(records) == 0:
                 id_ = None
             else:
-                id_ = cursor.fetchone()[0]
-            cursor.close()
+                id_ = records[0][0]
             return id_
-        """
-        # Find by Telegram (in task is not telegram)
-        sql_text = "select id from participants where telegram=%s;"
-        values_tuple = (TELEGRAM,)
-        cursor.execute(sql_text, values_tuple)
-        data = cursor.fetchone()
-        if data is not None:
-            id_ = data[0]
-            return id_
-        """
-        # Find by FIO (even a complete match cannot guarantee reliability, because may be namesakes)
-        if fio is None or not fio:
-            self.logger.info("Фамилия Имя отсутствуют")
-        else:
-            sql_text = """select id from participants where fio=%s;"""
-            values_tuple = (fio,)
-            # print(cursor.mogrify(sql_text, values_tuple))
-            cursor.execute(sql_text, values_tuple)
-            if cursor.rowcount > 1:
-                self.logger.error(f"ERROR:{cursor.mogrify(sql_text, values_tuple)}")
-                raise (f"Поиск участника по Фамилия Имя {fio} "
-                       f"возвращает больше одной строки. Возможно дублирование.")
-            elif cursor.rowcount == 1:
-                id_ = cursor.fetchone()[0]
-            elif cursor.rowcount == 0:
-                id_ = None
-            cursor.close()
-            return id_
-        # Сюда навряд ли дойдет, это какой-то непредвиденный случай
-        self.logger.error(f"Поиск по email {fio} "
-                          f"или фио {fio} ничего не нашёл. "
-                          f"Нужно рассмотреть этот случай подробнее!")
-        cursor.close()
-        # print(f"id_3 = {id_}")
-        # Если ничего не нашлось возвращаем ноль.
-        return None
 
     def disconnect(self):
         self.conn.close()
@@ -232,7 +203,13 @@ if __name__ == "__main__":
                           password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
                           port=config.config['postgres_port'])
 
+    id2 = postgres.find_participant_by(dict(type='email', value='tikitikishik@gmail.com'))
+    id3 = postgres.find_participant_by(dict(type='telegram', value='@rikitikishik'))
+    id4 = postgres.find_participant_by(dict(type='fio', value='ЛОГИНОВА ДАРЬЯ'))
+    id5 = postgres.find_participant_by(dict(type='fio_eng', value='MILA KIM VULFOV'))
+
+
     # id2 = postgres.find_participant_test("ivan@mail.ru")
     # id2 = postgres.find_participant_test("@ivan")
     # id2 = postgres.find_participant_test("ИВАНОВ ИВАН")
-    # print(id2)
+    print(f"id2={id2}, id3={id3}, id4={id4}, id5={id5}")

@@ -68,6 +68,7 @@ def create_ftp_login():
         # print("-"*45)
         # Так удобнее сразу копировать в таблицу
         print(translit_name(line[0]).lower() + "\t" + password_generator.random_password(strong=True, long=12))
+        print("=" * 45)
 
 
 def show_groups():

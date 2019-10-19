@@ -11,6 +11,7 @@ def random_password(strong=False, long=10, zoom=False):
     :param long: Длина паролья, для Zoom по умолчанию 10.
     :return: Словарь значений.
     """
+    print("-" * 45)
     # Набор символов пароля не должен содержать букв,
     # которые могут быть неправильно поняты пользователями
     # 'l', 'j', 'i', '0', 'o', 'O'
@@ -41,26 +42,32 @@ def random_password(strong=False, long=10, zoom=False):
     # Пароль должен начинаться с буквы
     if not password[0].isalpha():
         password = random.choice(letters) + password[1:]
-    print(f"password 1={password}")
+    print(f"password 1={password} - Пароль должен начинаться с буквы")
     # Пароль должен содержать хотя бы одну цифру (Zoom), если цифры нет, подставляем на третью позицию случайню цифру
     if not re.search(r'\d', password):
         print(f"цифр нет")
         password = password[:2] + random.choice(digits_chars) + password[2:]
+        print(f"password 2={password} - Пароль должен содержать хотя бы одну цифру")
         password = adjust_password_length(password)
-    print(f"password 2={password}")
+        print(f"password 3={password} - Нормализация длины. Пароль должен содержать хотя бы одну цифру")
+    print(f"password 4={password} - После Пароль должен содержать хотя бы одну цифру")
     # В сложном пароле должны быть и спецсимволы, если нет, подставляем на четвёртую позицию
     chars = set('@#$&', )
     if not any((c in chars) for c in password):
         print(f"спецсимволов нет")
         password = password[:3] + random.choice(['@', '#', '$', '&']) + password[3:]
+        print(f"password 5={password} - В сложном пароле должны быть и спецсимволы")
         password = adjust_password_length(password)
-    print(f"password 3={password}")
+        print(f"password 6={password} - Нормализация длины. В сложном пароле должны быть и спецсимволы")
+    print(f"password 7={password} - После. В сложном пароле должны быть и спецсимволы")
     # (Только для Zoom (zoom=True) Два последних символа - два маленькие буквы,
     # так визуально удобнее потом дописывать 55
     if zoom:
         print(f"пароль для zoom")
         password = password + random.choice(ascii_lowercase_chars) + random.choice(ascii_lowercase_chars)
-    print(f"password 4={password}")
+        print(f"password 8={password} - Два последних символа - два маленькие буквы для Zoom")
+    print(f"password 9={password} - ТАКОЙ БУДЕТ ПАРОЛЬ")
+    print("-"*45)
     return password
 
 

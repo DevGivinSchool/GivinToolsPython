@@ -12,9 +12,14 @@ import config
 from DBPostgres import DBPostgres
 
 email = []
-telegram = ['@aleksandr80kamensk'.lower()]
+telegram = ['@bogdan978'.lower()]
 fio = []
 
+if len(telegram) + len(fio) + len(email) > 1:
+    raise Exception("ERROR: Нужно использовать что-то одно email/telegram/fio!!!")
+    exit(1)
+
+print(1)
 if len(telegram) > 0:
     telegram_ = True
     listp = telegram
@@ -28,9 +33,7 @@ elif len(email) > 0:
     listp = email
     sql_in = 'email'
 
-if telegram_ + fio_ + email_ > 1:
-    raise Exception("ERROR: Нужно использовать что-то одно email/telegram/fio!!!")
-    exit(1)
+exit()
 
 # Подключение к БД
 postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],

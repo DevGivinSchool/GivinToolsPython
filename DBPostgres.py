@@ -145,10 +145,12 @@ class DBPostgres:
         # participant_id = self.find_participant(task.payment["Электронная почта"], task.payment["Фамилия Имя"])
         # TODO Реализовать поиск по fio_eng
         # Ищем участника сначала по email
-        participant_id = self.find_participant_by(dict(type='email', value=task.payment["Электронная почта"]))
+        self.logger.info(f"Ищем участника сначала по email - {task.payment['Электронная почта']}")
+        participant_id = self.find_participant_by('email', task.payment["Электронная почта"])
         if participant_id is None:
             # Ищем по fio
-            participant_id = self.find_participant_by(dict(type='email', value=task.payment["Фамилия Имя"]))
+            self.logger.info(f"Ищем участника по fio - {task.payment['Фамилия Имя']}")
+            participant_id = self.find_participant_by('fio', task.payment["Фамилия Имя"])
         cursor = self.conn.cursor()
         sql_text = """INSERT INTO payments(task_uuid, name_of_service, payment_id, amount, participant_id, 
         sales_slip, card_number, card_type, payment_purpose, last_name, first_name, fio, email, payment_system) 
@@ -168,22 +170,35 @@ class DBPostgres:
 
     ################################################################
 
-    def find_participant_by(self, ip):
+    def find_participant_by(self, criterion, value):
         """
         Find participant by email or telegram or fio or fio_eng
-        :param ip: Type and value for search {'type', '', 'value', ''}
+        :param criterion: Search criteria
+        :param value: Search value
         :return: None - if search nothing or ID participant
         """
-        if ip['value'] is None or not ip['value']:
-            self.logger.warning(f"{ip['type']} отсутствует. Поиск по {ip['type']} невозможен")
+        if value is None or not value:
+            self.logger.warning(f"{criterion} отсутствует. Поиск по {criterion} невозможен")
             return None
         else:
-            self.logger.info(f"Осуществляем поиск участника по {ip['type']}={ip['value']}")
-            sql_text = f"""select id from participants where {ip['type']}=%s;"""
-            values_tuple = (ip['value'],)
+            # Нормализация value под БД
+            if criterion == 'email':
+                value = value.lower()
+            elif criterion == 'telegram':
+                value = value.lower()
+            elif criterion == 'fio':
+                value = value.upper()
+            elif criterion == 'fio_eng':
+                value = value.upper()
+            else:
+                self.logger.error(f"Это неизвестный критерий поиска участника - {criterion}={value}")
+                raise
+            self.logger.info(f"Осуществляем поиск участника по {criterion}={value}")
+            sql_text = f"""select id from participants where {criterion}=%s;"""
+            values_tuple = (value,)
             records = self.execute_select(sql_text, values_tuple)
             if len(records) > 1:
-                raise (f"Поиск участника по {ip['type']}={ip['value']} "
+                raise (f"Поиск участника по {criterion}={value} "
                        f"возвращает больше одной строки. Возможно дублирование.")
             elif len(records) == 0:
                 id_ = None
@@ -203,10 +218,10 @@ if __name__ == "__main__":
                           password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
                           port=config.config['postgres_port'])
 
-    id2 = postgres.find_participant_by(dict(type='email', value='tikitikishik@gmail.com'))
-    id3 = postgres.find_participant_by(dict(type='telegram', value='@rikitikishik'))
-    id4 = postgres.find_participant_by(dict(type='fio', value='ЛОГИНОВА ДАРЬЯ'))
-    id5 = postgres.find_participant_by(dict(type='fio_eng', value='MILA KIM VULFOV'))
+    id2 = postgres.find_participant_by('email', 'tikitikishik@gmail.com')
+    id3 = postgres.find_participant_by('telegram', '@rikitikishik')
+    id4 = postgres.find_participant_by('fio', 'ЛОГИНОВА ДАРЬЯ')
+    id5 = postgres.find_participant_by('fio_eng', 'MILA KIM VULFOV')
 
 
     # id2 = postgres.find_participant_test("ivan@mail.ru")

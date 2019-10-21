@@ -12,14 +12,13 @@ import config
 from DBPostgres import DBPostgres
 
 email = []
-telegram = ['@bogdan978'.lower()]
+telegram = ['@']
 fio = []
 
 if len(telegram) + len(fio) + len(email) > 1:
     raise Exception("ERROR: Нужно использовать что-то одно email/telegram/fio!!!")
     exit(1)
 
-print(1)
 if len(telegram) > 0:
     telegram_ = True
     listp = telegram
@@ -32,32 +31,47 @@ elif len(email) > 0:
     email_ = True
     listp = email
     sql_in = 'email'
-
-exit()
-
+print(f"Осуществляется поиск по {sql_in}")
 # Подключение к БД
 postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
                       password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
                       port=config.config['postgres_port'])
 for p in listp:
-    # Выполняем поиск участника
+    print(f"Попытка блокировки участника {p}")
+    participant_id = None
+    # TODO Реализовать поиск по fio_eng
     if telegram_:
-        participant_id = postgres.find_participant(task.payment["Электронная почта"], task.payment["Фамилия Имя"])
+        # Ищем участника по Telegram
+        p = p.lower()
+        print(f"Ищем участника по Telegram - {p}")
+        participant_id = postgres.find_participant_by('telegram', p)
+    elif email_:
+        # Ищем участника по email
+        p = p.lower()
+        print(f"Ищем участника по email - {p}")
+        participant_id = postgres.find_participant_by('email', p)
+    elif fio_:
+        # Ищем участника по fio
+        p = p.upper()
+        p = p.lower()
+        participant_id = postgres.find_participant_by('fio', p)
     if participant_id is None:
-        participant_id = None
+        print(f"******* ВНИМАНИЕ: По значению {p} ничего не нашлось")
+        continue
     # Блокируем пользователя
-    sql_text = "UPDATE participants SET type='B', password=password||'55' where telegram=%s RETURNING id;"
-    values_tuple = (telegram,)
+    sql_text = f"UPDATE participants SET type='B', password=password||'55' where {sql_in}=%s RETURNING id;"
+    values_tuple = (p,)
     id_ = postgres.execute_dml_id(sql_text, values_tuple)
     if id_ is None:
-        print(f"Нет участника с Telegram {telegram}")
+        print(f"******* ВНИМАНИЕ: UPDATE для {p} не отработал")
     else:
-        print(f"Заблокировани участник ID={id_}")
+        print(f"Заблокирован участник ID={id_}")
         # Состояние участник
-        sql_text = 'SELECT fio, login, password, type FROM participants where id=%s;'
+        sql_text = 'SELECT id, fio, login, password, type FROM participants where id=%s;'
         values_tuple = (id_,)
         rows = postgres.execute_select(sql_text, values_tuple)
         print(rows)
+        # TODO Послать письмо админу чтобы сменил пароль Zoom
 postgres.disconnect()
 
 

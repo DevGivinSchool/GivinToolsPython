@@ -194,7 +194,7 @@ class DBPostgres:
                 self.logger.error(f"Это неизвестный критерий поиска участника - {criterion}={value}")
                 raise
             self.logger.info(f"Осуществляем поиск участника по {criterion}={value}")
-            sql_text = f"""select id from participants where {criterion}=%s;"""
+            sql_text = f"""select id from participants where {criterion}=%s and type in ('N', 'P');"""
             values_tuple = (value,)
             records = self.execute_select(sql_text, values_tuple)
             if len(records) > 1:

@@ -7,59 +7,61 @@ print(datetime.date(2019, 10, 10) + datetime.timedelta(days=97))
 
 # процедура блокировки пользователя
 import datetime
+import string
+import re
 import PASSWORDS
 import config
 from DBPostgres import DBPostgres
 
-email = []
-telegram = ['@']
-fio = []
 
-if len(telegram) + len(fio) + len(email) > 1:
-    raise Exception("ERROR: Нужно использовать что-то одно email/telegram/fio!!!")
-    exit(1)
+list_participants = """@Akmaral1111
+  САМАРИЧЕВ АнДРЕЙ 
+@telegram1
+wwww@mail.ru
+иванов иван
+van der bild
+"""
 
-if len(telegram) > 0:
-    telegram_ = True
-    listp = telegram
-    sql_in = 'telegram'
-elif len(fio) > 0:
-    fio_ = True
-    listp = fio
-    sql_in = 'fio'
-elif len(email) > 0:
-    email_ = True
-    listp = email
-    sql_in = 'email'
-print(f"Осуществляется поиск по {sql_in}")
 # Подключение к БД
 postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
                       password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
                       port=config.config['postgres_port'])
-for p in listp:
+pattern_eng = re.compile("[A-Za-z]+")
+pattern_rus = re.compile("[А-Яа-я]+")
+for p in list_participants.splitlines():
     print(f"Попытка блокировки участника {p}")
+    p = p.strip()
     participant_id = None
-    # TODO Реализовать поиск по fio_eng
-    if telegram_:
+    if p[0] == '@':
         # Ищем участника по Telegram
+        sql_instr = "telegram"
         p = p.lower()
         print(f"Ищем участника по Telegram - {p}")
         participant_id = postgres.find_participant_by('telegram', p)
-    elif email_:
+    elif '@' in p:
         # Ищем участника по email
+        sql_instr = "email"
         p = p.lower()
         print(f"Ищем участника по email - {p}")
         participant_id = postgres.find_participant_by('email', p)
-    elif fio_:
+    elif pattern_rus.match(p.replace(' ', '')):
         # Ищем участника по fio
+        sql_instr = "fio"
         p = p.upper()
-        p = p.lower()
+        print(f"Ищем участника по fio - {p}")
         participant_id = postgres.find_participant_by('fio', p)
+    elif pattern_eng.match(p.replace(' ', '')):
+        # Ищем участника по fio_eng
+        sql_instr = "fio_eng"
+        p = p.upper()
+        print(f"Ищем участника по fio_eng - {p}")
+        participant_id = postgres.find_participant_by('fio_eng', p)
     if participant_id is None:
         print(f"******* ВНИМАНИЕ: По значению {p} ничего не нашлось")
+        print("-" * 45)
         continue
     # Блокируем пользователя
-    sql_text = f"UPDATE participants SET type='B', password=password||'55' where {sql_in}=%s RETURNING id;"
+    sql_text = f"UPDATE participants SET type='B', password=password||'55' where {sql_instr}=%s RETURNING id;"
     values_tuple = (p,)
     id_ = postgres.execute_dml_id(sql_text, values_tuple)
     if id_ is None:
@@ -72,6 +74,7 @@ for p in listp:
         rows = postgres.execute_select(sql_text, values_tuple)
         print(rows)
         # TODO Послать письмо админу чтобы сменил пароль Zoom
+    print("-"*45)
 postgres.disconnect()
 
 

@@ -12,6 +12,7 @@ def random_password(strong=False, long=10, zoom=False):
     :return: Словарь значений.
     """
     print("-" * 45)
+    print(f"strong={strong}, zoom={zoom}, long={long}")
     # Набор символов пароля не должен содержать букв,
     # которые могут быть неправильно поняты пользователями
     # 'l', 'j', 'i', '0', 'o', 'O'
@@ -54,7 +55,6 @@ def random_password(strong=False, long=10, zoom=False):
     # В сложном пароле должны быть и спецсимволы, если нет, подставляем на четвёртую позицию
     chars = set('@#$&', )
     if not any((c in chars) for c in password):
-        print(f"спецсимволов нет")
         password = password[:3] + random.choice(['@', '#', '$', '&']) + password[3:]
         print(f"password 5={password} - В сложном пароле должны быть и спецсимволы")
         password = adjust_password_length(password)
@@ -63,7 +63,6 @@ def random_password(strong=False, long=10, zoom=False):
     # (Только для Zoom (zoom=True) Два последних символа - два маленькие буквы,
     # так визуально удобнее потом дописывать 55
     if zoom:
-        print(f"пароль для zoom")
         password = password + random.choice(ascii_lowercase_chars) + random.choice(ascii_lowercase_chars)
         print(f"password 8={password} - Два последних символа - два маленькие буквы для Zoom")
     print(f"password 9={password} - ТАКОЙ БУДЕТ ПАРОЛЬ")

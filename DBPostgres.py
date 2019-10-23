@@ -4,7 +4,7 @@ import logging
 
 class DBPostgres:
 
-    def __init__(self, dbname, host, port='5432', user='postgres', password='postgres'):
+    def __init__(self, dbname, host, logger=logging.getLogger('DBPostgres'), port='5432', user='postgres', password='postgres'):
         self.dbname = dbname
         self.host = host
         self.port = port
@@ -12,7 +12,7 @@ class DBPostgres:
         self.password = password
         self.conn = psycopg2.connect(dbname=self.dbname, user=self.user, password=self.password,
                                      host=self.host, port=self.port)
-        self.logger = logging.getLogger('DBPostgres')
+        self.logger = logger
 
     def execute_select(self, sql_text, values_tuple):
         """Execute selects
@@ -146,11 +146,11 @@ class DBPostgres:
         # TODO Реализовать поиск по fio_eng
         # Ищем участника сначала по email
         self.logger.info(f"Ищем участника сначала по email - {task.payment['Электронная почта']}")
-        participant_id = self.find_participant_by('email', task.payment["Электронная почта"])
+        participant_id, p_type = self.find_participant_by('email', task.payment["Электронная почта"])
         if participant_id is None:
             # Ищем по fio
             self.logger.info(f"Ищем участника по fio - {task.payment['Фамилия Имя']}")
-            participant_id = self.find_participant_by('fio', task.payment["Фамилия Имя"])
+            participant_id, p_type = self.find_participant_by('fio', task.payment["Фамилия Имя"])
         cursor = self.conn.cursor()
         sql_text = """INSERT INTO payments(task_uuid, name_of_service, payment_id, amount, participant_id, 
         sales_slip, card_number, card_type, payment_purpose, last_name, first_name, fio, email, payment_system) 
@@ -175,11 +175,11 @@ class DBPostgres:
         Find participant by email or telegram or fio or fio_eng
         :param criterion: Search criteria
         :param value: Search value
-        :return: None - if search nothing or ID participant
+        :return: None - if search nothing or ID participant and his type
         """
         if value is None or not value:
             self.logger.warning(f"{criterion} отсутствует. Поиск по {criterion} невозможен")
-            return None
+            return None, None
         else:
             # Нормализация value под БД
             if criterion == 'email':
@@ -194,17 +194,21 @@ class DBPostgres:
                 self.logger.error(f"Это неизвестный критерий поиска участника - {criterion}={value}")
                 raise
             self.logger.info(f"Осуществляем поиск участника по {criterion}={value}")
-            sql_text = f"""select id from participants where {criterion}=%s and type in ('N', 'P');"""
+            # Искать нужно с любым type т.к. заблокированный участник тоже может вновь оплатить
+            sql_text = f"""select id, type from participants where {criterion}=%s; """
             values_tuple = (value,)
             records = self.execute_select(sql_text, values_tuple)
+            # print(records)
             if len(records) > 1:
                 raise (f"Поиск участника по {criterion}={value} "
                        f"возвращает больше одной строки. Возможно дублирование.")
             elif len(records) == 0:
                 id_ = None
+                type_ = None
             else:
                 id_ = records[0][0]
-            return id_
+                type_ = records[0][1]
+            return id_, type_
 
     def disconnect(self):
         self.conn.close()

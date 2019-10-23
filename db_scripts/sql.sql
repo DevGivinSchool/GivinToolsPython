@@ -1,3 +1,16 @@
+-- ===============================================================
+-- Поиск участника
+SELECT
+*
+--id, last_name, first_name, fio, email, telegram, time_begin, time_end, login, password, payment_date, number_of_days, deadline, comment, until_date, type
+FROM public.participants
+where
+--telegram=lower('@')
+--last_name=upper('СМИРНОВ')
+id=1294
+;
+
+-- ===============================================================
 -- Создать пользователя
 INSERT INTO public.participants(
 	last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, type)
@@ -33,18 +46,6 @@ last_name=upper('Абдуллаева')
 ;
 
 -- ===============================================================
--- Поиск участника
-SELECT
-*
---id, last_name, first_name, fio, email, telegram, time_begin, time_end, login, password, payment_date, number_of_days, deadline, comment, until_date, type
-FROM public.participants
-where
---telegram=lower('@')
---last_name=upper('СМИРНОВ')
-id=1294
-;
-
--- ===============================================================
 --Получение списка участников (как регулярных так и заблокированных)
 SELECT id, last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, until_date, comment
 	FROM public.participants
@@ -72,11 +73,18 @@ order by last_name;
 
 -- ===============================================================
 -- Проставить дату оплаты
---select * from participants where fio='ЛАНДЕНОК АННА';
---UPDATE participants SET payment_date=NOW(), number_of_days=30, deadline=NOW()+interval '1' day * number_of_days, comment=NULL, type='P' WHERE id=XXX;
---UPDATE participants SET payment_date=to_date('04.10.2019', 'DD.MM.YYYY'), number_of_days=30, deadline=to_date('04.10.2019', 'DD.MM.YYYY')+interval '1' day * number_of_days, comment=NULL, type='P' WHERE id=XXX;
+UPDATE participants SET
+payment_date=to_date('18.10.2019', 'DD.MM.YYYY'),
+--payment_date=NOW(),
+number_of_days=30,
+deadline=to_date('18.10.2019', 'DD.MM.YYYY')+interval '1' day * 30,
+--deadline=NOW()+interval '1' day * 30,
+comment=NULL, type='P'
+WHERE
+--id=1249
+;
 --commit;
---select * from participants where fio='ЛАНДЕНОК АННА';
+
 
 -- ===============================================================
 -- Кто сегодня оплатил
@@ -136,6 +144,9 @@ order by p.last_name
 -- BACKUP
 pg_dump.exe -U postgres -d gs -f d:\YandexDisk\TEMP\gs20190908.sql
 pg_dump gs > gs20190920.sql
+-- Вариант с паролем смотри в PASSWORDS.py
+SET PGPASSWORD=<PassWord>
+"C:\Program Files (x86)\pgAdmin 4\v4\runtime\pg_dump.exe" --file "D:\YandexDisk\TEMP\GS\20191023.sql" --host "<ip>" --port "5432" --username "postgres" --no-password --verbose --format=p --encoding "UTF8" "gs"
 -- RESTORE
 cd "c:\Program Files\PostgreSQL\11\bin"
 psql.exe -U postgres -d gs -f d:\YandexDisk\TEMP\gs20190906.sql

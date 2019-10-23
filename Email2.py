@@ -58,7 +58,7 @@ class Email:
             self.logger.info("Try connect to DB")
             postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
                                   password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
-                                  port=config.config['postgres_port'])
+                                  port=config.config['postgres_port'], logger=self.logger)
         except Exception:
             # TODO Вынести процедуру опопвещения MAIN ERROR в отдельную процедуру
             error_text = \
@@ -80,6 +80,7 @@ class Email:
         for uid, message_data in self.client.fetch(messages, 'RFC822').items():
             """Get main parameters letters"""
             uuid = str(uid)
+            print(uuid)
             # self.work_logger = Log.setup_logger(uuid, config.config['log_dir'], f'{uuid}.log',
             #                                     config.config['log_level'])
             email_message = email.message_from_bytes(message_data[b'RFC822'])
@@ -200,6 +201,7 @@ class Email:
             else:
                 self.logger.warning(f"ВНИМАНИЕ: Это письмо уже обрабатывалось!")
             self.logger.info(f"Task {session_id}:{uuid}:{task_is_new} end")
+            print(uuid)
             # print('-' * 45)
             self.logger.info('-' * 45)
             # -----------------------------------------------------------------

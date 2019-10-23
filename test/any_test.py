@@ -14,12 +14,7 @@ import config
 from DBPostgres import DBPostgres
 
 
-list_participants = """@Akmaral1111
-  САМАРИЧЕВ АнДРЕЙ 
-@telegram1
-wwww@mail.ru
-иванов иван
-van der bild
+list_participants = """aclima57@mail.ru
 """
 
 # Подключение к БД
@@ -37,43 +32,48 @@ for p in list_participants.splitlines():
         sql_instr = "telegram"
         p = p.lower()
         print(f"Ищем участника по Telegram - {p}")
-        participant_id = postgres.find_participant_by('telegram', p)
+        participant_id, p_type = postgres.find_participant_by('telegram', p)
     elif '@' in p:
         # Ищем участника по email
         sql_instr = "email"
         p = p.lower()
         print(f"Ищем участника по email - {p}")
-        participant_id = postgres.find_participant_by('email', p)
+        participant_id, p_type = postgres.find_participant_by('email', p)
     elif pattern_rus.match(p.replace(' ', '')):
         # Ищем участника по fio
         sql_instr = "fio"
         p = p.upper()
         print(f"Ищем участника по fio - {p}")
-        participant_id = postgres.find_participant_by('fio', p)
+        participant_id, p_type = postgres.find_participant_by('fio', p)
     elif pattern_eng.match(p.replace(' ', '')):
         # Ищем участника по fio_eng
         sql_instr = "fio_eng"
         p = p.upper()
         print(f"Ищем участника по fio_eng - {p}")
-        participant_id = postgres.find_participant_by('fio_eng', p)
+        participant_id, p_type = postgres.find_participant_by('fio_eng', p)
     if participant_id is None:
         print(f"******* ВНИМАНИЕ: По значению {p} ничего не нашлось")
         print("-" * 45)
         continue
-    # Блокируем пользователя
-    sql_text = f"UPDATE participants SET type='B', password=password||'55' where {sql_instr}=%s RETURNING id;"
-    values_tuple = (p,)
-    id_ = postgres.execute_dml_id(sql_text, values_tuple)
-    if id_ is None:
-        print(f"******* ВНИМАНИЕ: UPDATE для {p} не отработал")
+    if p_type == 'N' or p_type == 'P':
+        # Блокируем пользователя
+        sql_text = f"UPDATE participants SET type='B', password=password||'55' where {sql_instr}=%s RETURNING id;"
+        values_tuple = (p,)
+        id_ = postgres.execute_dml_id(sql_text, values_tuple)
+        if id_ is None:
+            print(f"******* ВНИМАНИЕ: UPDATE для {p} не отработал")
+        else:
+            print(f"Заблокирован участник ID={id_}")
+            # Состояние участник
+            sql_text = 'SELECT id, fio, login, password, type FROM participants where id=%s;'
+            values_tuple = (id_,)
+            rows = postgres.execute_select(sql_text, values_tuple)
+            print(rows)
+            # TODO Послать письмо админу чтобы сменил пароль Zoom
+    elif p_type == 'B':
+        print("ЭТОТ УЧАСТНИК УЖЕ ЗАБЛОКИРОВАН")
     else:
-        print(f"Заблокирован участник ID={id_}")
-        # Состояние участник
-        sql_text = 'SELECT id, fio, login, password, type FROM participants where id=%s;'
-        values_tuple = (id_,)
-        rows = postgres.execute_select(sql_text, values_tuple)
-        print(rows)
-        # TODO Послать письмо админу чтобы сменил пароль Zoom
+        print(f"Неизвестный тип участника type={p_type}")
     print("-"*45)
 postgres.disconnect()
 

@@ -1,6 +1,7 @@
 import yandex_mail
 import yandex_connect
 import password_generator
+from utils import get_login
 
 
 class Task:
@@ -82,19 +83,20 @@ class Task:
 
             # Создаём почту новому участнику в домене @givinschool.org
             self.logger.info("Создаём почту новому участнику в домене @givinschool.org")
+            login_ = get_login(self.payment["Фамилия"], self.payment["Имя"])
             try:
-                result = yandex_mail.create_yandex_mail(self.payment["Фамилия"], self.payment["Имя"], department_id_=4)
+                result = yandex_mail.create_yandex_mail(self.payment["Фамилия"], self.payment["Имя"], login_, department_id_=4)
                 # print(f"Email created:{result['email']}")
-                self.login_ = result['email']
+                self.login_ = result['email'],
                 self.logger.info(f"Email created:{self.login_}")
                 # Отдел 4 = @ДРУЗЬЯ_ШКОЛЫ
             except yandex_connect.YandexConnectExceptionY as e:
                 # print(e.args[0])
                 if e.args[0] == 500:
                     print(f'Unhandled exception: Такая почта уже существует: '
-                          f'{self.payment["Фамилия"] + "_" + self.payment["Имя"] + "@givinschool.org"}')
+                          f'{login_ + "@givinschool.org"}')
                     self.logger.info(f'Unhandled exception: Такая почта уже существует: '
-                                     f'{result["login_"] + "@givinschool.org"}')
+                                     f'{login_ + "@givinschool.org"}')
                 else:
                     raise
             # Генерация пароля для Zoom (для всех почт пароль одинаковый)

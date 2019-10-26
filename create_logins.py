@@ -3,7 +3,7 @@ import password_generator
 import yandex_connect
 # На вход подаються строки: Фамилия;Имя (пока из list.py)
 from list import list_fio
-from stuff import translit_name
+from utils import get_login
 
 
 def from_list_create_sf_mails():
@@ -13,16 +13,17 @@ def from_list_create_sf_mails():
         # Иванов	Иван
         line = line.split('\t')
         # При транслитерации некоторые буквы переводятся в - ' - это нужно заменить
-        # print(line)
+        print(line)
         # ['Иванов', 'Иван']
+        login_ = get_login(line[0], line[1])
         try:
-            result = yandex_mail.create_yandex_mail(line[0], line[1], department_id_=4)
+            result = yandex_mail.create_yandex_mail(line[0], line[1], login_, department_id_=4)
             # Отдел 4 = @ДРУЗЬЯ_ШКОЛЫ
         except yandex_connect.YandexConnectExceptionY as e:
             # print(e.args[0])
             if e.args[0] == 500:
                 print(f"Unhandled exception: Такой пользователь уже существует: "
-                      f"{translit_name(line[0]) + '_' + translit_name(line[1]) + '@givinschool.org'}")
+                      f"{login_ + '@givinschool.org'}")
             else:
                 print("ERROR = " + e.__str__())
         # Для почты стандартный пароль, а это пароль для Zoom
@@ -111,7 +112,7 @@ if __name__ == "__main__":
     # while True:
     menu = {"1": ("Создание учёток для Друзей Школы", from_list_create_sf_mails),
             "2": ("Создание учёток для членов комманды", create_femaly_mail),
-            "3": ("Создание технических учёток", create_login_mail),
+            "3": ("Создание технических учёток (для технических почт)", create_login_mail),
             "4": ("Логин для FTP", create_ftp_login),
             "5": ("Посмотреть список групп", show_groups),
             "6": ("Выход", exit_fn)

@@ -1,12 +1,13 @@
 import yandex_connect
 import PASSWORDS
 import logging
-from stuff import translit_name
+# from utils import translit_name
+from utils import get_login
 
 logger = logging.getLogger('DBPostgres')
 
 
-def create_yandex_mail(familia_, name_, login_=None, password_=None, department_id_=1):
+def create_yandex_mail(familia_, name_, login_, password_=None, department_id_=1):
     """
     Create Yandex mail.
     :param login_: Login
@@ -22,10 +23,8 @@ def create_yandex_mail(familia_, name_, login_=None, password_=None, department_
         password_ = PASSWORDS.logins['default_ymail_password']
     # print(password_)
     logger.debug(f"password_={password_}")
-    # Если логин не задан, тогда делаем его вида familia_name
     if login_ is None:
-        # У некоторых фамили и имена сложные = несколько слов через пробел, поэтому пробел заменяю на подчёркивание
-        login_ = translit_name(familia_).replace(' ', '_') + "_" + translit_name(name_).replace(' ', '_')
+        login_ = get_login(familia_, name_)
     # print(login_)
     logger.debug(f"login_={login_}")
     # https://yandex.ru/dev/connect/directory/api/concepts/users/add-user-docpage/

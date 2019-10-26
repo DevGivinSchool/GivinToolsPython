@@ -12,17 +12,16 @@ import re
 import PASSWORDS
 import config
 from DBPostgres import DBPostgres
+from utils import is_eng
+from utils import is_rus
 
-
-list_participants = """aclima57@mail.ru
+list_participants = """
 """
 
 # Подключение к БД
 postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
                       password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
                       port=config.config['postgres_port'])
-pattern_eng = re.compile("[A-Za-z]+")
-pattern_rus = re.compile("[А-Яа-я]+")
 for p in list_participants.splitlines():
     print(f"Попытка блокировки участника {p}")
     p = p.strip()
@@ -39,13 +38,13 @@ for p in list_participants.splitlines():
         p = p.lower()
         print(f"Ищем участника по email - {p}")
         participant_id, p_type = postgres.find_participant_by('email', p)
-    elif pattern_rus.match(p.replace(' ', '')):
+    elif is_rus(p):
         # Ищем участника по fio
         sql_instr = "fio"
         p = p.upper()
         print(f"Ищем участника по fio - {p}")
         participant_id, p_type = postgres.find_participant_by('fio', p)
-    elif pattern_eng.match(p.replace(' ', '')):
+    elif is_eng(p):
         # Ищем участника по fio_eng
         sql_instr = "fio_eng"
         p = p.upper()

@@ -2,6 +2,8 @@ import datetime
 import requests
 import re
 from lxml import html
+from utils import is_eng
+from utils import is_rus
 
 
 def get_clear_payment():
@@ -10,6 +12,8 @@ def get_clear_payment():
         "participant_id": "",
         "number_of_days": 30,
         "deadline": "",
+        "fio_lang": "RUS",
+        "participant_type": "",
         "Фамилия": "",
         "Имя": "",
         "Фамилия Имя": "",
@@ -40,6 +44,12 @@ def payment_normalization(payment):
     payment["Имя"] = payment["Имя"].upper()
     payment["Фамилия Имя"] = payment["Фамилия Имя"].upper()
     payment["Электронная почта"] = payment["Электронная почта"].lower()
+    if is_rus(payment["Фамилия Имя"]):
+        payment["fio_lang"] = "RUS"
+    elif is_eng(payment["Фамилия Имя"]):
+        payment["fio_lang"] = "ENG"
+    else:
+        raise Exception(f"ERROR: Неизвестный язык ФИО: {payment['Фамилия Имя']}")
     return payment
 
 

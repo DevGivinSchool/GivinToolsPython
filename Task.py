@@ -58,11 +58,18 @@ class Task:
                 # raise Exception("The participant must have a Email")
 
             # Создаём нового пользователя в БД
-            self.logger.info("Создаём нового пользователя в БД")
-            sql_text = """INSERT INTO participants(last_name, first_name, fio, email, type) 
-            VALUES (%s, %s, %s, %s, %s) RETURNING id;"""
-            values_tuple = (self.payment["Фамилия"], self.payment["Имя"],
-                            self.payment["Фамилия Имя"], self.payment["Электронная почта"], 'N')
+            self.logger.info(f"Создаём нового пользователя в БД ({self.payment['fio_lang']})")
+            if self.payment["fio_lang"] == "RUS":
+                sql_text = """INSERT INTO participants(last_name, first_name, fio, email, type) 
+                VALUES (%s, %s, %s, %s, %s) RETURNING id;"""
+                values_tuple = (self.payment["Фамилия"], self.payment["Имя"],
+                                self.payment["Фамилия Имя"], self.payment["Электронная почта"], 'N')
+            else:
+                sql_text = """INSERT INTO participants(last_name, first_name, fio, email, type, last_name_eng, first_name_eng, fio_eng) 
+                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
+                values_tuple = (self.payment["Фамилия"], self.payment["Имя"],
+                                self.payment["Фамилия Имя"], self.payment["Электронная почта"], 'N',
+                                self.payment["Фамилия"], self.payment["Имя"], self.payment["Фамилия Имя"])
             self.payment["participant_id"] = self.database.execute_dml_id(sql_text, values_tuple)
             # print(type(self.payment["participant_id"]))
             # print(self.payment["participant_id"])
@@ -115,27 +122,35 @@ class Task:
         else:
             # Отмечаем оплату в БД
             self.mark_payment_into_db()
-            # TODO Если пользователь был заблокированным, тогда:
-                # TODO Написать письмо пользователю
-                # TODO Написать письмо админу чтобы разблокировал Zoom учётку.
-            pass
-
         self.logger.info('Task_run end')
 
     def mark_payment_into_db(self, participant_type='P'):
         """
-        Отмечаем оплату в БД. Поле until_date (отсрочка до) обнуляется.
+        Отмечаем оплату в БД. Поля until_date (отсрочка до) и comment - обнуляются.
         :return:
         """
         self.logger.info("Отмечаем оплату в БД")
         # Состояние участника до отметки
         self.logger.info(self.select_participant(self.payment["participant_id"]))
         # Коментарий и поле отсрочки обнуляются
-        sql_text = """UPDATE participants 
-        SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s 
-        WHERE id=%s;"""
-        values_tuple = (self.payment["Время проведения"], self.payment["number_of_days"],
-                        self.payment["deadline"], participant_type, self.payment["participant_id"])
+        # Для заблокированного пользователя меняется его тип (type) и из пароля удаляются два последних символа
+        if self.payment["participant_id"] == "B":
+            self.logger.info("Разблокировка пользователя")
+            sql_text = """UPDATE participants 
+            SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s, 
+            password=left(password, LENGTH(password)-2) 
+            WHERE id=%s;"""
+            values_tuple = (self.payment["Время проведения"], self.payment["number_of_days"],
+                            self.payment["deadline"], participant_type, self.payment["participant_id"])
+            # TODO Если пользователь был заблокированным, тогда:
+                # TODO Написать письмо пользователю
+                # TODO Написать письмо админу чтобы разблокировал Zoom учётку.
+        else:
+            sql_text = """UPDATE participants 
+            SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s 
+            WHERE id=%s;"""
+            values_tuple = (self.payment["Время проведения"], self.payment["number_of_days"],
+                            self.payment["deadline"], participant_type, self.payment["participant_id"])
         # self.logger.info(sql_text % values_tuple)
         self.database.execute_dml(sql_text, values_tuple)
         # Состояние участника после отметки

@@ -218,10 +218,11 @@ class Email:
         self.logger.info(f'payment = {payment}')
         # Put in Payment to Task and insert Payment to DB
         task.payment = payment
-        payment_id, participant_id = postgres.create_payment(task)
+        payment_id, participant_id, participant_type = postgres.create_payment(task)
         task.payment["task_uuid"] = payment_id
         task.payment["participant_id"] = participant_id
-        self.logger.info(f"Payment {payment_id} for participant {participant_id} created")
+        task.payment["participant_type"] = participant_type
+        self.logger.info(f"Payment {payment_id} for participant {participant_id}|{participant_type} created")
         self.logger.info("create_payment end")
 
     def get_decoded_email_body(self, msg):

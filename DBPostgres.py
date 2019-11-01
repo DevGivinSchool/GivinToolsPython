@@ -4,7 +4,8 @@ import logging
 
 class DBPostgres:
 
-    def __init__(self, dbname, host, logger=logging.getLogger('DBPostgres'), port='5432', user='postgres', password='postgres'):
+    def __init__(self, dbname, host, logger=logging.getLogger('DBPostgres'), port='5432', user='postgres',
+                 password='postgres'):
         self.dbname = dbname
         self.host = host
         self.port = port
@@ -142,15 +143,16 @@ class DBPostgres:
         :param task:
         :return:
         """
-        # participant_id = self.find_participant(task.payment["Электронная почта"], task.payment["Фамилия Имя"])
-        # TODO Реализовать поиск по fio_eng
         # Ищем участника сначала по email
         self.logger.info(f"Ищем участника сначала по email - {task.payment['Электронная почта']}")
         participant_id, p_type = self.find_participant_by('email', task.payment["Электронная почта"])
         if participant_id is None:
-            # Ищем по fio
+            # Ищем по fio в зависимости от языка RUS\ENG
             self.logger.info(f"Ищем участника по fio - {task.payment['Фамилия Имя']}")
-            participant_id, p_type = self.find_participant_by('fio', task.payment["Фамилия Имя"])
+            if task.payment["fio_lang"] == "RUS":
+                participant_id, p_type = self.find_participant_by('fio', task.payment["Фамилия Имя"])
+            else:  # Иначе ищем по ENG потому что после парсера никаких других языков быть не может
+                participant_id, p_type = self.find_participant_by('fio_eng', task.payment["Фамилия Имя"])
         cursor = self.conn.cursor()
         sql_text = """INSERT INTO payments(task_uuid, name_of_service, payment_id, amount, participant_id, 
         sales_slip, card_number, card_type, payment_purpose, last_name, first_name, fio, email, payment_system) 
@@ -166,7 +168,7 @@ class DBPostgres:
         self.conn.commit()
         id_ = cursor.fetchone()[0]
         cursor.close()
-        return id_, participant_id
+        return id_, participant_id, p_type
 
     ################################################################
 
@@ -195,7 +197,7 @@ class DBPostgres:
                 raise
             self.logger.info(f"Осуществляем поиск участника по {criterion}={value}")
             # Искать нужно с любым type т.к. заблокированный участник тоже может вновь оплатить
-            sql_text = f"""select id, type from participants where {criterion}=%s; """
+            sql_text = f"select id, type from participants where {criterion}=%s;"
             values_tuple = (value,)
             records = self.execute_select(sql_text, values_tuple)
             # print(records)
@@ -226,7 +228,6 @@ if __name__ == "__main__":
     id3 = postgres.find_participant_by('telegram', '@rikitikishik')
     id4 = postgres.find_participant_by('fio', 'ЛОГИНОВА ДАРЬЯ')
     id5 = postgres.find_participant_by('fio_eng', 'MILA KIM VULFOV')
-
 
     # id2 = postgres.find_participant_test("ivan@mail.ru")
     # id2 = postgres.find_participant_test("@ivan")

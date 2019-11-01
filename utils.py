@@ -24,10 +24,15 @@ def get_login(familia_, name_):
     :param name_:
     :return: login_
     """
+    if familia_ is None or familia_ == '':
+        raise Exception('ERROR: Для логина обязательно нужна фамилия')
     familia_ = familia_.strip()
-    name_ = name_.strip()
     if is_rus(familia_):
         familia_ = translit_name(familia_.lower()).replace(' ', '_')
-    if is_rus(name_):
-        name_ = translit_name(name_.lower()).replace(' ', '_')
-    return familia_ + "_" + name_
+    if name_ is None or name_ == '':
+        return familia_
+    else:
+        name_ = name_.strip()
+        if is_rus(name_):
+            name_ = translit_name(name_.lower()).replace(' ', '_')
+        return familia_ + "_" + name_

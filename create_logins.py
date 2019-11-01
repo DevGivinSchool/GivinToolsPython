@@ -31,14 +31,16 @@ def from_list_create_sf_mails():
         print(f"Пароль для Zoom: {password_generator.random_password(strong=True, zoom=True)}")
 
 
-def create_femaly_mail():
+def create_team_mail():
     """ Русские только Фамилия (для почт тех кто в команде)"""
     for line in list_fio.splitlines():
         line = line.split(' ')
         # print(line)
+        # ['Карякина', 'Наталья']
+        login_ = get_login(line[0], None)
         password = password_generator.random_password(strong=True, long=8)
         # Отдел 1 = Все сотрудники
-        result = yandex_mail.create_yandex_mail(line[0], line[1], translit_name(line[0]), password, department_id_=1)
+        result = yandex_mail.create_yandex_mail(line[0], line[1], login_, password, department_id_=1)
         # print(password)
         print(create_info_str(result))
 
@@ -104,14 +106,14 @@ if __name__ == "__main__":
     # Русские Имя и Фамилия (для Друзей Школы)
     # from_list_create_sf_mails()
     # Русские только Фамилия (для почт тех кто в команде)
-    # create_femaly_mail()
+    # create_team_mail()
     # English login (для технических почт)
     # create_login_mail()
     # Посмотреть список групп
     # show_groups()
     # while True:
     menu = {"1": ("Создание учёток для Друзей Школы", from_list_create_sf_mails),
-            "2": ("Создание учёток для членов комманды", create_femaly_mail),
+            "2": ("Создание учёток для членов комманды", create_team_mail),
             "3": ("Создание технических учёток (для технических почт)", create_login_mail),
             "4": ("Логин для FTP", create_ftp_login),
             "5": ("Посмотреть список групп", show_groups),

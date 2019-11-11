@@ -95,7 +95,7 @@ class Task:
                 result = yandex_mail.create_yandex_mail(self.payment["Фамилия"], self.payment["Имя"], login_, department_id_=4)
                 # print(f"Email created:{result['email']}")
                 self.login_ = result['email'],
-                self.logger.info(f"Email created:{self.login_}")
+                self.logger.info(f"Email created: {self.login_[0]}")
                 # Отдел 4 = @ДРУЗЬЯ_ШКОЛЫ
             except yandex_connect.YandexConnectExceptionY as e:
                 # print(e.args[0])
@@ -108,7 +108,7 @@ class Task:
                     raise
             # Генерация пароля для Zoom (для всех почт пароль одинаковый)
             self.password_ = password_generator.random_password(strong=True, zoom=True)
-            self.logger.info(f"Password:{self.password_}")
+            self.logger.info(f"Password: {self.password_}")
             self.logger.info("Обновляем участнику логин и пароль в БД")
             sql_text = """UPDATE participants SET login=%s, password=%s WHERE id=%s;"""
             values_tuple = (self.login_, self.password_, self.payment["participant_id"])

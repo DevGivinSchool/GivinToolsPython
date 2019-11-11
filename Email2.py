@@ -144,7 +144,8 @@ class Email:
                             """
                             self.move_email_to_trash(uuid)
                     # В Getcourse только платежи за ДШ иного там нет
-                    elif ffrom == 'no-reply@getcourse.ru' and fsubject.startswith("Поступил платеж"):
+                    elif (ffrom == 'no-reply@getcourse.ru' or ffrom == 'info@study.givinschool.org') \
+                            and fsubject.startswith("Поступил платеж"):
                         self.logger.info(f'Это письмо от платежной системы - GetCourse')
                         # print(f'Это письмо от платежной системы - GetCourse')
                         payment = Parser.parse_getcourse_html(body['body_html'])

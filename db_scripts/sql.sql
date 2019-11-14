@@ -5,35 +5,39 @@ SELECT
 --id, last_name, first_name, fio, email, telegram, time_begin, time_end, login, password, payment_date, number_of_days, deadline, comment, until_date, type
 FROM public.participants
 where
---telegram=lower('@')
---last_name=upper('СМИРНОВ')
-id=1294
+--telegram=lower('ххххх')
+--last_name like upper('%ххххх%')
+--last_name_eng like upper('%ххххх%')
+id=1234
 ;
 
 -- ===============================================================
--- Создать пользователя
+-- Создать участника
 INSERT INTO public.participants(
 	last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, type)
 	VALUES (upper('МАССОЛЬД'), upper('МАРИНА'), upper('МАССОЛЬД МАРИНА'), lower('mmassold@gmx.de'), lower('@marinamassold1975'), 'massold_marina@givinschool.org', 'rkP&Q8Sxfq', to_date('15.10.2019', 'dd.mm.yyyy'), 30, to_date('15.10.2019', 'dd.mm.yyyy') + INTERVAL '30 day', 'N');
 
--- Обновить пользователя
+-- Обновить участника
 UPDATE participants SET
 email=lower('@')
 ,telegram=lower('@')
 where
---telegram=lower('@')
---last_name=upper('СМИРНОВ')
-id=1294
+--telegram=lower('ххххх')
+--last_name like upper('%ххххх%')
+--last_name_eng like upper('%ххххх%')
+id=1234
 ;
 
--- Добавить дней пользователю
+-- Добавить дней участнику
 UPDATE participants SET
 payment_date = to_date('10.10.2019', 'dd.mm.yyyy'),
 number_of_days = 97,
 deadline = to_date('10.10.2019', 'dd.mm.yyyy') + INTERVAL '97 day'
 where
---telegram=lower('@M505058')
-last_name=upper('фридман')
+--telegram=lower('ххххх')
+--last_name like upper('%ххххх%')
+--last_name_eng like upper('%ххххх%')
+id=1234
 ;
 
 
@@ -41,8 +45,10 @@ last_name=upper('фридман')
 -- Блокировка участника (= ПОМЕНЯТЬ ПАРОЛЬ ZOOM)
 UPDATE participants SET type='B', password=password||'55'
 where
---telegram=lower('@M505058')
-last_name=upper('Абдуллаева')
+--telegram=lower('ххххх')
+--last_name like upper('%ххххх%')
+--last_name_eng like upper('%ххххх%')
+id=1234
 ;
 
 -- ===============================================================
@@ -80,11 +86,12 @@ number_of_days=30,
 deadline=to_date('18.10.2019', 'DD.MM.YYYY')+interval '1' day * 30,
 --deadline=NOW()+interval '1' day * 30,
 comment=NULL, type='P'
-WHERE
---id=1249
+where
+--telegram=lower('ххххх')
+--last_name like upper('%ххххх%')
+--last_name_eng like upper('%ххххх%')
+id=1234
 ;
---commit;
-
 
 -- ===============================================================
 -- Кто сегодня оплатил

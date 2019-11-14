@@ -12,11 +12,6 @@ id=1234
 ;
 
 -- ===============================================================
--- Создать участника
-INSERT INTO public.participants(
-	last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, type)
-	VALUES (upper('МАССОЛЬД'), upper('МАРИНА'), upper('МАССОЛЬД МАРИНА'), lower('mmassold@gmx.de'), lower('@marinamassold1975'), 'massold_marina@givinschool.org', 'rkP&Q8Sxfq', to_date('15.10.2019', 'dd.mm.yyyy'), 30, to_date('15.10.2019', 'dd.mm.yyyy') + INTERVAL '30 day', 'N');
-
 -- Обновить участника
 UPDATE participants SET
 email=lower('@')
@@ -28,36 +23,21 @@ where
 id=1234
 ;
 
--- Добавить дней участнику
-UPDATE participants SET
-payment_date = to_date('10.10.2019', 'dd.mm.yyyy'),
-number_of_days = 97,
-deadline = to_date('10.10.2019', 'dd.mm.yyyy') + INTERVAL '97 day'
-where
---telegram=lower('ххххх')
---last_name like upper('%ххххх%')
---last_name_eng like upper('%ххххх%')
-id=1234
-;
-
-
-
--- Блокировка участника (= ПОМЕНЯТЬ ПАРОЛЬ ZOOM)
-UPDATE participants SET type='B', password=password||'55'
-where
---telegram=lower('ххххх')
---last_name like upper('%ххххх%')
---last_name_eng like upper('%ххххх%')
-id=1234
-;
-
 -- ===============================================================
---Получение списка участников (как регулярных так и заблокированных)
-SELECT id, last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, until_date, comment
-	FROM public.participants
-	where type='P'
-	--where type='B'
-order by last_name;
+-- Проставить дату оплаты
+UPDATE participants SET
+payment_date=to_date('18.10.2019', 'DD.MM.YYYY'),
+--payment_date=NOW(),
+number_of_days=30,
+deadline=to_date('18.10.2019', 'DD.MM.YYYY')+interval '1' day * 30,
+--deadline=NOW()+interval '1' day * 30,
+comment=NULL, type='P'
+where
+--telegram=lower('ххххх')
+--last_name like upper('%ххххх%')
+--last_name_eng like upper('%ххххх%')
+id=1234
+;
 
 -- ===============================================================
 -- Получение списка должников
@@ -78,20 +58,25 @@ or (until_date - CURRENT_TIMESTAMP < INTERVAL '0 days' and until_date is not NUL
 order by last_name;
 
 -- ===============================================================
--- Проставить дату оплаты
-UPDATE participants SET
-payment_date=to_date('18.10.2019', 'DD.MM.YYYY'),
---payment_date=NOW(),
-number_of_days=30,
-deadline=to_date('18.10.2019', 'DD.MM.YYYY')+interval '1' day * 30,
---deadline=NOW()+interval '1' day * 30,
-comment=NULL, type='P'
-where
---telegram=lower('ххххх')
---last_name like upper('%ххххх%')
---last_name_eng like upper('%ххххх%')
-id=1234
-;
+-- Удаление участника
+--select * from payments where participant_id=xxxx;
+--update payments set participant_id=xxxx where participant_id=xxxx;
+--select * from participants where id=xxxx;
+--delete from participants where id=xxxx;
+
+-- ===============================================================
+-- Создать участника
+INSERT INTO public.participants(
+	last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, type)
+	VALUES (upper('last_name'), upper('first_name'), upper('fio'), lower('email'), lower('telegram'), 'login', 'password', to_date('15.10.2019', 'dd.mm.yyyy'), 30, to_date('15.10.2019', 'dd.mm.yyyy') + INTERVAL '30 day', 'N');
+
+-- ===============================================================
+--Получение списка участников (как регулярных так и заблокированных)
+SELECT id, last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, until_date, comment
+	FROM public.participants
+	where type='P'
+	--where type='B'
+order by last_name;
 
 -- ===============================================================
 -- Кто сегодня оплатил

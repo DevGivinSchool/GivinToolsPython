@@ -123,15 +123,15 @@ class Email:
                         # Это платёж PayKeeper но НЕ за ДШ
                         else:
                             # print('Это ИНОЙ платёж')
-                            self.logger.info('Это ИНОЙ платёж')
+                            self.logger.info('ЭТО ИНОЙ ПЛАТЁЖ')
                             if uuid is not None:
-                                self.logger.info(f"UUID: {uuid}")
+                                self.logger.info(f"    UUID   : {uuid}")
                             if ffrom is not None:
-                                self.logger.info(f"FROM: {ffrom}")
+                                self.logger.info(f"    FROM   : {ffrom}")
                             if fsubject is not None:
-                                self.logger.info(f"SUBJECT: {fsubject}")
+                                self.logger.info(f"    SUBJECT: {fsubject}")
                             if fsubject is not None:
-                                self.logger.info(f'PAYMENT: {payment}')
+                                self.logger.info(f'    PAYMENT: {payment}')
                             """
                             if body is not None:
                                 self.logger.info(f"body_type: {body['body_type']}")
@@ -154,25 +154,25 @@ class Email:
                         self.move_email_to_trash(uuid)
                     # Это письмо вообще не платёж
                     else:
-                        self.logger.info(f'Это письмо НЕ от платежных систем - ничего с ним не делаю, пока...')
+                        self.logger.info(f'ЭТО ПИСЬМО НЕ ОТ ПЛАТЁЖНЫХ СИСТЕМ (ничего с ним не делаю, пока...)')
                         # print(f'Это письмо НЕ от платежных систем - ничего с ним не делаю, пока...')
                         # Если в тема письма начинается на #
                         # значит это команда иначе удалить
                         if not fsubject.startswith("#"):
                             if uuid is not None:
-                                self.logger.info(f"UUID: {uuid}")
+                                self.logger.info(f"    UUID   : {uuid}")
                             if ffrom is not None:
-                                self.logger.info(f"FROM: {ffrom}")
+                                self.logger.info(f"    FROM   : {ffrom}")
                             if fsubject is not None:
-                                self.logger.info(f"SUBJECT: {fsubject}")
+                                self.logger.info(f"    SUBJECT: {fsubject}")
                             if body is not None:
-                                self.logger.info(f"body_type: {body['body_type']}")
+                                self.logger.info(f"    body_type: {body['body_type']}")
                                 if body['body_type'] == 'mix':
-                                    self.logger.info(f"BODY\n: {body['body_text']}")
+                                    self.logger.info(f"    BODY\n: {body['body_text']}")
                                 elif body['body_type'] == 'html':
-                                    self.logger.info(f"BODY\n: {body['body_html']}")
+                                    self.logger.info(f"    BODY\n: {body['body_html']}")
                                 else:
-                                    self.logger.info(f"BODY\n: {body['body_text']}")
+                                    self.logger.info(f"    BODY\n: {body['body_text']}")
                             self.move_email_to_trash(uuid)
                         else:
                             # TODO Процедура обработки писем с командами (fsubject.startswith("#"))

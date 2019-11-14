@@ -52,9 +52,9 @@ class Task:
             # TODO Временно можно создавать пользователей GetCourse без почты - писать в лог WARNING
             if self.payment["Электронная почта"] is None \
                     or not self.payment["Электронная почта"]:
-                self.logger.error("+++++++++++++++++++++++++++++++++++++++")
+                self.logger.error("+"*60)
                 self.logger.error("The participant must have a Email!!!")
-                self.logger.error("+++++++++++++++++++++++++++++++++++++++")
+                self.logger.error("+"*60)
                 # raise Exception("The participant must have a Email")
 
             # Создаём нового пользователя в БД

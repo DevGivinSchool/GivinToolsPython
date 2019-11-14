@@ -117,11 +117,16 @@ class Task:
             values_tuple = (self.login_, self.password_, self.payment["participant_id"])
             self.database.execute_dml(sql_text, values_tuple)
             self.logger.info(self.select_participant(self.payment["participant_id"]))
-            self.logger.info("TODO: Отправляем участнику оповещение по почте")
-            # TODO Написать письмо пользователю
-            self.logger.warning("+++++++++++++++++++++++++++++++++++++++")
-            self.logger.warning("Create ZOOM                         !!!")
-            self.logger.warning("+++++++++++++++++++++++++++++++++++++++")
+            self.logger.warning("+"*60)
+            # TODO Создать участнику учётку Zoom
+            self.logger.info("TODO: Создать участнику учётку Zoom")
+            # TODO Внести email и Telegram участника в БД
+            self.logger.info("TODO: Внести email и Telegram участника в БД")
+            # TODO Отправить email участнику
+            self.logger.info("TODO: Отправить email участнику")
+            # TODO Отправить Telegram участнику
+            self.logger.info("TODO: Отправить Telegram участнику")
+            self.logger.warning("+"*60)
         else:
             # Отмечаем оплату в БД
             self.mark_payment_into_db()

@@ -106,6 +106,9 @@ class Task:
                                      f'{login_ + "@givinschool.org"}')
                 else:
                     raise
+            # Для удобства создания учётки zoom записать в лог фамилию и имя
+            self.logger.info(f"Фамилия: {self.payment['Фамилия'].capitalize()}")
+            self.logger.info(f"Имя: {self.payment['Имя'].capitalize()}")
             # Генерация пароля для Zoom (для всех почт пароль одинаковый)
             self.password_ = password_generator.random_password(strong=True, zoom=True)
             self.logger.info(f"Password: {self.password_}")

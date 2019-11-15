@@ -284,7 +284,7 @@ class Email:
         """Проверяем что назначение платежа - Друзья школы"""
         text_lower = text.lower()
         # print(f'text_lower={text_lower}')
-        list_ofstrs = ['дш', 'друзья', 'школы']
+        list_ofstrs = ['дш', 'друзья школы']
         # print(f'list_ofstrs={list_ofstrs}')
         # Check if all strings from the list exists in given string
         result = False

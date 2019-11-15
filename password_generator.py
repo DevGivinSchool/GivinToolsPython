@@ -60,13 +60,44 @@ def random_password(strong=False, long=10, zoom=False):
         password = adjust_password_length(password)
         print(f"password 6={password} - Нормализация длины. В сложном пароле должны быть и спецсимволы")
     print(f"password 7={password} - После. В сложном пароле должны быть и спецсимволы")
+    # В сложном пароле должны быть как большие так и маленькие буквы
+    # Сначала проверяем что в пароле только маленькие буквы
+    chars = set(ascii_uppercase_chars, )
+    if not any((c in chars) for c in password):
+        print(f"Пароль {password} не содержит заглавных букв")
+        for i in range(0, len(password), 1):
+            if password[i].isalpha():
+                # print(pswd[0:i] + pswd[i + 1:])
+                if i == 0:
+                    # print(password[i].upper() + password[i + 1:])
+                    password = password[i].upper() + password[i + 1:]
+                else:
+                    # print(password[:i] + password[i].upper() + password[i + 1:])
+                    password = password[:i] + password[i].upper() + password[i + 1:]
+                break
+    print(f"password 8={password} - После. Сначала проверяем что в пароле только маленькие буквы")
+    # Сначала проверяем что в пароле только заглавные буквы
+    chars = set(ascii_lowercase_chars, )
+    if not any((c in chars) for c in password):
+        print(f"Пароль {password} не содержит строчных букв")
+        for i in range(0, len(password), 1):
+            if password[i].isalpha():
+                # print(pswd[0:i] + pswd[i + 1:])
+                if i == 0:
+                    # print(password[i].upper() + password[i + 1:])
+                    password = password[i].upper() + password[i + 1:]
+                else:
+                    # print(password[:i] + password[i].upper() + password[i + 1:])
+                    password = password[:i] + password[i].upper() + password[i + 1:]
+                break
+    print(f"password 9={password} - После. Сначала проверяем что в пароле только заглавные буквы")
     # (Только для Zoom (zoom=True) Два последних символа - два маленькие буквы,
     # так визуально удобнее потом дописывать 55
     if zoom:
         password = password + random.choice(ascii_lowercase_chars) + random.choice(ascii_lowercase_chars)
-        print(f"password 8={password} - Два последних символа - два маленькие буквы для Zoom")
-    print(f"password 9={password} - ТАКОЙ БУДЕТ ПАРОЛЬ")
-    print("-"*45)
+        print(f"password 10={password} - Два последних символа - два маленькие буквы для Zoom")
+    print(f"password 11={password} - ТАКОЙ БУДЕТ ПАРОЛЬ")
+    print("-" * 45)
     return password
 
 
@@ -78,14 +109,32 @@ def adjust_password_length(pswd):
     :param pswd: Пароль на входе
     :return: Нормализованный пароль
     """
-    seq = range(1, len(pswd), 1)
-    for i in seq:
+    for i in range(1, len(pswd), 1):
         if pswd[i].isalpha():
             # print(pswd[0:i] + pswd[i + 1:])
             return pswd[0:i] + pswd[i + 1:]
 
 
-
 if __name__ == "__main__":
     print(random_password(strong=True, zoom=True))  # для ДШ
     # adjust_password_length('xpt4LkWS')
+
+    """
+    ascii_uppercase_chars = ''.join(string.ascii_uppercase.split("O"))
+    print(ascii_uppercase_chars)
+    pw = ['s8g$hycefu', 's8g$hYcefu']
+    for password in pw:
+        chars = set(ascii_uppercase_chars, )
+        if not any((c in chars) for c in password):
+            print(f"Пароль {password} не содержит заглавных букв")
+            for i in range(0, len(password), 1):
+                if password[i].isalpha():
+                    # print(pswd[0:i] + pswd[i + 1:])
+                    if i == 0:
+                        print(password[i].upper() + password[i + 1:])
+                    else:
+                        print(password[:i] + password[i].upper() + password[i + 1:])
+                    break
+        else:
+            print(f"Строка {password} содержит заглавные буквы")
+    """

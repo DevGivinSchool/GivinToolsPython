@@ -11,13 +11,17 @@ def from_list_create_sf_mails():
     for line in list_fio.splitlines():
         # Когда копирую из Google Sheets разделитель = Tab
         # Иванов	Иван
-        line = line.split('\t')
+        line_ = line.split('\t', maxsplit=1)
+        if len(line_) < 2:
+            line_ = line.split(' ', maxsplit=1)
+        else:
+            raise Exception("ERROR: Строка ФИО не разделяется ни через пробел ни через табуляцию")
         # При транслитерации некоторые буквы переводятся в - ' - это нужно заменить
-        print(line)
+        print(line_)
         # ['Иванов', 'Иван']
-        login_ = get_login(line[0], line[1])
+        login_ = get_login(line_[0], line_[1])
         try:
-            result = yandex_mail.create_yandex_mail(line[0], line[1], login_, department_id_=4)
+            result = yandex_mail.create_yandex_mail(line_[0], line_[1], login_, department_id_=4)
             # Отдел 4 = @ДРУЗЬЯ_ШКОЛЫ
         except yandex_connect.YandexConnectExceptionY as e:
             # print(e.args[0])
@@ -81,6 +85,17 @@ def show_groups():
     # [{'id': 1, 'name': 'Все сотрудники'}, {'id': 3, 'name': '@СПЕЦПОЧТЫ'}, {'id': 4, 'name': '@ДРУЗЬЯ_ШКОЛЫ'}]
 
 
+def generate_password():
+    s = 7
+    while s not in [0, 1]:
+        s = int(input("Строгий пароль (цифры и спецсимволы)? 0-Нет; 1-Да:"))
+    z = 7
+    while z not in [0, 1]:
+        z = int(input("Пароль для Zoom? 0-Нет; 1-Да:"))
+    ln = int(input("Длина пароля (по умолчанию 10 символов):") or 10)
+    print(f"Пароль: {password_generator.random_password(strong=s, zoom=z, long=ln)}")
+
+
 def create_info_str(result, password=True, welcome=True):
     text = ""
     text = text + f"Для: {result['name']['last']} {result['name']['first']}\n"
@@ -89,8 +104,8 @@ def create_info_str(result, password=True, welcome=True):
         text = text + f"Пароль: {result['password_']}\n"
     if welcome:
         text = text + f"Привет {result['name']['last']} {result['name']['first']}. " \
-                  f"Твоя почта в Школе Гивина (Яндека.Почта - https://mail.yandex.ru)." \
-                  f" Для входа используй имя - {result['email']} и пароль - {result['password_']}\n"
+                      f"Твоя почта в Школе Гивина (Яндека.Почта - https://mail.yandex.ru)." \
+                      f" Для входа используй имя - {result['email']} и пароль - {result['password_']}\n"
     return text
 
 
@@ -117,7 +132,8 @@ if __name__ == "__main__":
             "3": ("Создание технических учёток (для технических почт)", create_login_mail),
             "4": ("Логин для FTP", create_ftp_login),
             "5": ("Посмотреть список групп", show_groups),
-            "6": ("Выход", exit_fn)
+            "6": ("Генерировать пароль", generate_password),
+            "7": ("Выход", exit_fn)
             }
     for key in sorted(menu.keys()):
         print(key + ":" + menu[key][0])

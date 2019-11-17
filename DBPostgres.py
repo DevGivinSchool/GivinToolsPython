@@ -86,7 +86,7 @@ class DBPostgres:
             # print(e.diag.message_detail)
             try:
                 cursor = self.conn.cursor()
-                sql_text = """UPDATE tasks set attempt = attempt + 1 where task_uuid=%s;"""
+                sql_text = """UPDATE tasks set number_of_attempts = number_of_attempts + 1 where task_uuid=%s;"""
                 values_tuple = (task.uuid,)
                 cursor.execute(sql_text, values_tuple)
                 self.conn.commit()

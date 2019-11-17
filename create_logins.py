@@ -6,18 +6,25 @@ from list import list_fio
 from utils import get_login
 
 
+# TODO: На вход везде должно подаваться одно и тоже Фамилия + Имя + Login, если чего-то нет, то оно собирается из друго.
+
+def split_str(line):
+    line_ = line.split('\t', maxsplit=1)
+    if len(line_) < 2:
+        line_ = line.split(' ', maxsplit=1)
+    else:
+        raise Exception("ERROR: Строка ФИО не разделяется ни через пробел ни через табуляцию")
+    print(f"line_={line_}; line_[0]={line_[0]}; line_[1]={line_[1]}")
+    return line_
+
+
 def from_list_create_sf_mails():
     """ Русские Имя и Фамилия (для Друзей Школы)"""
     for line in list_fio.splitlines():
         # Когда копирую из Google Sheets разделитель = Tab
         # Иванов	Иван
-        line_ = line.split('\t', maxsplit=1)
-        if len(line_) < 2:
-            line_ = line.split(' ', maxsplit=1)
-        else:
-            raise Exception("ERROR: Строка ФИО не разделяется ни через пробел ни через табуляцию")
+        line_ = split_str(line)
         # При транслитерации некоторые буквы переводятся в - ' - это нужно заменить
-        print(line_)
         # ['Иванов', 'Иван']
         login_ = get_login(line_[0], line_[1])
         try:
@@ -38,8 +45,7 @@ def from_list_create_sf_mails():
 def create_team_mail():
     """ Русские только Фамилия (для почт тех кто в команде)"""
     for line in list_fio.splitlines():
-        line = line.split(' ')
-        # print(line)
+        line = split_str(line)
         # ['Карякина', 'Наталья']
         login_ = get_login(line[0], None)
         password = password_generator.random_password(strong=True, long=8)
@@ -53,10 +59,8 @@ def create_login_mail():
     """ English login (для технических почт)"""
     for line in list_fio.splitlines():
         # Отдел Кадров	hr
-        line = line.split('\t')  # Когда копирю из Google Sheets разделитель = Tab
-        print(line)
+        line = split_str(line)
         login = line[1].lower()
-        line = line[0].split(' ', maxsplit=1)
         familia = line[0]
         name = line[1]
         password = password_generator.random_password(strong=True, long=8)
@@ -69,12 +73,14 @@ def create_login_mail():
 def create_ftp_login():
     """ FTP login (для ftp сервера)"""
     for line in list_fio.splitlines():
-        line = line.split(' ')
+        line = split_str(line)
+        # ['Карякина', 'Наталья']
+        login_ = get_login(line[0], None)
         # print(f"Login: {translit_name(line[0]).lower()}")
         # print(f"Password: {password_generator.random_password(strong=True, long=12)}")
         # print("-"*45)
         # Так удобнее сразу копировать в таблицу
-        print(translit_name(line[0]).lower() + "\t" + password_generator.random_password(strong=True, long=12))
+        print(login_ + "\t" + password_generator.random_password(strong=True, long=12))
         print("=" * 45)
 
 

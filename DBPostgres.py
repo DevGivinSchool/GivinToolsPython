@@ -70,11 +70,11 @@ class DBPostgres:
         """
         try:
             cursor = self.conn.cursor()
+            # Решил не писать в tasks поля body, т.к. база пухнет, а эту информацию можно и в почте посмотреть.
             sql_text = """INSERT INTO tasks 
-            (time_begin, task_from, task_subject, task_body_type, task_body_html, task_body_text,
-             task_uuid, session_id) VALUES (NOW(), %s, %s, %s, %s, %s, %s, %s) RETURNING task_uuid;"""
-            values_tuple = (task.ffrom, task.subject, task.body['body_type'], task.body['body_html'],
-                            task.body['body_text'], task.uuid, session_id)
+            (time_begin, task_from, task_subject, task_uuid, session_id) 
+            VALUES (NOW(), %s, %s, %s, %s) RETURNING task_uuid;"""
+            values_tuple = (task.ffrom, task.subject, task.uuid, session_id)
             cursor.execute(sql_text, values_tuple)
         except psycopg2.errors.UniqueViolation as e:
             """ If that row already exist, than update attempts"""

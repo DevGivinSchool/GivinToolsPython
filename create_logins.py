@@ -10,10 +10,11 @@ from utils import get_login
 
 def split_str(line):
     line_ = line.split('\t', maxsplit=1)
+    print(line_, len(line_))
     if len(line_) < 2:
         line_ = line.split(' ', maxsplit=1)
-    else:
-        raise Exception("ERROR: Строка ФИО не разделяется ни через пробел ни через табуляцию")
+        if len(line_) < 2:
+            raise Exception("ERROR: Строка ФИО не разделяется ни через пробел ни через табуляцию")
     print(f"line_={line_}; line_[0]={line_[0]}; line_[1]={line_[1]}")
     return line_
 
@@ -58,15 +59,25 @@ def create_team_mail():
 def create_login_mail():
     """ English login (для технических почт)"""
     for line in list_fio.splitlines():
+        # На вход подаються Фамилия Имя Логин
         # Отдел Кадров	hr
         line = split_str(line)
+        print(line)
         login = line[1].lower()
         familia = line[0]
         name = line[1]
         password = password_generator.random_password(strong=True, long=8)
         print(familia, name, login)
         # Отдел 3 = @СПЕЦПОЧТЫ
-        result = yandex_mail.create_yandex_mail(familia, name, login, password, department_id_=3)
+        try:
+            result = yandex_mail.create_yandex_mail(familia, name, login, password, department_id_=3)
+        except yandex_connect.YandexConnectExceptionY as e:
+            # print(e.args[0])
+            if e.args[0] == 500:
+                print(f"Unhandled exception: Такой пользователь уже существует: "
+                      f"{login_ + '@givinschool.org'}")
+            else:
+                print("ERROR = " + e.__str__())
         print(create_info_str(result))
 
 

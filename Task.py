@@ -1,7 +1,9 @@
 import yandex_mail
 import yandex_connect
 import password_generator
+import PASSWORDS
 from utils import get_login
+from alert_to_mail import send_mail
 
 
 class Task:
@@ -52,9 +54,9 @@ class Task:
             # TODO Временно можно создавать пользователей GetCourse без почты - писать в лог WARNING
             if self.payment["Электронная почта"] is None \
                     or not self.payment["Электронная почта"]:
-                self.logger.error("+"*60)
+                self.logger.error("+" * 60)
                 self.logger.error("The participant must have a Email!!!")
-                self.logger.error("+"*60)
+                self.logger.error("+" * 60)
                 # raise Exception("The participant must have a Email")
 
             # Создаём нового пользователя в БД
@@ -92,7 +94,8 @@ class Task:
             self.logger.info("Создаём почту новому участнику в домене @givinschool.org")
             login_ = get_login(self.payment["Фамилия"], self.payment["Имя"])
             try:
-                result = yandex_mail.create_yandex_mail(self.payment["Фамилия"], self.payment["Имя"], login_, department_id_=4)
+                result = yandex_mail.create_yandex_mail(self.payment["Фамилия"], self.payment["Имя"], login_,
+                                                        department_id_=4)
                 # print(f"Email created:{result['email']}")
                 self.login_ = result['email'],
                 self.logger.info(f"Email created: {self.login_[0]}")
@@ -117,16 +120,19 @@ class Task:
             values_tuple = (self.login_, self.password_, self.payment["participant_id"])
             self.database.execute_dml(sql_text, values_tuple)
             self.logger.info(self.select_participant(self.payment["participant_id"]))
-            self.logger.warning("+"*60)
+            self.logger.warning("+" * 60)
             # TODO Создать участнику учётку Zoom
             self.logger.info("TODO: Создать участнику учётку Zoom")
+            mail_text = f"Создать учётку zoom участнику {self.payment['Фамилия'].capitalize()} " \
+                        f"{self.payment['Имя'].capitalize()}\nLogin: {self.login_[0]}\nPassword: {self.password_}"
+            send_mail(PASSWORDS.logins['admin_emails'], "CREATE ZOOM", mail_text)
             # TODO Внести email и Telegram участника в БД
             self.logger.info("TODO: Внести email и Telegram участника в БД")
-            # TODO Отправить email участнику
+            # TODO Отправить email участнику (нужно сначала наладить парсинг почт с GetCourse)
             self.logger.info("TODO: Отправить email участнику")
             # TODO Отправить Telegram участнику
             self.logger.info("TODO: Отправить Telegram участнику")
-            self.logger.warning("+"*60)
+            self.logger.warning("+" * 60)
         else:
             # Отмечаем оплату в БД
             self.mark_payment_into_db()
@@ -151,8 +157,8 @@ class Task:
             values_tuple = (self.payment["Время проведения"], self.payment["number_of_days"],
                             self.payment["deadline"], participant_type, self.payment["participant_id"])
             # TODO Если пользователь был заблокированным, тогда:
-                # TODO Написать письмо пользователю
-                # TODO Написать письмо админу чтобы разблокировал Zoom учётку.
+            # TODO Написать письмо пользователю
+            # TODO Написать письмо админу чтобы разблокировал Zoom учётку.
         else:
             sql_text = """UPDATE participants 
             SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s 
@@ -175,4 +181,3 @@ class Task:
         values_tuple = (task_uuid,)
         rows = self.database.execute_select(sql_text, values_tuple)
         return rows
-

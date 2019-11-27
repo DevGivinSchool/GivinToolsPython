@@ -68,7 +68,16 @@ order by last_name;
 -- Создать участника
 INSERT INTO public.participants(
 	last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, type)
-	VALUES (upper('last_name'), upper('first_name'), upper('fio'), lower('email'), lower('telegram'), 'login', 'password', to_date('15.10.2019', 'dd.mm.yyyy'), 30, to_date('15.10.2019', 'dd.mm.yyyy') + INTERVAL '30 day', 'N');
+	VALUES (upper('last_name'),
+	upper('first_name'),
+	upper('fio'),
+	lower('email'),
+	lower('telegram'),
+	'login',
+	'password',
+	to_date('15.10.2019', 'dd.mm.yyyy'),
+	30,
+	to_date('15.10.2019', 'dd.mm.yyyy') + INTERVAL '30 day', 'N');
 
 -- ===============================================================
 --Получение списка участников (как регулярных так и заблокированных)

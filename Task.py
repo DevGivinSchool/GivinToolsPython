@@ -125,13 +125,16 @@ class Task:
             self.logger.info("TODO: Создать участнику учётку Zoom")
             mail_text = f"Создать учётку zoom участнику {self.payment['Фамилия'].capitalize()} " \
                         f"{self.payment['Имя'].capitalize()}\nLogin: {self.login_[0]}\nPassword: {self.password_}"
-            send_mail(PASSWORDS.logins['admin_emails'], "CREATE ZOOM", mail_text)
             # TODO Внести email и Telegram участника в БД
             self.logger.info("TODO: Внести email и Telegram участника в БД")
+            mail_text += f"\nВнести email и Telegram участника в БД - {self.payment['Кассовый чек 54-ФЗ']}"
             # TODO Отправить email участнику (нужно сначала наладить парсинг почт с GetCourse)
             self.logger.info("TODO: Отправить email участнику")
+            mail_text += f"\nОтправить email участнику"
             # TODO Отправить Telegram участнику
             self.logger.info("TODO: Отправить Telegram участнику")
+            mail_text += f"\nОтправить Telegram участнику"
+            send_mail(PASSWORDS.logins['admin_emails'], "CREATE ZOOM", mail_text)
             self.logger.warning("+" * 60)
         else:
             # Отмечаем оплату в БД

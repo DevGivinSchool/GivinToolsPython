@@ -19,13 +19,6 @@ def send_mail(receiver_emails, subject, message, sender_email="robot@givinschool
     :param int port: Порт
     :return:
     """
-    logger.info(f"Send email to {receiver_emails}")
-    print(f"LOGGER = {logger}")
-    # Create message
-    email_text = MIMEText(message, 'plain', 'utf-8')
-    email_text['Subject'] = Header(subject, 'utf-8')
-    email_text['From'] = sender_email
-    email_text['To'] = receiver_emails
     # Create a secure SSL context
     context = ssl.create_default_context()
     server = smtplib.SMTP_SSL("smtp.yandex.ru", port, context=context)
@@ -33,10 +26,19 @@ def send_mail(receiver_emails, subject, message, sender_email="robot@givinschool
         server.login(PASSWORDS.logins['ymail_login'], PASSWORDS.logins['ymail_password'])
     except Exception:
         logger.error("ERROR: Can't connect to SMTP server:\n" + traceback.format_exc())
-    try:
-        server.sendmail(sender_email, receiver_emails, email_text.as_string())
-    except Exception:
-        logger.error(f"ERROR: Can't send email to {receiver_emails}:\n" + traceback.format_exc())
+    for one_receiver in receiver_emails:
+        logger.info(f"Send email to {one_receiver}")
+        # print(f"LOGGER = {logger}")
+        print(f"Send email to {one_receiver}")
+        # Create message
+        email_text = MIMEText(message, 'plain', 'utf-8')
+        email_text['Subject'] = Header(subject, 'utf-8')
+        email_text['From'] = sender_email
+        email_text['To'] = one_receiver
+        try:
+            server.sendmail(sender_email, one_receiver, email_text.as_string())
+        except Exception:
+            logger.error(f"ERROR: Can't send email to {one_receiver}:\n" + traceback.format_exc())
     server.quit()
 
 

@@ -182,7 +182,7 @@ class Email:
                 except Exception:
                     error_text = "TASK ERROR:\n" + traceback.format_exc()
                     # print(uuid, error_text)
-                    postgres.task_error(error_text, uuid)
+
                     self.logger.error(error_text)
                     if uuid is not None:
                         self.logger.error(f"UUID: {uuid}")
@@ -198,6 +198,8 @@ class Email:
                         else:
                             self.logger.error(f"BODY\n: {body['body_text']}")
                     self.logger.info('-' * 45)
+                    postgres.task_error(error_text, uuid)
+                    send_mail(PASSWORDS.logins['admin_emails'], "TASK ERROR", error_text)
                     continue
             else:
                 self.logger.warning(f"ВНИМАНИЕ: Это письмо уже обрабатывалось!")
@@ -282,9 +284,9 @@ class Email:
 
     def check_school_friends(self, text):
         """Проверяем что назначение платежа - Друзья школы"""
-        text_lower = text.lower()
+        text_lower = text.lower().strip()
         # print(f'text_lower={text_lower}')
-        list_ofstrs = ['дш', 'друзья школы']
+        list_ofstrs = ['дш', 'друзья школы', 'д.ш.']
         # print(f'list_ofstrs={list_ofstrs}')
         # Check if all strings from the list exists in given string
         result = False

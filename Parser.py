@@ -85,7 +85,10 @@ def parse_getcourse_html(body_html):
             # print(line)
             if line.startswith('Поступила оплата'):
                 payment["ID платежа"] = re.findall(r'\d{4}', line)[0]
-                payment["Оплаченная сумма"] = re.findall(r'\d+ \d+', line)[0].replace(' ', '')
+                # print(line)
+                # Так ищет любые суммы и <1000 тоже
+                payment["Оплаченная сумма"] = re.findall(r'на сумму.*руб.', line)[0]\
+                    .replace('на сумму ', '').replace('руб.', '').replace(' ', '')
                 # print('1')
                 # result = re.findall(r'\d{4}', line)
                 # print(result[0])

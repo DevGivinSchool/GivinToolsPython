@@ -65,6 +65,12 @@ order by last_name;
 --delete from participants where id=xxxx;
 
 -- ===============================================================
+-- Удаление task чтобы обойти - ВНИМАНИЕ: Это письмо уже обрабатывалось!
+--select count(*) from tasks;
+--select * from tasks where task_uuid=1021;
+--delete from tasks where task_uuid=1014;
+
+-- ===============================================================
 -- Создать участника
 INSERT INTO public.participants(
 	last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, type)

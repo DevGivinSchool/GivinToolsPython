@@ -3,7 +3,7 @@ import re
 import sys
 import traceback
 from email.header import decode_header
-
+import html2text
 import PASSWORDS
 import Parser
 import config
@@ -170,7 +170,11 @@ class Email:
                                 if body['body_type'] == 'mix':
                                     self.logger.info(f"    BODY\n: {body['body_text']}")
                                 elif body['body_type'] == 'html':
-                                    self.logger.info(f"    BODY\n: {body['body_html']}")
+                                    # Преобразование письма в формате html в текст
+                                    h = html2text.HTML2Text()
+                                    h.ignore_links = False
+                                    body_html = h.handle(body['body_html'])
+                                    self.logger.info(f"    BODY\n: {body_html}")
                                 else:
                                     self.logger.info(f"    BODY\n: {body['body_text']}")
                             self.move_email_to_trash(uuid)
@@ -194,6 +198,7 @@ class Email:
                         if body['body_type'] == 'mix':
                             self.logger.error(f"BODY\n: {body['body_text']}")
                         elif body['body_type'] == 'html':
+
                             self.logger.error(f"BODY\n: {body['body_html']}")
                         else:
                             self.logger.error(f"BODY\n: {body['body_text']}")

@@ -221,7 +221,7 @@ def parse_getcourse_page(link, payment, logger):
         button = browser.find_element_by_css_selector(".float-row > .btn-success")
         button.click()
         time.sleep(10)
-        link = "https://givin.school/sales/control/deal/update/id/24611232"
+        # link = "https://givin.school/sales/control/deal/update/id/24611232"
         # link = "https://givin.school/sales/control/deal/update/id/24968591"
         link_id = link.rsplit("/", 1)
         link = "https://givinschoolru.getcourse.ru/sales/control/deal/update/id/" + link_id[1]

@@ -110,7 +110,7 @@ class Email:
                     if ffrom == 'noreply@server.paykeeper.ru' and fsubject == 'Принята оплата':
                         self.logger.info(f'Это письмо от платежной системы - PayKeeper')
                         # print(f'Это письмо от платежной системы - PayKeeper')
-                        payment = Parser.parse_paykeeper_html(body['body_html'])
+                        payment = Parser.parse_paykeeper_html(body['body_html'], self.logger)
                         # Пока создание платежа перенесу отсюда - ниже в, чтобы в БД создавались платежи только ДШ
                         # self.create_payment(payment, postgres, task)
                         # Это платёж PayKeeper за ДШ
@@ -148,7 +148,7 @@ class Email:
                             and fsubject.startswith("Поступил платеж"):
                         self.logger.info(f'Это письмо от платежной системы - GetCourse')
                         # print(f'Это письмо от платежной системы - GetCourse')
-                        payment = Parser.parse_getcourse_html(body['body_html'])
+                        payment = Parser.parse_getcourse_html(body['body_html'], self.logger)
                         self.create_payment(payment, postgres, task)
                         task.task_run()
                         self.move_email_to_trash(uuid)

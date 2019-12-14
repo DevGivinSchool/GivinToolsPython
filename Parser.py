@@ -1,9 +1,13 @@
 import datetime
 import requests
 import re
+import PASSWORDS
+import traceback
+import time
 from lxml import html
 from utils import is_eng
 from utils import is_rus
+from alert_to_mail import send_mail
 
 
 def get_clear_payment():
@@ -18,6 +22,7 @@ def get_clear_payment():
         "Имя": "",
         "Фамилия Имя": "",
         "Электронная почта": "",
+        "telegram": "",
         "Наименование услуги": "",
         "ID платежа": "",
         "Оплаченная сумма": "",
@@ -44,6 +49,7 @@ def payment_normalization(payment):
     payment["Имя"] = payment["Имя"].upper()
     payment["Фамилия Имя"] = payment["Фамилия Имя"].upper()
     payment["Электронная почта"] = payment["Электронная почта"].lower()
+    payment["telegram"] = payment["telegram"].lower()
     if is_rus(payment["Фамилия Имя"]):
         payment["fio_lang"] = "RUS"
     elif is_eng(payment["Фамилия Имя"]):
@@ -65,7 +71,7 @@ def payment_computation(payment):
     return payment
 
 
-def parse_getcourse_html(body_html):
+def parse_getcourse_html(body_html, logger):
     # TODO: Реализовать аутентификацию на getcourse, чтобы мочь пройти по ссылке в письме на страницу платежа.
     #       Это можно обойти через вебхуки
     #       А пока написал на форум
@@ -87,7 +93,7 @@ def parse_getcourse_html(body_html):
                 payment["ID платежа"] = re.findall(r'\d{4}', line)[0]
                 # print(line)
                 # Так ищет любые суммы и <1000 тоже
-                payment["Оплаченная сумма"] = re.findall(r'на сумму.*руб.', line)[0]\
+                payment["Оплаченная сумма"] = re.findall(r'на сумму.*руб.', line)[0] \
                     .replace('на сумму ', '').replace('руб.', '').replace(' ', '')
                 # print('1')
                 # result = re.findall(r'\d{4}', line)
@@ -126,13 +132,21 @@ def parse_getcourse_html(body_html):
     # TODO Получать дату оплаты для GetCourse по дате и времени самого письма
     payment["Время проведения"] = datetime.datetime.now()
     payment["Платежная система"] = 1
+    # Пытаемся получить email и Telegram, если ошибка просто пишем в лог и идём дальше.
+    try:
+        # Пытаюсь получить email и Telegram со страницы заказа
+        parse_getcourse_page(payment["Кассовый чек 54-ФЗ"], payment, logger)
+    except Exception as e:
+        mail_text = f'Ошибка парсинга страницы заказа GetCourse\n' + traceback.format_exc()
+        logger.error(mail_text)
+        send_mail(PASSWORDS.logins['admin_emails'], "ERROR PARSING", mail_text)
     payment = payment_normalization(payment)
     payment = payment_computation(payment)
     # print(payment)
     return payment
 
 
-def parse_paykeeper_html(body_html):
+def parse_paykeeper_html(body_html, logger):
     payment = get_clear_payment()
     tree = html.fromstring(body_html)
     # print(tree)
@@ -170,5 +184,86 @@ def parse_paykeeper_html(body_html):
     return payment
 
 
+def parse_getcourse_page(link, payment, logger):
+    """
+    Парсинг страницы заказа GetCourse и получение email и telegram
+    :param link: Ссылка на страницу заказа GetCourse
+    :param payment: Теущий платёж
+    :param logger: Текущий логгер
+    :return:
+    """
+    """
+    Алексей Сутов, [05.10.19 13:17]
+    тебе на питоне надо сделать Login, сохранить все куки и потом уже спрашивать
+    Алексей Сутов, [05.10.19 13:17]
+    там php session id + csrf token
+    Алексей Сутов, [05.10.19 13:17]
+    причём csrf они вроде не проверяют, раз из постмана могу всё грузить
+    url = "https://givinschoolru.getcourse.ru/cms/system/login"
+    querystring = {"required": "true"}
+    payload = "action=processXdget&xdgetId=99945&params%5Baction%5D=login&params%5Bemail%5D=asutov%40outlook.com&params%5Bpassword%5D=password123"
+    headers = {
+        'Content-Type': "application/x-www-form-urlencoded",
+        'cache-control': "no-cache",
+        'Postman-Token': "86a39678-b2c1-4169-8fad-6444b53ed97a"
+    }
+    response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
+    print(response.text)
+    """
+    from selenium import webdriver
+    try:
+        browser = webdriver.Chrome()
+        browser.get(PASSWORDS.logins['getcourse_login_page'])
+        input_login = browser.find_element_by_css_selector("input.form-control.form-field-email")
+        input_login.send_keys(PASSWORDS.logins['getcourse_login'])
+        input_password = browser.find_element_by_css_selector("input.form-control.form-field-password")
+        input_password.send_keys(PASSWORDS.logins['getcourse_password'])
+        button = browser.find_element_by_css_selector(".float-row > .btn-success")
+        button.click()
+        time.sleep(10)
+        link = "https://givin.school/sales/control/deal/update/id/24611232"
+        # link = "https://givin.school/sales/control/deal/update/id/24968591"
+        link_id = link.rsplit("/", 1)
+        link = "https://givinschoolru.getcourse.ru/sales/control/deal/update/id/" + link_id[1]
+        browser.get(link)
+        time.sleep(10)
+        email_element = browser.find_element_by_css_selector("div.user-email")
+        email = email_element.text
+        if len(email) < 0:
+            logger.warning(f"PARSING: Не нашел email на странице заказа - {link}")
+        else:
+            print(f"email={email}")
+            payment["Электронная почта"] = email
+        telegram_elements = browser.find_elements_by_css_selector(".text-block>div[style]")
+        text = ""
+        for telegram_element in telegram_elements:
+            text += telegram_element.text
+        print(text)
+        mask = r'@\w*'
+        result = re.search(mask, text)
+        if result is None:
+            mask = r'https://t.me/\w*'
+            result = re.search(mask, text)
+            if result is None:
+                logger.warning(f"PARSING: Не нашел telegram на странице заказа - {link}")
+            else:
+                result = '@' + result.group(0).rsplit("/", 1)[1]
+                print(f"telegram={result}")
+                payment["telegram"] = result
+        else:
+            result = result.group(0)
+            print(f"telegram={result}")
+            payment["telegram"] = result
+        # закрываем браузер после всех манипуляций
+        browser.quit()
+    finally:
+        # закрываем браузер даже в случае ошибки
+        browser.quit()
+
+
 if __name__ == "__main__":
-    parse_getcourse_html("aaaa")
+    # parse_getcourse_html("aaaa")
+    import logging
+    logger = logging.basicConfig(filename='parser.log', level=logging.INFO)
+    payment = get_clear_payment()
+    parse_getcourse_page("https://givin.school/sales/control/deal/update/id/24611232", payment, logger)

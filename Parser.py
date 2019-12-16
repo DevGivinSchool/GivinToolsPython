@@ -221,8 +221,6 @@ def parse_getcourse_page(link, payment, logger):
         button = browser.find_element_by_css_selector(".float-row > .btn-success")
         button.click()
         time.sleep(10)
-        # link = "https://givin.school/sales/control/deal/update/id/24611232"
-        # link = "https://givin.school/sales/control/deal/update/id/24968591"
         link_id = link.rsplit("/", 1)
         link = "https://givinschoolru.getcourse.ru/sales/control/deal/update/id/" + link_id[1]
         browser.get(link)
@@ -267,3 +265,7 @@ if __name__ == "__main__":
     logger = logging.basicConfig(filename='parser.log', level=logging.INFO)
     payment = get_clear_payment()
     parse_getcourse_page("https://givin.school/sales/control/deal/update/id/24611232", payment, logger)
+    print(payment)
+    payment = get_clear_payment()
+    parse_getcourse_page("https://givin.school/sales/control/deal/update/id/24968591", payment, logger)
+    print(payment)

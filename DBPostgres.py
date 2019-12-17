@@ -1,5 +1,6 @@
 import psycopg2
 import logging
+import Parser
 
 
 class DBPostgres:
@@ -153,6 +154,15 @@ class DBPostgres:
                 participant_id, p_type = self.find_participant_by('fio', task.payment["Фамилия Имя"])
             else:  # Иначе ищем по ENG потому что после парсера никаких других языков быть не может
                 participant_id, p_type = self.find_participant_by('fio_eng', task.payment["Фамилия Имя"])
+            if participant_id is None and task.payment["Платежная система"] == 1:
+                # Если это Getcourse и ничего по ФИО и почте (которой могло и не быть) не нашлось,
+                # тогда парсим страницу GetCourse и пытаемся еще раз поискать по почте и телеграм
+                Parser.parse_getcourse_page(task.payment["Кассовый чек 54-ФЗ"], task.payment, self.logger)
+                self.logger.info(f"Ищем участника повторно по email - {task.payment['Электронная почта']}")
+                participant_id, p_type = self.find_participant_by('email', task.payment["Электронная почта"])
+                if participant_id is None:
+                    self.logger.info(f"Ищем участника по Telegram - {task.payment['telegram']}")
+                    participant_id, p_type = self.find_participant_by('telegram', task.payment["telegram"])
         cursor = self.conn.cursor()
         sql_text = """INSERT INTO payments(task_uuid, name_of_service, payment_id, amount, participant_id, 
         sales_slip, card_number, card_type, payment_purpose, last_name, first_name, fio, email, payment_system) 

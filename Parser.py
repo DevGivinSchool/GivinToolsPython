@@ -8,6 +8,7 @@ from lxml import html
 from utils import is_eng
 from utils import is_rus
 from alert_to_mail import send_mail
+from selenium import webdriver
 
 
 def get_clear_payment():
@@ -48,15 +49,18 @@ def payment_normalization(payment):
     payment["Фамилия"] = payment["Фамилия"].upper()
     payment["Имя"] = payment["Имя"].upper()
     payment["Фамилия Имя"] = payment["Фамилия Имя"].upper()
-    payment["Электронная почта"] = payment["Электронная почта"].lower()
-    payment["telegram"] = payment["telegram"].lower()
+    payment_normalization2(payment)
     if is_rus(payment["Фамилия Имя"]):
         payment["fio_lang"] = "RUS"
     elif is_eng(payment["Фамилия Имя"]):
         payment["fio_lang"] = "ENG"
     else:
         raise Exception(f"ERROR: Неизвестный язык ФИО: {payment['Фамилия Имя']}")
-    return payment
+
+
+def payment_normalization2(payment):
+    payment["Электронная почта"] = payment["Электронная почта"].lower()
+    payment["telegram"] = payment["telegram"].lower()
 
 
 def payment_computation(payment):
@@ -68,14 +72,10 @@ def payment_computation(payment):
     # Вычисляем до какой даты произведена оплата
     if isinstance(payment["Время проведения"], datetime.datetime):
         payment["deadline"] = payment["Время проведения"] + datetime.timedelta(days=payment["number_of_days"])
-    return payment
 
 
 def parse_getcourse_html(body_html, logger):
-    # TODO: Реализовать аутентификацию на getcourse, чтобы мочь пройти по ссылке в письме на страницу платежа.
-    #       Это можно обойти через вебхуки
-    #       А пока написал на форум
-    #       https://stackoverflow.com/questions/57555807/how-to-authenticate-to-this-site-with-python
+    logger.info("Парсинг parse_paykeeper_html")
     payment = get_clear_payment()
     tree = html.fromstring(body_html)
     td = tree.xpath('//div/table/tr[1]/td[2]')
@@ -132,21 +132,14 @@ def parse_getcourse_html(body_html, logger):
     # TODO Получать дату оплаты для GetCourse по дате и времени самого письма
     payment["Время проведения"] = datetime.datetime.now()
     payment["Платежная система"] = 1
-    # Пытаемся получить email и Telegram, если ошибка просто пишем в лог и идём дальше.
-    try:
-        # Пытаюсь получить email и Telegram со страницы заказа
-        parse_getcourse_page(payment["Кассовый чек 54-ФЗ"], payment, logger)
-    except Exception as e:
-        mail_text = f'Ошибка парсинга страницы заказа GetCourse\n' + traceback.format_exc()
-        logger.error(mail_text)
-        send_mail(PASSWORDS.logins['admin_emails'], "ERROR PARSING", mail_text)
-    payment = payment_normalization(payment)
-    payment = payment_computation(payment)
+    payment_normalization(payment)
+    payment_computation(payment)
     # print(payment)
     return payment
 
 
 def parse_paykeeper_html(body_html, logger):
+    logger.info("Парсинг parse_paykeeper_html")
     payment = get_clear_payment()
     tree = html.fromstring(body_html)
     # print(tree)
@@ -178,15 +171,17 @@ def parse_paykeeper_html(body_html, logger):
     payment["Имя"] = ' '.join(fio[1:]).strip()
     payment["Время проведения"] = datetime.datetime.strptime(payment["Время проведения"], '%Y-%m-%d %H:%M:%S')
     payment["Платежная система"] = 2
-    payment = payment_normalization(payment)
-    payment = payment_computation(payment)
+    payment_normalization(payment)
+    payment_computation(payment)
     # print(payment)
     return payment
 
 
 def parse_getcourse_page(link, payment, logger):
     """
-    Парсинг страницы заказа GetCourse и получение email и telegram
+    Парсинг страницы заказа GetCourse и получение email и telegram.
+    Пытаемся получить email и Telegram, если ошибка просто пишем в лог и идём дальше.
+    Пример вызова: parse_getcourse_page(payment["Кассовый чек 54-ФЗ"], payment, logger)
     :param link: Ссылка на страницу заказа GetCourse
     :param payment: Теущий платёж
     :param logger: Текущий логгер
@@ -210,7 +205,6 @@ def parse_getcourse_page(link, payment, logger):
     response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
     print(response.text)
     """
-    from selenium import webdriver
     try:
         browser = webdriver.Chrome()
         browser.get(PASSWORDS.logins['getcourse_login_page'])
@@ -254,6 +248,11 @@ def parse_getcourse_page(link, payment, logger):
             payment["telegram"] = result
         # закрываем браузер после всех манипуляций
         browser.quit()
+        payment_normalization(payment)
+    except Exception as e:
+        mail_text = f'Ошибка парсинга страницы заказа GetCourse\n' + traceback.format_exc()
+        logger.error(mail_text)
+        send_mail(PASSWORDS.logins['admin_emails'], "ERROR PARSING", mail_text)
     finally:
         # закрываем браузер даже в случае ошибки
         browser.quit()

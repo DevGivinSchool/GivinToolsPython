@@ -1,3 +1,8 @@
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+
+driver = webdriver.Chrome(ChromeDriverManager().install())
+
 """
 link = "https://givin.school/sales/control/deal/update/id/24611232"
 link_id = link.rsplit("/", 1)
@@ -6,14 +11,14 @@ print(link)
 """
 
 
-import re
+"""import re
 text = '@ddddd raetbr rter @telegram_name bbb, https://t.me/chigirigi fedgfsg купефук '
 mask = r'https://t.me/\w*'
 result = re.search(mask, text)
 result2 = re.search(mask, text)
 result = '@' + result.group(0).rsplit("/", 1)[1]
 print(result)
-print("exit")
+print("exit")"""
 
 """
 text = "Поступила оплата по заказу 1052 на сумму 2 2 руб. через Яндекс.Касса."

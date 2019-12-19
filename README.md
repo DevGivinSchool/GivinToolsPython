@@ -80,6 +80,15 @@ pip install -U pip==19.3.1
 pip uninstall <package>
 pip install <package>
 
+# Проблемы с Chromedriver
+Не смотря на то что драйвер в system32, python его в упор не видит
+Ошибка: selenium.common.exceptions.WebDriverException: Message: 'chromedriver.exe' executable needs to be in PATH. Please see https://sites.google.com/a/chromium.org/chromedriver/home
+
+Вот так можно установить последнюю версию драйвера
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+driver = webdriver.Chrome(ChromeDriverManager().install())
+
 # Модули
 IMAPClient:
     Github - https://github.com/mjs/imapclient

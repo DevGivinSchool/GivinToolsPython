@@ -173,6 +173,7 @@ class Email:
                                     # Преобразование письма в формате html в текст
                                     h = html2text.HTML2Text()
                                     h.ignore_links = False
+                                    h.single_line_break = True
                                     body_html = h.handle(body['body_html'])
                                     self.logger.info(f"    BODY\n: {body_html}")
                                 else:

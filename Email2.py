@@ -171,6 +171,7 @@ class Email:
                                     self.logger.info(f"    BODY\n: {body['body_text']}")
                                 elif body['body_type'] == 'html':
                                     # Преобразование письма в формате html в текст
+                                    self.logger.info(f"Преобразование письма в формате html в текст")
                                     h = html2text.HTML2Text()
                                     h.ignore_links = False
                                     h.single_line_break = True

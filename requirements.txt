@@ -15,5 +15,5 @@ six==1.13.0
 soupsieve==1.9.5
 transliterate==1.10.2
 urllib3==1.25.7
-yandex-connect==0.27b0
+yandex-connect==0.28b0
 zoomus==1.1.1

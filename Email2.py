@@ -99,6 +99,28 @@ class Email:
             self.logger.debug(f"ffrom={ffrom}")
             self.logger.debug(f"fsubject={fsubject}")
             body = self.get_decoded_email_body(email_message)
+            if body is None:
+                error_text = 'ERROR: Неизвестный формат письма'
+                self.logger.error(error_text)
+                if uuid is not None:
+                    self.logger.error(f"UUID: {uuid}")
+                if ffrom is not None:
+                    self.logger.error(f"FROM: {ffrom}")
+                if fsubject is not None:
+                    self.logger.error(f"SUBJECT: {fsubject}")
+                if body is not None:
+                    if body['body_type'] == 'mix':
+                        self.logger.error(f"BODY\n: {body['body_text']}")
+                    elif body['body_type'] == 'html':
+
+                        self.logger.error(f"BODY\n: {body['body_html']}")
+                    else:
+                        self.logger.error(f"BODY\n: {body['body_text']}")
+                self.logger.info('-' * 45)
+                postgres.task_error(error_text, uuid)
+                send_mail(PASSWORDS.logins['admin_emails'], "TASK ERROR", error_text)
+                self.move_email_to_trash(uuid)
+                continue
             # Create Task and insert it to DB
             task = Task(uuid, ffrom, fsubject, body, self.logger, postgres)
             task_is_new = postgres.create_task(session_id, task)
@@ -285,8 +307,8 @@ class Email:
             self.logger.debug(f"body_type={body['body_type']}")
             self.logger.debug(f"body_html={body['body_html']}")
         else:
-            raise Exception('Неизвестный формат письма')
-
+            # raise Exception('Неизвестный формат письма')
+            return None
         return body
 
     def check_school_friends(self, text):

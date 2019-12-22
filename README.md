@@ -56,6 +56,8 @@ body2=b'\xc8\xe2\xe0\xed\xee\xe2 \xc8\xe2\xe0\xed\r\n\xcf\xe5\xf2\xf0\xee\xe2 \x
 pip freeze > c:\MyGit\GivinToolsPython\requirements.txt
 pip install -r c:\MyGit\GivinToolsPython\requirements.txt
 
+В случае ошибок лучше сначала попробовать установить все через PyCharm.
+
 Если будет ошибка:
 Error: pg_config executable not found.
 нужно установить Postgres и добавить в PATH путь до pg_config

@@ -6,7 +6,7 @@ from email.header import decode_header
 import html2text
 import PASSWORDS
 import Parser
-import config
+import gtp_config
 from DBPostgres import DBPostgres
 from Task import Task
 from alert_to_mail import send_mail
@@ -56,9 +56,9 @@ class Email:
         self.logger.info("sort_mail begin")
         try:
             self.logger.info("Try connect to DB")
-            postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
-                                  password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
-                                  port=config.config['postgres_port'], logger=self.logger)
+            postgres = DBPostgres(dbname=gtp_config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
+                                  password=PASSWORDS.logins['postgres_password'], host=gtp_config.config['postgres_host'],
+                                  port=gtp_config.config['postgres_port'], logger=self.logger)
         except Exception:
             # TODO Вынести процедуру опопвещения MAIN ERROR в отдельную процедуру
             error_text = \

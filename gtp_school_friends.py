@@ -82,7 +82,7 @@ DB: Закрываю сессию работы
                 Список отослать менеджерам (Павлу) по почте или Телеграм
 """
 from Log import Log
-import config
+import gtp_config
 import PASSWORDS
 import traceback
 import sys
@@ -94,8 +94,8 @@ from alert_to_mail import send_mail
 
 # Текущая дата для имени лог файла (без %S)
 now = datetime.now().strftime("%Y%m%d%H%M")
-logger = Log.setup_logger('__main__', config.config['log_dir'], f'gtp_school_friends_{now}.log',
-                          config.config['log_level'])
+logger = Log.setup_logger('__main__', gtp_config.config['log_dir'], f'gtp_school_friends_{now}.log',
+                          gtp_config.config['log_level'])
 logger.info('START gtp_school_friends')
 
 

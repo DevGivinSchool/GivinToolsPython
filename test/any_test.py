@@ -10,7 +10,7 @@ import datetime
 import string
 import re
 import PASSWORDS
-import config
+import gtp_config
 from DBPostgres import DBPostgres
 from utils import is_eng
 from utils import is_rus
@@ -19,9 +19,9 @@ list_participants = """
 """
 
 # Подключение к БД
-postgres = DBPostgres(dbname=config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
-                      password=PASSWORDS.logins['postgres_password'], host=config.config['postgres_host'],
-                      port=config.config['postgres_port'])
+postgres = DBPostgres(dbname=gtp_config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
+                      password=PASSWORDS.logins['postgres_password'], host=gtp_config.config['postgres_host'],
+                      port=gtp_config.config['postgres_port'])
 for p in list_participants.splitlines():
     print(f"Попытка блокировки участника {p}")
     p = p.strip()

@@ -51,7 +51,6 @@ class Task:
             if self.payment["Имя"] is None or not self.payment["Имя"]:
                 self.logger.error("The participant must have a Name")
                 raise Exception("The participant must have a Name")
-            # TODO Временно можно создавать пользователей GetCourse без почты - писать в лог WARNING
             if self.payment["Электронная почта"] is None \
                     or not self.payment["Электронная почта"]:
                 self.logger.error("+" * 60)
@@ -62,15 +61,17 @@ class Task:
             # Создаём нового пользователя в БД
             self.logger.info(f"Создаём нового пользователя в БД ({self.payment['fio_lang']})")
             if self.payment["fio_lang"] == "RUS":
-                sql_text = """INSERT INTO participants(last_name, first_name, fio, email, type) 
-                VALUES (%s, %s, %s, %s, %s) RETURNING id;"""
+                sql_text = """INSERT INTO participants(last_name, first_name, fio, email, telegram, type) 
+                VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;"""
                 values_tuple = (self.payment["Фамилия"], self.payment["Имя"],
-                                self.payment["Фамилия Имя"], self.payment["Электронная почта"], 'N')
+                                self.payment["Фамилия Имя"], self.payment["Электронная почта"],
+                                self.payment["telegram"], 'N')
             else:
-                sql_text = """INSERT INTO participants(last_name, first_name, fio, email, type, last_name_eng, first_name_eng, fio_eng) 
-                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
+                sql_text = """INSERT INTO participants(last_name, first_name, fio, email, telegram, type, last_name_eng, first_name_eng, fio_eng) 
+                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
                 values_tuple = (self.payment["Фамилия"], self.payment["Имя"],
-                                self.payment["Фамилия Имя"], self.payment["Электронная почта"], 'N',
+                                self.payment["Фамилия Имя"], self.payment["Электронная почта"],
+                                self.payment["telegram"], 'N',
                                 self.payment["Фамилия"], self.payment["Имя"], self.payment["Фамилия Имя"])
             self.payment["participant_id"] = self.database.execute_dml_id(sql_text, values_tuple)
             # print(type(self.payment["participant_id"]))

@@ -126,21 +126,46 @@ class Task:
             self.logger.info("TODO: Создать участнику учётку Zoom")
             mail_text = f"Создать учётку zoom участнику {self.payment['Фамилия'].capitalize()} " \
                         f"{self.payment['Имя'].capitalize()}\nLogin: {self.login_[0]}\nPassword: {self.password_}"
-            # TODO Внести email и Telegram участника в БД
-            self.logger.info("TODO: Внести email и Telegram участника в БД")
-            mail_text += f"\nВнести email и Telegram участника в БД - {self.payment['Кассовый чек 54-ФЗ']}"
-            # TODO Отправить email участнику (нужно сначала наладить парсинг почт с GetCourse)
-            self.logger.info("TODO: Отправить email участнику")
-            mail_text += f"\nОтправить email участнику"
+            mail_text += f"\nСведения по участнику и платежу можно посмотреть по ссылке - {self.payment['Кассовый чек 54-ФЗ']}"
             # TODO Отправить Telegram участнику
-            self.logger.info("TODO: Отправить Telegram участнику")
+            self.logger.info("TODO: Отправить уведомление участнику в Telegram.")
             mail_text += f"\nОтправить Telegram участнику"
             send_mail(PASSWORDS.logins['admin_emails'], "CREATE ZOOM", mail_text)
             self.logger.warning("+" * 60)
+            self.participant_notification()
         else:
             # Отмечаем оплату в БД
             self.mark_payment_into_db()
         self.logger.info('Task_run end')
+
+    def participant_notification(self):
+        self.logger.info("Уведомление участника")
+        mail_text2 = f"""Здравствуйте, {self.payment['Имя'].capitalize()}!  
+
+Поздравляем, Вы оплатили абонемент на месяц совместных занятий в онлайн-формате "Друзья Школы Гивина". 
+
+Ваш новый zoom-аккаунт:
+Логин: {self.login_[0]}
+Пароль: {self.password_}
+
+Сохраните себе эти данные, чтобы не потерять их. 
+
+Эти данные вы можете использовать с настоящего момента:
+1) Скачайте приложение Zoom на компьютер, если ещё не cделали это ранее. 
+2) Установите приложение Zoom на ваш компьютер.
+3) Запустите эту программу.
+4) Нажмите кнопку Sign In ("Войти в..").
+5) Введите логин и пароль, предоставленные вам в этом письме .
+6) Поставьте птичку (галку) в поле Keep me logged in ("Не выходить из системы").
+7) Нажмите Sign In ("Войти"). 
+8) Далее из чата Объявлений в телеграмме найдет сообщение с ссылкой на занятия. Нажмите на неё. Она будет открываться в браузере, появится сверху сообщение с кнопкой, жмём на кнопку Open ZOOM Meetings (либо Открыть ZOOM)
+9) Появится окно для ввода пароля конференции. Здесь вводим три цифры 355. 
+
+С благодарностью и сердечным теплом,
+команда Школы Гивина."""
+        self.logger.info(mail_text2)
+        send_mail([self.payment["Электронная почта"]],
+                  r"[ШКОЛА ГИВИНА]. Поздравляем, Вы приняты в Друзья Школы", mail_text2)
 
     def mark_payment_into_db(self, participant_type='P'):
         """
@@ -160,9 +185,11 @@ class Task:
             WHERE id=%s;"""
             values_tuple = (self.payment["Время проведения"], self.payment["number_of_days"],
                             self.payment["deadline"], participant_type, self.payment["participant_id"])
-            # TODO Если пользователь был заблокированным, тогда:
-            # TODO Написать письмо пользователю
-            # TODO Написать письмо админу чтобы разблокировал Zoom учётку.
+            self.logger.info("Уведомление администратора о разблокировке пользователя")
+            mail_text = f"Разблокировать участника: {self.payment['Фамилия'].capitalize()} " \
+                        f"{self.payment['Имя'].capitalize()}\nLogin: {self.login_[0]}\nPassword: {self.password_}"
+            send_mail(PASSWORDS.logins['admin_emails'], "UNBLOCK PARTICIPANT", mail_text)
+            self.participant_notification()
         else:
             sql_text = """UPDATE participants 
             SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s 

@@ -66,7 +66,7 @@ class Email:
             print(error_text)
             self.logger.error(error_text)
             self.logger.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
-            send_mail(PASSWORDS.logins['admin_emails'], "MAIN ERROR (Postgres)", error_text)
+            send_mail(PASSWORDS.logins['admin_emails'], "MAIN ERROR (Postgres)", error_text, self.logger)
             self.logger.error("Exit with error")
             sys.exit(1)
         # TODO: Здесь нужно сделать провеку есть ли незавершенные сесии и если есть отправить письмо админу,
@@ -118,7 +118,7 @@ class Email:
                         self.logger.error(f"BODY\n: {body['body_text']}")
                 self.logger.info('-' * 45)
                 postgres.task_error(error_text, uuid)
-                send_mail(PASSWORDS.logins['admin_emails'], "TASK ERROR", error_text)
+                send_mail(PASSWORDS.logins['admin_emails'], "TASK ERROR", error_text, self.logger)
                 self.move_email_to_trash(uuid)
                 continue
             # Create Task and insert it to DB
@@ -228,7 +228,7 @@ class Email:
                             self.logger.error(f"BODY\n: {body['body_text']}")
                     self.logger.info('-' * 45)
                     postgres.task_error(error_text, uuid)
-                    send_mail(PASSWORDS.logins['admin_emails'], "TASK ERROR", error_text)
+                    send_mail(PASSWORDS.logins['admin_emails'], "TASK ERROR", error_text, self.logger)
                     continue
             else:
                 self.logger.warning(f"ВНИМАНИЕ: Это письмо уже обрабатывалось!")

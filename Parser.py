@@ -206,8 +206,8 @@ def parse_getcourse_page(link, payment, logger):
     print(response.text)
     """
     try:
-        # browser = webdriver.Chrome(r'c:\Users\bobrovsky\.wdm\drivers\chromedriver\79.0.3945.36\win32\chromedriver.exe')
-        browser = webdriver.Chrome(r'c:\Windows\System32\chromedriver.exe')
+        browser = webdriver.Chrome(r'c:\Users\bobrovsky\.wdm\drivers\chromedriver\79.0.3945.36\win32\chromedriver.exe')
+        # browser = webdriver.Chrome(r'c:\Windows\System32\chromedriver.exe')
         browser.get(PASSWORDS.logins['getcourse_login_page'])
         input_login = browser.find_element_by_css_selector("input.form-control.form-field-email")
         input_login.send_keys(PASSWORDS.logins['getcourse_login'])
@@ -225,13 +225,15 @@ def parse_getcourse_page(link, payment, logger):
         if len(email) < 0:
             logger.warning(f"PARSING: Не нашел email на странице заказа - {link}")
         else:
-            print(f"email={email}")
+            # print(f"email={email}")
             payment["Электронная почта"] = email
+            logger.info(f"PARSING: email={email}")
         telegram_elements = browser.find_elements_by_css_selector(".text-block>div[style]")
         text = ""
         for telegram_element in telegram_elements:
             text += telegram_element.text
-        print(text)
+        # print(text)
+        logger.info(f"PARSING: text={text}")
         mask = r'@\w*'
         result = re.search(mask, text)
         if result is None:
@@ -241,8 +243,9 @@ def parse_getcourse_page(link, payment, logger):
                 logger.warning(f"PARSING: Не нашел telegram на странице заказа - {link}")
             else:
                 result = '@' + result.group(0).rsplit("/", 1)[1]
-                print(f"telegram={result}")
+                # print(f"telegram={result}")
                 payment["telegram"] = result
+                logger.info(f"PARSING: telegram={result}")
         else:
             result = result.group(0)
             print(f"telegram={result}")
@@ -253,7 +256,7 @@ def parse_getcourse_page(link, payment, logger):
     except Exception as e:
         mail_text = f'Ошибка парсинга страницы заказа GetCourse\n' + traceback.format_exc()
         logger.error(mail_text)
-        send_mail(PASSWORDS.logins['admin_emails'], "ERROR PARSING", mail_text)
+        send_mail(PASSWORDS.logins['admin_emails'], "ERROR PARSING", mail_text, logger)
     finally:
         # закрываем браузер даже в случае ошибки
         browser.quit()

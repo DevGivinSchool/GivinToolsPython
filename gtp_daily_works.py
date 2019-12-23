@@ -33,7 +33,7 @@ def main():
         print(error_text)
         logger.error(error_text)
         logger.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
-        send_mail(PASSWORDS.logins['admin_emails'], "DAILY WORKS ERROR", error_text)
+        send_mail(PASSWORDS.logins['admin_emails'], "DAILY WORKS ERROR", error_text, logger)
         logger.error("Exit with error")
         sys.exit(1)
     logger.info('END gtp_daily_works')

@@ -2,14 +2,11 @@ import smtplib
 import ssl
 import traceback
 import PASSWORDS
-import logging
 from email.mime.text import MIMEText
 from email.header import Header
 
-logger = logging.getLogger('alert_to_mail')
 
-
-def send_mail(receiver_emails, subject, message, sender_email="robot@givinschool.org", port=465):
+def send_mail(receiver_emails, subject, message, logger, sender_email="robot@givinschool.org", port=465):
     """
     Отправка почтового сообщения
     :param list receiver_emails: Список email получателей

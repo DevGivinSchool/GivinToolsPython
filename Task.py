@@ -129,8 +129,8 @@ class Task:
             mail_text += f"\nСведения по участнику и платежу можно посмотреть по ссылке - {self.payment['Кассовый чек 54-ФЗ']}"
             # TODO Отправить Telegram участнику
             self.logger.info("TODO: Отправить уведомление участнику в Telegram.")
-            mail_text += f"\nОтправить Telegram участнику"
-            send_mail(PASSWORDS.logins['admin_emails'], "CREATE ZOOM", mail_text)
+            mail_text += f"\nОтправить Telegram участнику {self.payment['telegram']}"
+            send_mail(PASSWORDS.logins['admin_emails'], "CREATE ZOOM", mail_text, self.logger)
             self.logger.warning("+" * 60)
             self.participant_notification()
         else:
@@ -165,7 +165,7 @@ class Task:
 команда Школы Гивина."""
         self.logger.info(mail_text2)
         send_mail([self.payment["Электронная почта"]],
-                  r"[ШКОЛА ГИВИНА]. Поздравляем, Вы приняты в Друзья Школы", mail_text2)
+                  r"[ШКОЛА ГИВИНА]. Поздравляем, Вы приняты в Друзья Школы", mail_text2, self.logger)
 
     def mark_payment_into_db(self, participant_type='P'):
         """
@@ -188,7 +188,7 @@ class Task:
             self.logger.info("Уведомление администратора о разблокировке пользователя")
             mail_text = f"Разблокировать участника: {self.payment['Фамилия'].capitalize()} " \
                         f"{self.payment['Имя'].capitalize()}\nLogin: {self.login_[0]}\nPassword: {self.password_}"
-            send_mail(PASSWORDS.logins['admin_emails'], "UNBLOCK PARTICIPANT", mail_text)
+            send_mail(PASSWORDS.logins['admin_emails'], "UNBLOCK PARTICIPANT", mail_text, self.logger)
             self.participant_notification()
         else:
             sql_text = """UPDATE participants 

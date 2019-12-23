@@ -206,7 +206,8 @@ def parse_getcourse_page(link, payment, logger):
     print(response.text)
     """
     try:
-        browser = webdriver.Chrome()
+        # browser = webdriver.Chrome(r'c:\Users\bobrovsky\.wdm\drivers\chromedriver\79.0.3945.36\win32\chromedriver.exe')
+        browser = webdriver.Chrome(r'c:\Windows\System32\chromedriver.exe')
         browser.get(PASSWORDS.logins['getcourse_login_page'])
         input_login = browser.find_element_by_css_selector("input.form-control.form-field-email")
         input_login.send_keys(PASSWORDS.logins['getcourse_login'])

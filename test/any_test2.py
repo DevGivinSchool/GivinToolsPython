@@ -1,7 +1,12 @@
-from selenium import webdriver
+"""from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 
-driver = webdriver.Chrome(ChromeDriverManager().install())
+driver = webdriver.Chrome(ChromeDriverManager().install())"""
+
+from datetime import datetime
+item = '2019-08-07'
+item = datetime.strptime(item, '%Y-%m-%d')
+print(item)
 
 """
 link = "https://givin.school/sales/control/deal/update/id/24611232"

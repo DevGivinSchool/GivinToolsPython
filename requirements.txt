@@ -1,3 +1,4 @@
+xlsxwriter
 beautifulsoup4==4.8.1
 bitrix24-python3-client==0.4.0
 certifi==2019.11.28

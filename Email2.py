@@ -248,7 +248,7 @@ class Email:
     def create_payment(self, payment, postgres, task):
         self.logger.info("create_payment begin")
         # This payment after parsing mail
-        self.logger.info(f'payment = {payment}')
+        self.logger.info(f'payment after parsing = {payment}')
         # Put in Payment to Task and insert Payment to DB
         # and join payment after parsing with participant if it is
         task.payment = payment

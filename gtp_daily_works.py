@@ -9,7 +9,6 @@ from Log import Log
 from alert_to_mail import send_mail
 from datetime import datetime
 
-
 # Текущая дата для имени лог файла (без %S)
 now = datetime.now().strftime("%Y%m%d%H%M")
 logger = Log.setup_logger('__main__', gtp_config.config['log_dir'], f'gtp_daily_works_{now}.log',
@@ -118,6 +117,8 @@ order by last_name"""
     worksheet.write(0, 8, 'Оплачено до', heading)
     worksheet.write(0, 9, 'Отсрочка до', heading)
     worksheet.write(0, 10, 'Коментарий', heading)
+    table_text = "id | type | Фамилия | Имя | email | telegram | Дата оплаты | Дней | Оплачено до | Отсрочка до | Коментарий"
+    table = [[2, 4, 7, 3, 5, 8, 11, 4, 11, 11, 10], ]
     # Начинаем со второй строки.
     date_format = workbook.add_format({'num_format': 'dd.mm.yyyy'})
     row = 1
@@ -126,22 +127,29 @@ order by last_name"""
         col = 0
         for item in rec:
             # print(row, col, item)
-            if col == 6 or col == 8 or col == 9:
+            if col == 6 or col == 8 or col == 9:  # Столбцы в формате даты
                 if item is None:
                     worksheet.write(row, col, item)
+                    table_text += "None"
                 else:
                     # item = datetime.strptime(item, '%Y-%m-%d')
                     # print(type(item))
                     worksheet.write_datetime(row, col, item, date_format)
-            elif col == 10:
+                    table_text += item
+            elif col == 10:  # Коментарий может содержать переносы, убираем их
                 if item is None:
                     worksheet.write(row, col, item)
+                    table_text += item
                 else:
                     worksheet.write(row, col, item.replace("\n", " "))
+                    table_text += item.replace("\n", " ")
             else:
                 worksheet.write(row, col, item)
+                table_text += item
             col += 1
+            table_text += " | "  # Разделитель столбцов
         row += 1
+        table_text += "\n"  # Разделитель строк
     # Установка ширины столбцов
     worksheet.set_column(0, 1, 5)
     worksheet.set_column(2, 5, 20)
@@ -154,7 +162,9 @@ order by last_name"""
     now_for_text = datetime.now().strftime("%d.%m.%Y")
     mail_text = f"""Здравствуйте!
 
-Во вложении содержиться список должников на сегодня {now_for_text}.
+Во вложении содержиться список должников на сегодня {now_for_text} в формате xlsx.
+Таблица в виде текста:
+{table_text}
     
 С уважением, ваш робот."""
     print(mail_text)

@@ -186,19 +186,15 @@ def main():
         logger.error("Exit with error")
         sys.exit(1)
 
-    # try:
-    #     participants_notification(dbconnect)
-    # except Exception:
-    #     send_error("DAILY WORKS ERROR: participants_notification()")
+    try:
+        participants_notification(dbconnect)
+    except Exception:
+        send_error("DAILY WORKS ERROR: participants_notification()")
 
     try:
         getting_list_debtors(dbconnect)
     except Exception:
         send_error("DAILY WORKS ERROR: getting_list_debtors()")
-
-    # TODO Получение списка должников и его отправка менедджерам по почте
-    #  (пока вручную запросом и потом через выгрузку в TXT и в Excel)
-    #     в этот список включать пользователей без почты и телеграм
 
     # TODO Процедура удаления пользователей у которых последний платёж год назад вместе со всеми их платёжками и письмами
 

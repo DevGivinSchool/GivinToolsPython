@@ -30,7 +30,8 @@ class Log:
             print(f"Creation of the log_file from log_path:'{log_path}' and log_name:'{log_name}' failed")
             exit(1)
 
-        log_formatter = logging.Formatter('%(asctime)s|%(levelname)s|%(name)s|%(process)d:%(thread)d - %(message)s')
+        # log_formatter = logging.Formatter('%(asctime)s|%(levelname)s|%(name)s|%(process)d:%(thread)d - %(message)s')
+        log_formatter = logging.Formatter('%(asctime)s|%(levelname)8s| %(message)s')
         handler = logging.FileHandler(log_file, mode='w', encoding='utf-8')
         handler.setFormatter(log_formatter)
         custom_logger = logging.getLogger(name)

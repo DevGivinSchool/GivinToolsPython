@@ -177,7 +177,7 @@ class Task:
         self.logger.info(self.select_participant(self.payment["participant_id"]))
         # Коментарий и поле отсрочки обнуляются
         # Для заблокированного пользователя меняется его тип (type) и из пароля удаляются два последних символа
-        if self.payment["participant_id"] == "B":
+        if self.payment["participant_type"] == "B":
             self.logger.info("Разблокировка пользователя")
             sql_text = """UPDATE participants 
             SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s, 

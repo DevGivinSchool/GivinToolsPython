@@ -135,17 +135,17 @@ order by last_name"""
                     # item = datetime.strptime(item, '%Y-%m-%d')
                     # print(type(item))
                     worksheet.write_datetime(row, col, item, date_format)
-                    table_text += item
+                    table_text += item.strftime("%d.%m.%Y")
             elif col == 10:  # Коментарий может содержать переносы, убираем их
                 if item is None:
                     worksheet.write(row, col, item)
-                    table_text += item
+                    table_text += str(item)
                 else:
                     worksheet.write(row, col, item.replace("\n", " "))
                     table_text += item.replace("\n", " ")
             else:
                 worksheet.write(row, col, item)
-                table_text += item
+                table_text += str(item)
             col += 1
             table_text += " | "  # Разделитель столбцов
         row += 1
@@ -196,10 +196,10 @@ def main():
         logger.error("Exit with error")
         sys.exit(1)
 
-    try:
-        participants_notification(dbconnect)
-    except Exception:
-        send_error("DAILY WORKS ERROR: participants_notification()")
+    # try:
+    #     participants_notification(dbconnect)
+    # except Exception:
+    #     send_error("DAILY WORKS ERROR: participants_notification()")
 
     try:
         getting_list_debtors(dbconnect)

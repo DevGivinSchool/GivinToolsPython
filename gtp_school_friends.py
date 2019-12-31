@@ -1,3 +1,5 @@
+# Здесь есть полезные фишки для БД - https://github.com/alexey-goloburdin/telegram-finance-bot/blob/master/expenses.py
+
 # TODO Отправлять письми оповещения в том числе и на почту robot с темой [ШКОЛА ГИВИНА].
 #  В самой почте сделать правило пересыки таких писем в Отправленные.
 

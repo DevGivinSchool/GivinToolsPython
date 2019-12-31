@@ -29,11 +29,12 @@ def participants_notification(dbconnect):
 until_date - current_date as "INTERVAL2",
 deadline - current_date as "INTERVAL",
 --last_name, 
-first_name, 
+--first_name,
+fio, 
 email, 
---telegram,
---payment_date, 
---number_of_days, 
+telegram,
+payment_date, 
+number_of_days, 
 deadline, 
 until_date
 --,comment
@@ -48,16 +49,27 @@ order by last_name"""
 
     values_tuple = (None,)
     records = dbconnect.execute_select(sql_text, values_tuple)
-    # (None, 7, 'АЛЕКСЕЙ', 'an54324@mail.ru', datetime.date(2019, 12, 31), None)
+    # (None, 7, 'АЛААА', 'anxxxxx@mail.ru', datetime.date(2019, 12, 31), None)
+    # (None, 7, 'БАРААААА', 'ИРАААА', 'barxxxx.xxx@inbox.ru', '@irinabar6', datetime.date(2019, 12, 8), 30, datetime.date(2020, 1, 7), None)
+    # (None, 7, 'БАРААААА ИРАААА', 'barxxxx.xxx@inbox.ru', '@irinabar6', datetime.date(2019, 12, 8), 30, datetime.date(2020, 1, 7), None)
     intervals = {3: "3 дня", 7: "7 дней"}
+
     for p in records:
+        # Интервал высчитывается по двум полям until_date и deadline. Здесь определяется какой из них используется.
         if p[0] is None:
             interval = intervals[p[1]]
         else:
             interval = intervals[p[0]]
+        # Определяем что используется Срок оплаты или отсрочка
+        if p[7] is None:
+            until_date = p[8]
+        else:
+            until_date = p[7]
         mail_text = f"""Здравствуйте, {p[2].capitalize()}!  
 
-Напоминаем вам о том, что через {interval} - {p[4]} у вас истекает оплаченный период Друзей Школы (ДШ). 
+Напоминаем вам о том, что вы {p[5].strftime("%d.%m.%Y")} оплатили период {p[6]} дней Друзей Школы (ДШ).
+{until_date} через {interval} у вас истекает оплаченный период Друзей Школы (ДШ).
+
 Вы можете оплатить ДШ через эти платёжные системы (в первых двух вариантах доступен PayPal). Во втором варианте возможна оплата сразу за 3 или 6 месяцев, при этом вы полаете скидки 7% и 13% соответственно:
 1) (+PayPal) https://givinschoolru.getcourse.ru/friends
 2) (+PayPal) https://lp.givinschool.org/dsh
@@ -65,6 +77,9 @@ order by last_name"""
 
 Пожалуйста, при оплате, указывайте свои Фамилию, Имя, такие же как и при регистрации.
 В назначение платежа можно написать "друзья школы" или просто "дш".
+
+Ваш email:    {p[3]}
+Ваш telegram: {p[4]}
 
 С благодарностью и сердечным теплом,
 команда Школы Гивина.
@@ -196,10 +211,10 @@ def main():
         logger.error("Exit with error")
         sys.exit(1)
 
-    # try:
-    #     participants_notification(dbconnect)
-    # except Exception:
-    #     send_error("DAILY WORKS ERROR: participants_notification()")
+    try:
+        participants_notification(dbconnect)
+    except Exception:
+        send_error("DAILY WORKS ERROR: participants_notification()")
 
     try:
         getting_list_debtors(dbconnect)

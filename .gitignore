@@ -1,3 +1,9 @@
+#
+list.py
+PASSWORDS.py
+log/
+chromedriver.exe
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -125,6 +131,3 @@ dmypy.json
 
 # PyCharm files
 .idea/
-list.py
-PASSWORDS.py
-log/

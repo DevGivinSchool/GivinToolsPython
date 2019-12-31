@@ -206,9 +206,10 @@ def parse_getcourse_page(link, payment, logger):
     print(response.text)
     """
     try:
-        # browser = webdriver.Chrome(r'c:\Users\bobrovsky\.wdm\drivers\chromedriver\79.0.3945.36\win32\chromedriver.exe')
+        browser = webdriver.Chrome()
+        # browser = webdriver.Chrome(r'chromedriver.exe')
         # browser = webdriver.Chrome(r'c:\Windows\System32\chromedriver.exe')
-        browser = webdriver.Chrome(r'c:\Users\MinistrBob\.wdm\drivers\chromedriver\79.0.3945.36\win32\chromedriver.exe')
+        # browser = webdriver.Chrome(r'c:\Users\MinistrBob\.wdm\drivers\chromedriver\79.0.3945.36\win32\chromedriver.exe')
         browser.get(PASSWORDS.logins['getcourse_login_page'])
         input_login = browser.find_element_by_css_selector("input.form-control.form-field-email")
         input_login.send_keys(PASSWORDS.logins['getcourse_login'])
@@ -235,22 +236,28 @@ def parse_getcourse_page(link, payment, logger):
             text += telegram_element.text
         # print(text)
         logger.info(f"PARSING: text={text}")
+        # Сначала ищем нормальное написание @xxxx
         mask = r'@\w*'
         result = re.search(mask, text)
         if result is None:
+            # Иногда указывают ссылку на страницу telegram
             mask = r'https://t.me/\w*'
             result = re.search(mask, text)
             if result is None:
-                logger.warning(f"PARSING: Не нашел telegram на странице заказа - {link}")
+                # Иногда указывают имя без символа @ (здесь может выбраться некоректное имя)
+                mask = r'[a-zA-Z0-9_]+'
+                result = re.search(mask, text)
+                if result is None:
+                    logger.warning(f"PARSING: Не нашел telegram на странице заказа - {link}")
+                else:
+                    result = result.group(0)
             else:
                 result = '@' + result.group(0).rsplit("/", 1)[1]
-                # print(f"telegram={result}")
-                payment["telegram"] = result
-                logger.info(f"PARSING: telegram={result}")
         else:
             result = result.group(0)
-            print(f"telegram={result}")
-            payment["telegram"] = result
+        print(f"telegram={result}")
+        payment["telegram"] = result
+        logger.info(f"PARSING: telegram={result}")
         # закрываем браузер после всех манипуляций
         browser.quit()
         payment_normalization(payment)

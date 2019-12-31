@@ -3,7 +3,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 driver = webdriver.Chrome(ChromeDriverManager().install())"""
 
-import datetime
+"""import datetime
 #from string import Template
 #t = Template('$id|$type|$family|$name|$email|$telegram|')
 row = (1126, 'P', 'АБРАМОВА', 'ЕЛЕНА', 'el34513543@gmail.com', '', datetime.date(2019, 8, 7), 45,
@@ -21,7 +21,7 @@ for i in row:
     row2.add(i)
     row3.append(i)
 print(row2)
-print(row3)
+print(row3)"""
 
 """from datetime import datetime
 item = '2019-08-07'
@@ -35,14 +35,15 @@ link = "https://givinschoolru.getcourse.ru/sales/control/deal/update/id/" + link
 print(link)
 """
 
-"""import re
-text = '@ddddd raetbr rter @telegram_name bbb, https://t.me/chigirigi fedgfsg купефук '
-mask = r'https://t.me/\w*'
+import re
+text = 'SCH_Mihail_Ivanenko вафйуцке @ddddd raetbr rter @telegram_name bbb, https://t.me/chigirigi fedgfsg купефук '
+# mask = r'https://t.me/\w*'
+mask = r'[a-zA-Z0-9_]+'
 result = re.search(mask, text)
-result2 = re.search(mask, text)
-result = '@' + result.group(0).rsplit("/", 1)[1]
-print(result)
-print("exit")"""
+# result2 = re.search(mask, text)
+# result = '@' + result.group(0).rsplit("/", 1)[1]
+print(result.group(0))
+print("exit")
 
 """
 text = "Поступила оплата по заказу 1052 на сумму 2 2 руб. через Яндекс.Касса."

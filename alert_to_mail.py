@@ -25,6 +25,8 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None, sen
     :param int port: Порт
     :return:
     """
+    # Все письма отправляются на почту robot для хранения.
+    receiver_emails.append(PASSWORDS.logins['ymail_login'])
     # Create a secure SSL context
     context = ssl.create_default_context()
     server = smtplib.SMTP_SSL("smtp.yandex.ru", port, context=context)
@@ -54,7 +56,6 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None, sen
         logger.info(f"Send email to {one_receiver}")
         # print(f"LOGGER = {logger}")
         msg['To'] = one_receiver
-        msg['Bcc'] = PASSWORDS.logins['ymail_login']
         try:
             server.sendmail(sender_email, one_receiver, msg.as_string())
         except Exception:

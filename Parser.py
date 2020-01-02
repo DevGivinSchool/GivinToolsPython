@@ -246,7 +246,7 @@ def parse_getcourse_page(link, payment, logger):
             if result is None:
                 # Иногда указывают имя без символа @ (здесь может выбраться некоректное имя)
                 mask = r'[a-zA-Z0-9_]+'
-                result = re.search(mask, text)
+                result = "@" + re.search(mask, text)
                 if result is None:
                     logger.warning(f"PARSING: Не нашел telegram на странице заказа - {link}")
                 else:

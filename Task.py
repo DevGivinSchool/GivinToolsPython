@@ -186,8 +186,8 @@ class Task:
             values_tuple = (self.payment["Время проведения"], self.payment["number_of_days"],
                             self.payment["deadline"], participant_type, self.payment["participant_id"])
             self.logger.info("Уведомление администратора о разблокировке пользователя")
-            mail_text = f"Разблокировать участника: {self.payment['Фамилия'].capitalize()} " \
-                        f"{self.payment['Имя'].capitalize()}\nLogin: {self.login_[0]}\nPassword: {self.password_}"
+            mail_text = f"Разблокировать участника: {self.payment['Фамилия']} " \
+                        f"{self.payment['Имя']}\nLogin: {self.login_[0]}\nPassword: {self.password_}"
             send_mail(PASSWORDS.logins['admin_emails'], "UNBLOCK PARTICIPANT", mail_text, self.logger)
             self.participant_notification()
         else:

@@ -51,6 +51,7 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None, sen
         encoders.encode_base64(xlsx)
         xlsx.add_header('Content-Disposition', 'attachment', filename=os.path.basename(attached_file))
         msg.attach(xlsx)
+    logger.info(f"Список адресов: {receiver_emails}")
     for one_receiver in receiver_emails:
         print(f"Send email to {one_receiver}")
         logger.info(f"Send email to {one_receiver}")

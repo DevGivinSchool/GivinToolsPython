@@ -1,3 +1,6 @@
+
+
+
 """from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -35,7 +38,7 @@ link = "https://givinschoolru.getcourse.ru/sales/control/deal/update/id/" + link
 print(link)
 """
 
-import re
+"""import re
 text = 'SCH_Mihail_Ivanenko вафйуцке @ddddd raetbr rter @telegram_name bbb, https://t.me/chigirigi fedgfsg купефук '
 # mask = r'https://t.me/\w*'
 mask = r'[a-zA-Z0-9_]+'
@@ -43,7 +46,7 @@ result = re.search(mask, text)
 # result2 = re.search(mask, text)
 # result = '@' + result.group(0).rsplit("/", 1)[1]
 print(result.group(0))
-print("exit")
+print("exit")"""
 
 """
 text = "Поступила оплата по заказу 1052 на сумму 2 2 руб. через Яндекс.Касса."

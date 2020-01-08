@@ -62,6 +62,17 @@ class DBPostgres:
 
     ###########################################################################
 
+    def get_participant_by_id(self, value):
+        """
+        Возвращает основные сведения участника по ID
+        :param value: ID
+        :return:
+        """
+        sql_text = f"select last_name, first_name, fio, email, telegram, login, password from participants where id=%s;"
+        values_tuple = (value,)
+        return self.execute_select(sql_text, values_tuple)
+
+
     def create_task(self, session_id, task):
         """
         Create new task. If the task already exist, then increase attempt count.

@@ -98,8 +98,8 @@ class Task:
                 result = yandex_mail.create_yandex_mail(self.payment["Фамилия"], self.payment["Имя"], login_,
                                                         department_id_=4)
                 # print(f"Email created:{result['email']}")
-                self.login_ = result['email'],
-                self.logger.info(f"Email created: {self.login_[0]}")
+                self.login_ = result['email']
+                self.logger.info(f"Email created: {self.login_}")
                 # Отдел 4 = @ДРУЗЬЯ_ШКОЛЫ
             except yandex_connect.YandexConnectExceptionY as e:
                 # print(e.args[0])
@@ -125,7 +125,7 @@ class Task:
             # TODO Создать участнику учётку Zoom
             self.logger.info("TODO: Создать участнику учётку Zoom")
             mail_text = f"Создать учётку zoom участнику {self.payment['Фамилия'].capitalize()} " \
-                        f"{self.payment['Имя'].capitalize()}\nLogin: {self.login_[0]}\nPassword: {self.password_}"
+                        f"{self.payment['Имя'].capitalize()}\nLogin: {self.login_}\nPassword: {self.password_}"
             mail_text += f"\nСведения по участнику и платежу можно посмотреть по ссылке - {self.payment['Кассовый чек 54-ФЗ']}"
             # TODO Отправить Telegram участнику
             self.logger.info("TODO: Отправить уведомление участнику в Telegram.")
@@ -140,12 +140,12 @@ class Task:
 
     def participant_notification(self):
         self.logger.info("Уведомление участника")
-        mail_text2 = f"""Здравствуйте, {self.payment['Имя'].capitalize()}!  
+        mail_text2 = f"""Здравствуйте, {self.payment['Фамилия Имя'].capitalize()}!  
 
 Поздравляем, Вы оплатили абонемент на месяц совместных занятий в онлайн-формате "Друзья Школы Гивина". 
 
-Ваш новый zoom-аккаунт:
-Логин: {self.login_[0]}
+Ваш zoom-аккаунт:
+Логин: {self.login_}
 Пароль: {self.password_}
 
 Сохраните себе эти данные, чтобы не потерять их. 
@@ -178,16 +178,28 @@ class Task:
         # Коментарий и поле отсрочки обнуляются
         # Для заблокированного пользователя меняется его тип (type) и из пароля удаляются два последних символа
         if self.payment["participant_type"] == "B":
+            # Нужно дополнить сведения участника которых не хватает (т.к. это не новый участник а заблокированный)
+            result = self.database.get_participant_by_id(self.payment["participant_id"])[0]
+            self.payment["Фамилия"] = result[0]
+            self.payment["Имя"] = result[1]
+            self.payment["Фамилия Имя"] = result[2]
+            self.payment["Электронная почта"] = result[3]
+            self.payment["telegram"] = result[4]
+            self.login_ = result[5]
+            self.password_ = result[6]
+            # [('ИВАНОВ', 'ИВАН', 'ИВАНОВ ИВАН', 'xxx@mail.ru', '@xxxx', 'ivanov_ivan@givinschool.org', '43RFji1r48')]
+            # Исправление пароля (вырезать 55 в конце)
+            if self.password_[-2:] == "55":
+                self.password_ = self.password_[:-2]
             self.logger.info("Разблокировка пользователя")
             sql_text = """UPDATE participants 
-            SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s, 
-            password=left(password, LENGTH(password)-2) 
+            SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s, password=%s
             WHERE id=%s;"""
             values_tuple = (self.payment["Время проведения"], self.payment["number_of_days"],
-                            self.payment["deadline"], participant_type, self.payment["participant_id"])
+                            self.payment["deadline"], participant_type, self.password_, self.payment["participant_id"])
             self.logger.info("Уведомление администратора о разблокировке пользователя")
-            mail_text = f"Разблокировать участника: {self.payment['Фамилия']} " \
-                        f"{self.payment['Имя']}\nLogin: {self.login_[0]}\nPassword: {self.password_}"
+            mail_text = f"Разблокировать участника {self.payment['Фамилия Имя']}:" \
+                        f"\nLogin: {self.login_}\nPassword: {self.password_}"
             send_mail(PASSWORDS.logins['admin_emails'], "UNBLOCK PARTICIPANT", mail_text, self.logger)
             self.participant_notification()
         else:

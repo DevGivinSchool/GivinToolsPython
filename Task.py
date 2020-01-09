@@ -111,8 +111,8 @@ class Task:
                 else:
                     raise
             # Для удобства создания учётки zoom записать в лог фамилию и имя
-            self.logger.info(f"Фамилия: {self.payment['Фамилия'].capitalize()}")
-            self.logger.info(f"Имя: {self.payment['Имя'].capitalize()}")
+            self.logger.info(f"Фамилия: {self.payment['Фамилия'].title()}")
+            self.logger.info(f"Имя: {self.payment['Имя'].title()}")
             # Генерация пароля для Zoom (для всех почт пароль одинаковый)
             self.password_ = password_generator.random_password(strong=True, zoom=True)
             self.logger.info(f"Password: {self.password_}")
@@ -124,8 +124,8 @@ class Task:
             self.logger.warning("+" * 60)
             # TODO Создать участнику учётку Zoom
             self.logger.info("TODO: Создать участнику учётку Zoom")
-            mail_text = f"Создать учётку zoom участнику {self.payment['Фамилия'].capitalize()} " \
-                        f"{self.payment['Имя'].capitalize()}\nLogin: {self.login_}\nPassword: {self.password_}"
+            mail_text = f"Создать учётку zoom участнику {self.payment['Фамилия'].title()} " \
+                        f"{self.payment['Имя'].title()}\nLogin: {self.login_}\nPassword: {self.password_}"
             mail_text += f"\nСведения по участнику и платежу можно посмотреть по ссылке - {self.payment['Кассовый чек 54-ФЗ']}"
             # TODO Отправить Telegram участнику
             self.logger.info("TODO: Отправить уведомление участнику в Telegram.")
@@ -140,7 +140,7 @@ class Task:
 
     def participant_notification(self):
         self.logger.info("Уведомление участника")
-        mail_text2 = f"""Здравствуйте, {self.payment['Фамилия Имя'].capitalize()}!  
+        mail_text2 = f"""Здравствуйте, {self.payment['Фамилия Имя'].title()}!  
 
 Поздравляем, Вы оплатили абонемент на месяц совместных занятий в онлайн-формате "Друзья Школы Гивина". 
 

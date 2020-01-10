@@ -1,6 +1,7 @@
-import datetime
+from datetime import datetime
 import requests
 import re
+import gtp_config
 import PASSWORDS
 import traceback
 import time
@@ -9,7 +10,7 @@ from utils import is_eng
 from utils import is_rus
 from alert_to_mail import send_mail
 from selenium import webdriver
-
+from Log import Log
 
 def get_clear_payment():
     payment_zero = {
@@ -275,7 +276,10 @@ def parse_getcourse_page(link, payment, logger):
 if __name__ == "__main__":
     # parse_getcourse_html("aaaa")
     import logging
-    logger = logging.basicConfig(filename='parser.log', level=logging.INFO)
+
+    now = datetime.now().strftime("%Y%m%d%H%M")
+    logger = Log.setup_logger('__main__', gtp_config.config['log_dir'], f'gtp_school_friends_{now}.log',
+                              gtp_config.config['log_level'])
     payment = get_clear_payment()
     parse_getcourse_page("https://givin.school/sales/control/deal/update/id/24611232", payment, logger)
     print(payment)

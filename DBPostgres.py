@@ -243,9 +243,9 @@ if __name__ == "__main__":
     import gtp_config
     import PASSWORDS
 
-    postgres = DBPostgres(dbname=gtp_config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
-                          password=PASSWORDS.logins['postgres_password'], host=gtp_config.config['postgres_host'],
-                          port=gtp_config.config['postgres_port'])
+    postgres = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
+                          password=PASSWORDS.logins['postgres_password'], host=PASSWORDS.logins['postgres_host'],
+                          port=PASSWORDS.logins['postgres_port'])
 
     id2 = postgres.find_participant_by('email', 'tikitikishik@gmail.com')
     id3 = postgres.find_participant_by('telegram', '@rikitikishik')

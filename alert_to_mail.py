@@ -26,7 +26,8 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None, sen
     :return:
     """
     # Все письма отправляются на почту robot для хранения.
-    receiver_emails.append(PASSWORDS.logins['ymail_login'])
+    if PASSWORDS.logins['ymail_login'] not in receiver_emails:
+        receiver_emails.append(PASSWORDS.logins['ymail_login'])
     # Create a secure SSL context
     context = ssl.create_default_context()
     server = smtplib.SMTP_SSL("smtp.yandex.ru", port, context=context)
@@ -73,7 +74,7 @@ if __name__ == "__main__":
     name = "ДМИТРИЙ"
     login = "bbbbb_ddsgqwawe@givinschool.org"
     password = "V4$mWEXCqr"
-    mail_text2 = f"""Здравствуйте, {name.capitalize()}!  
+    mail_text2 = f"""Здравствуйте, {name.title()}!  
 
 Поздравляем, Вы оплатили абонемент на месяц совместных занятий в онлайн-формате "Друзья Школы Гивина". 
 

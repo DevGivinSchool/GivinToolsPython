@@ -59,8 +59,10 @@ def payment_normalization(payment):
 
 
 def payment_normalization2(payment):
-    payment["Электронная почта"] = payment["Электронная почта"].lower()
-    payment["telegram"] = payment["telegram"].lower()
+    if payment["Электронная почта"]:
+        payment["Электронная почта"] = payment["Электронная почта"].lower()
+    if payment["telegram"]:
+        payment["telegram"] = payment["telegram"].lower()
 
 
 def payment_computation(payment):
@@ -246,6 +248,7 @@ def parse_getcourse_page(link, payment, logger):
             if result is None:
                 # Иногда указывают имя без символа @ (здесь может выбраться некоректное имя)
                 mask = r'[a-zA-Z0-9_]+'
+                result = re.search(mask, text)
                 if result is None:
                     logger.warning(f"PARSING: Не нашел telegram на странице заказа - {link}")
                 else:

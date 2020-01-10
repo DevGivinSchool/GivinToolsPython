@@ -65,7 +65,7 @@ order by last_name"""
             until_date = p[8]
         else:
             until_date = p[7]
-        mail_text = f"""Здравствуйте, {p[2].capitalize()}!  
+        mail_text = f"""Здравствуйте, {p[2].title()}!  
 
 Напоминаем вам о том, что вы {p[5].strftime("%d.%m.%Y")} оплатили период {p[6]} дней Друзей Школы (ДШ).
 {until_date} через {interval} у вас истекает оплаченный период Друзей Школы (ДШ).

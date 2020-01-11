@@ -172,7 +172,7 @@ def parse_paykeeper_html(body_html, logger):
     payment["Фамилия"] = fio[0]
     # У некоторых фамили и имена сложные = несколько слов через пробел, поэтому пробел заменяю на подчёркивание
     payment["Имя"] = ' '.join(fio[1:]).strip()
-    payment["Время проведения"] = datetime.datetime.strptime(payment["Время проведения"], '%Y-%m-%d %H:%M:%S')
+    payment["Время проведения"] = datetime.strptime(payment["Время проведения"], '%Y-%m-%d %H:%M:%S')
     payment["Платежная система"] = 2
     payment_normalization(payment)
     payment_computation(payment)

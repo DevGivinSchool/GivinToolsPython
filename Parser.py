@@ -1,10 +1,11 @@
-from datetime import datetime
 import requests
 import re
 import gtp_config
 import PASSWORDS
 import traceback
 import time
+from datetime import datetime
+from datetime import timedelta
 from lxml import html
 from utils import is_eng
 from utils import is_rus
@@ -74,7 +75,7 @@ def payment_computation(payment):
         payment["number_of_days"] = 90
     # Вычисляем до какой даты произведена оплата
     if isinstance(payment["Время проведения"], datetime):
-        payment["deadline"] = payment["Время проведения"] + datetime.timedelta(days=payment["number_of_days"])
+        payment["deadline"] = payment["Время проведения"] + timedelta(days=payment["number_of_days"])
 
 
 def parse_getcourse_html(body_html, logger):
@@ -133,7 +134,7 @@ def parse_getcourse_html(body_html, logger):
     # print(f'5:{payment["Фамилия Имя"]}')
     # У GetCourse в письме дата не указана, поэтому ставлю текущую
     # TODO Получать дату оплаты для GetCourse по дате и времени самого письма
-    payment["Время проведения"] = datetime.datetime.now()
+    payment["Время проведения"] = datetime.now()
     payment["Платежная система"] = 1
     payment_normalization(payment)
     payment_computation(payment)

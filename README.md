@@ -95,3 +95,6 @@ driver = webdriver.Chrome(ChromeDriverManager().install())
 IMAPClient:
     Github - https://github.com/mjs/imapclient
     Doc - https://imapclient.readthedocs.io/en/2.1.0/
+    
+# Backup Postgresql
+Скрипты в папке backup (взял отсюда - https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux)

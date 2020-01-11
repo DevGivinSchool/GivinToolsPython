@@ -202,10 +202,10 @@ def main():
     """
     logger.info("Try connect to DB")
     try:
-        dbconnect = DBPostgres(dbname=gtp_config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
+        dbconnect = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
                                password=PASSWORDS.logins['postgres_password'],
-                               host=gtp_config.config['postgres_host'],
-                               port=gtp_config.config['postgres_port'], logger=logger)
+                               host=PASSWORDS.logins['postgres_host'],
+                               port=PASSWORDS.logins['postgres_port'], logger=logger)
     except Exception:
         send_error("DAILY WORKS ERROR: Can't connect to DB!!!")
         logger.error("Exit with error")

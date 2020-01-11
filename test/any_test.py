@@ -19,9 +19,9 @@ list_participants = """
 """
 
 # Подключение к БД
-postgres = DBPostgres(dbname=gtp_config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
-                      password=PASSWORDS.logins['postgres_password'], host=gtp_config.config['postgres_host'],
-                      port=gtp_config.config['postgres_port'])
+postgres = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
+                      password=PASSWORDS.logins['postgres_password'], host=PASSWORDS.logins['postgres_host'],
+                      port=PASSWORDS.logins['postgres_port'])
 for p in list_participants.splitlines():
     print(f"Попытка блокировки участника {p}")
     p = p.strip()

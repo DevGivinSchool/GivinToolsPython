@@ -56,9 +56,9 @@ class Email:
         self.logger.info("sort_mail begin")
         try:
             self.logger.info("Try connect to DB")
-            postgres = DBPostgres(dbname=gtp_config.config['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
-                                  password=PASSWORDS.logins['postgres_password'], host=gtp_config.config['postgres_host'],
-                                  port=gtp_config.config['postgres_port'], logger=self.logger)
+            postgres = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
+                                  password=PASSWORDS.logins['postgres_password'], host=PASSWORDS.logins['postgres_host'],
+                                  port=PASSWORDS.logins['postgres_port'], logger=self.logger)
         except Exception:
             # TODO Вынести процедуру опопвещения MAIN ERROR в отдельную процедуру
             error_text = \

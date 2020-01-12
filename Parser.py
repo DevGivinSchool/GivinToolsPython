@@ -212,7 +212,7 @@ def parse_getcourse_page(link, payment, logger):
     try:
         chromeOptions = webdriver.ChromeOptions()
         chromeOptions.add_argument("--headless")
-        browser = webdriver.Chrome(options=chromeOptions)
+        browser = webdriver.Chrome(r'/usr/local/bin/chromedriver', options=chromeOptions)
         # browser = webdriver.Chrome(r'chromedriver.exe')
         # browser = webdriver.Chrome(r'c:\Windows\System32\chromedriver.exe')
         # browser = webdriver.Chrome(r'c:\Users\MinistrBob\.wdm\drivers\chromedriver\79.0.3945.36\win32\chromedriver.exe')

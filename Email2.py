@@ -124,7 +124,7 @@ class Email:
             # Create Task and insert it to DB
             task = Task(uuid, ffrom, fsubject, body, self.logger, postgres)
             task_is_new = postgres.create_task(session_id, task)
-            self.logger.info(f"Task {session_id}:{uuid}:{task_is_new} begin")
+            self.logger.info(f"Task ID={uuid} NEW={task_is_new} begin")
             if task_is_new:
                 try:
                     """Определяем типа письма (платёж / не платёж) и вытаскиваем данные платежа в payment."""
@@ -232,7 +232,7 @@ class Email:
                     continue
             else:
                 self.logger.warning(f"ВНИМАНИЕ: Это письмо уже обрабатывалось!")
-            self.logger.info(f"Task {session_id}:{uuid}:{task_is_new} end")
+            self.logger.info(f"Task ID={uuid} NEW={task_is_new} end")
             print(uuid)
             # print('-' * 45)
             self.logger.info('-' * 45)

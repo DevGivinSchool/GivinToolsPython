@@ -89,6 +89,7 @@ def parse_getcourse_html(body_html, logger):
     # print("=" * 45)
     raw_text = td[0].text_content().splitlines()
     order_list = ""
+    p = 0
     for i, line in enumerate(raw_text):
         line = line.strip()
         if len(line) != 0:
@@ -121,9 +122,11 @@ def parse_getcourse_html(body_html, logger):
             elif line.startswith('Состав заказа:'):
                 # print(f'4={i}')
                 p = i
-                logger.debug(f'p={p}')
+                logger.debug(f'Состав заказа1: p={p} i={i}')
             elif i > p:
+                logger.debug(f'Состав заказа2: p={p} i={i}')
                 order_list = order_list + ' ' + line
+                logger.debug(f'order_list={order_list}')
     order_list = order_list.strip()
     payment["Наименование услуги"] = order_list
     logger.debug(f'Наименование услуги={order_list}')

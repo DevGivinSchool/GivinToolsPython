@@ -74,7 +74,7 @@ class Email:
         #  проставлять в поле завершения, а признак в поле признака
         session_id = postgres.session_begin()
         self.logger.info('=' * 45)
-        self.logger.info(f'Start session = {session_id}')
+        self.logger.info(f'Session begin (session_id={session_id})')
         messages = self.client.search('ALL')
         """We go through the cycle in all letters"""
         for uid, message_data in self.client.fetch(messages, 'RFC822').items():
@@ -124,7 +124,7 @@ class Email:
             # Create Task and insert it to DB
             task = Task(uuid, ffrom, fsubject, body, self.logger, postgres)
             task_is_new = postgres.create_task(session_id, task)
-            self.logger.info(f"Task ID={uuid} NEW={task_is_new} begin")
+            self.logger.info(f"Task begin: ID={uuid}|NEW={task_is_new}")
             if task_is_new:
                 try:
                     """Определяем типа письма (платёж / не платёж) и вытаскиваем данные платежа в payment."""
@@ -232,14 +232,14 @@ class Email:
                     continue
             else:
                 self.logger.warning(f"ВНИМАНИЕ: Это письмо уже обрабатывалось!")
-            self.logger.info(f"Task ID={uuid} NEW={task_is_new} end")
+            self.logger.info(f"Task end: ID={uuid}|NEW={task_is_new}")
             print(uuid)
             # print('-' * 45)
             self.logger.info('-' * 45)
             # -----------------------------------------------------------------
         self.client.expunge()
         postgres.session_end(session_id)
-        self.logger.info(f'End session = {session_id}')
+        self.logger.info(f'Session end')
         self.logger.info('=' * 45)
         self.logger.info("sort_mail end")
         # TODO: Сводка не нужна. Если всё хорошо то мне об этом и знать не нужно,

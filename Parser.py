@@ -93,12 +93,15 @@ def parse_getcourse_html(body_html, logger):
         line = line.strip()
         if len(line) != 0:
             # print(line)
+            logger.debug(f"line={line}")
             if line.startswith('Поступила оплата'):
                 payment["ID платежа"] = re.findall(r'\d{4}', line)[0]
+                logger.debug(f'ID платежа={payment["ID платежа"]}')
                 # print(line)
                 # Так ищет любые суммы и <1000 тоже
                 payment["Оплаченная сумма"] = re.findall(r'на сумму.*руб.', line)[0] \
                     .replace('на сумму ', '').replace('руб.', '').replace(' ', '')
+                logger.debug(f'Оплаченная сумма={payment["Оплаченная сумма"]}')
                 # print('1')
                 # result = re.findall(r'\d{4}', line)
                 # print(result[0])
@@ -106,29 +109,37 @@ def parse_getcourse_html(body_html, logger):
                 # print(result2[0])
             elif line.startswith('Страница заказ:'):
                 payment["Кассовый чек 54-ФЗ"] = line.split(' ')[2].strip()
+                logger.debug(f'Кассовый чек 54-ФЗ={payment["Кассовый чек 54-ФЗ"]}')
                 # link = line.split(' ')[2].strip()
                 # print(link)
             elif line.startswith('Клиент:'):
                 payment["Фамилия Имя"] = line.split(':')[1].strip()
+                logger.debug(f'Фамилия Имя={payment["Фамилия Имя"]}')
                 # print(f'1:{payment["Фамилия Имя"]}')
                 # client = line.split(':')[1].strip()
                 # print(client)
             elif line.startswith('Состав заказа:'):
                 # print(f'4={i}')
                 p = i
+                logger.debug(f'p={p}')
             elif i > p:
                 order_list = order_list + ' ' + line
     order_list = order_list.strip()
     payment["Наименование услуги"] = order_list
+    logger.debug(f'Наименование услуги={order_list}')
     # print(order_list)
     # print("=" * 45)
     fio = payment["Фамилия Имя"].split(" ")
+    logger.debug(f'fio={fio}')
     # print(f'2:{fio}')
     payment["Имя"] = fio[0]
+    logger.debug(f'Имя={payment["Имя"]}')
     # У некоторых фамили и имена сложные = несколько слов через пробел, поэтому пробел заменяю на подчёркивание
     payment["Фамилия"] = ' '.join(fio[1:]).strip()
+    logger.debug(f'Фамилия={payment["Фамилия"]}')
     # В письме идет сначало имя а потом фамилия
     payment["Фамилия Имя"] = payment["Фамилия"] + " " + payment["Имя"]
+    logger.debug(f'Фамилия Имя={payment["Фамилия Имя"]}')
     # print(f'3:{payment["Фамилия"]}')
     # print(f'4:{payment["Имя"]}')
     # print(f'5:{payment["Фамилия Имя"]}')

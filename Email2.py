@@ -171,9 +171,12 @@ class Email:
                         self.logger.info(f'Это письмо от платежной системы - GetCourse')
                         # print(f'Это письмо от платежной системы - GetCourse')
                         payment = Parser.parse_getcourse_html(body['body_html'], self.logger)
-                        self.create_payment(payment, postgres, task)
-                        task.task_run()
-                        self.move_email_to_trash(uuid)
+                        if self.check_school_friends(payment["Наименование услуги"]):
+                            # print('Это платёж Друзья Школы')
+                            self.logger.info('Это платёж Друзья Школы')
+                            self.create_payment(payment, postgres, task)
+                            task.task_run()
+                            self.move_email_to_trash(uuid)
                     # Это письмо вообще не платёж
                     else:
                         self.logger.info(f'ЭТО ПИСЬМО НЕ ОТ ПЛАТЁЖНЫХ СИСТЕМ (ничего с ним не делаю, пока...)')

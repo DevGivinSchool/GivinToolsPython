@@ -128,55 +128,18 @@ class Email:
             if task_is_new:
                 try:
                     """Определяем типа письма (платёж / не платёж) и вытаскиваем данные платежа в payment."""
-                    # В PayKeeper могут быть платежи не за ДШ а за что-то другое
+                    # PayKeeper
                     if ffrom == 'noreply@server.paykeeper.ru' and fsubject == 'Принята оплата':
                         self.logger.info(f'Это письмо от платежной системы - PayKeeper')
-                        # print(f'Это письмо от платежной системы - PayKeeper')
                         payment = Parser.parse_paykeeper_html(body['body_html'], self.logger)
-                        # Пока создание платежа перенесу отсюда - ниже в, чтобы в БД создавались платежи только ДШ
-                        # self.create_payment(payment, postgres, task)
-                        # Это платёж PayKeeper за ДШ
-                        if self.check_school_friends(payment["Наименование услуги"]):
-                            # print('Это платёж Друзья Школы')
-                            self.logger.info('Это платёж Друзья Школы')
-                            self.create_payment(payment, postgres, task)
-                            task.task_run()
-                            self.move_email_to_trash(uuid)
-                        # Это платёж PayKeeper но НЕ за ДШ
-                        else:
-                            # print('Это ИНОЙ платёж')
-                            self.logger.info('ЭТО ИНОЙ ПЛАТЁЖ')
-                            if uuid is not None:
-                                self.logger.info(f"    UUID   : {uuid}")
-                            if ffrom is not None:
-                                self.logger.info(f"    FROM   : {ffrom}")
-                            if fsubject is not None:
-                                self.logger.info(f"    SUBJECT: {fsubject}")
-                            if fsubject is not None:
-                                self.logger.info(f'    PAYMENT: {payment}')
-                            """
-                            if body is not None:
-                                self.logger.info(f"body_type: {body['body_type']}")
-                                if body['body_type'] == 'mix':
-                                    self.logger.info(f"BODY\n: {body['body_text']}")
-                                elif body['body_type'] == 'html':
-                                    self.logger.info(f"BODY\n: {body['body_html']}")
-                                else:
-                                    self.logger.info(f"BODY\n: {body['body_text']}")
-                            """
-                            self.move_email_to_trash(uuid)
-                    # В Getcourse только платежи за ДШ иного там нет
+                        self.check_payment(ffrom, fsubject, payment, postgres, task, uuid)
+                    # Getcourse
                     elif (ffrom == 'no-reply@getcourse.ru' or ffrom == 'info@study.givinschool.org' or ffrom == 'info@givin.school') \
                             and fsubject.startswith("Поступил платеж"):
                         self.logger.info(f'Это письмо от платежной системы - GetCourse')
                         # print(f'Это письмо от платежной системы - GetCourse')
                         payment = Parser.parse_getcourse_html(body['body_html'], self.logger)
-                        if self.check_school_friends(payment["Наименование услуги"]):
-                            # print('Это платёж Друзья Школы')
-                            self.logger.info('Это платёж Друзья Школы')
-                            self.create_payment(payment, postgres, task)
-                            task.task_run()
-                            self.move_email_to_trash(uuid)
+                        self.check_payment(ffrom, fsubject, payment, postgres, task, uuid)
                     # Это письмо вообще не платёж
                     else:
                         self.logger.info(f'ЭТО ПИСЬМО НЕ ОТ ПЛАТЁЖНЫХ СИСТЕМ (ничего с ним не делаю, пока...)')
@@ -247,6 +210,36 @@ class Email:
         self.logger.info("sort_mail end")
         # TODO: Сводка не нужна. Если всё хорошо то мне об этом и знать не нужно,
         #  нужны только ошибки и оповещения о работа которые мне нужно выполнить
+
+    def check_payment(self, ffrom, fsubject, payment, postgres, task, uuid):
+        if self.check_school_friends(payment["Наименование услуги"]):
+            # print('Это платёж Друзья Школы')
+            self.logger.info('Это платёж Друзья Школы')
+            self.create_payment(payment, postgres, task)
+            task.task_run()
+            self.move_email_to_trash(uuid)
+        # Это платёж но НЕ за ДШ
+        else:
+            self.logger.info('ЭТО ИНОЙ ПЛАТЁЖ')
+            if uuid is not None:
+                self.logger.info(f"    UUID   : {uuid}")
+            if ffrom is not None:
+                self.logger.info(f"    FROM   : {ffrom}")
+            if fsubject is not None:
+                self.logger.info(f"    SUBJECT: {fsubject}")
+            if fsubject is not None:
+                self.logger.info(f'    PAYMENT: {payment}')
+            """
+            if body is not None:
+                self.logger.info(f"body_type: {body['body_type']}")
+                if body['body_type'] == 'mix':
+                    self.logger.info(f"BODY\n: {body['body_text']}")
+                elif body['body_type'] == 'html':
+                    self.logger.info(f"BODY\n: {body['body_html']}")
+                else:
+                    self.logger.info(f"BODY\n: {body['body_text']}")
+            """
+            self.move_email_to_trash(uuid)
 
     def create_payment(self, payment, postgres, task):
         self.logger.info("create_payment begin")

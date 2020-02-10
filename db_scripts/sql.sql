@@ -31,7 +31,7 @@ payment_date=to_date('18.10.2019', 'DD.MM.YYYY'),
 number_of_days=30,
 deadline=to_date('18.10.2019', 'DD.MM.YYYY')+interval '1' day * 30,
 --deadline=NOW()+interval '1' day * 30,
-comment=NULL, type='P'
+comment=NULL, type='P', until_date=NULL
 where
 --telegram=lower('ххххх')
 --last_name like upper('%ххххх%')

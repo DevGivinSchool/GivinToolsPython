@@ -81,7 +81,7 @@ def payment_computation(payment):
 
 def parse_getcourse_html(body_html, logger):
     logger.info("Парсинг parse_getcourse_html")
-    logger.info(f"body_html=\n{body_html}\n")
+    logger.debug(f"body_html=\n{body_html}\n")
     payment = get_clear_payment()
     tree = html.fromstring(body_html)
     td = tree.xpath('//div/table/tr[1]/td[2]')
@@ -164,6 +164,7 @@ def parse_getcourse_html(body_html, logger):
 
 def parse_paykeeper_html(body_html, logger):
     logger.info("Парсинг parse_paykeeper_html")
+    logger.debug(f"body_html=\n{body_html}\n")
     payment = get_clear_payment()
     tree = html.fromstring(body_html)
     # print(tree)

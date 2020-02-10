@@ -13,6 +13,7 @@ from alert_to_mail import send_mail
 from selenium import webdriver
 from Log import Log
 
+
 def get_clear_payment():
     payment_zero = {
         "task_uuid": "",
@@ -101,9 +102,12 @@ def parse_getcourse_html(body_html, logger):
                 logger.debug(f'ID платежа={payment["ID платежа"]}')
                 # print(line)
                 # Так ищет любые суммы и <1000 тоже
-                payment["Оплаченная сумма"] = re.findall(r'на сумму.*руб.', line)[0] \
-                    .replace('на сумму ', '').replace('руб.', '').replace(' ', '')
-                logger.debug(f'Оплаченная сумма={payment["Оплаченная сумма"]}')
+                if len(re.findall(r'на сумму.*руб.', line)) > 0:
+                    payment["Оплаченная сумма"] = re.findall(r'на сумму.*руб.', line)[0] \
+                        .replace('на сумму ', '').replace('руб.', '').replace(' ', '')
+                    logger.debug(f'Оплаченная сумма={payment["Оплаченная сумма"]}')
+                else:
+                    logger.warning(f'Оплаченная сумма не в рублях = {line}')
                 # print('1')
                 # result = re.findall(r'\d{4}', line)
                 # print(result[0])

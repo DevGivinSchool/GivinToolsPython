@@ -109,7 +109,7 @@ def parse_getcourse_html(body_html, logger):
                 # print(result[0])
                 # result2 = re.findall(r'\d+ \d+', line)
                 # print(result2[0])
-            elif line.startswith('Страница заказ:'):
+            elif line.startswith('Страница заказ:') or line.startswith('Страница заказа:'):
                 payment["Кассовый чек 54-ФЗ"] = line.split(' ')[2].strip()
                 logger.debug(f'Кассовый чек 54-ФЗ={payment["Кассовый чек 54-ФЗ"]}')
                 # link = line.split(' ')[2].strip()

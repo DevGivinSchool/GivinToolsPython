@@ -107,6 +107,7 @@ def parse_getcourse_html(body_html, logger):
                         .replace('на сумму ', '').replace('руб.', '').replace(' ', '')
                     logger.debug(f'Оплаченная сумма={payment["Оплаченная сумма"]}')
                 else:
+                    payment["Оплаченная сумма"] = "0"
                     logger.warning(f'Оплаченная сумма не в рублях = {line}')
                 # print('1')
                 # result = re.findall(r'\d{4}', line)

@@ -10,25 +10,25 @@ body_html = """
 	<tr>
 				<td valign="top">
 			<div  style="">
-			<img width='50' class='user-profile-image ' src='http://fs-th02.getcourse.ru/fileservice/file/thumbnail/h/AB.fb16f6cdaa994ebf0d144241c1f50a0e.jpg/s/50x50/a/76390/sc/131'>			</div>
+			<img width='50' class='user-profile-image user-default-profile-image ' src='http://getcourse.ru/public/img/default_profile_50.png'>			</div>
 		</td>
 				<td>
-			     Поступила оплата по заказу 1584 на сумму 1 990 руб. через CloudPayments.
+			     Поступила оплата по заказу 1517 на сумму 150€ через PayPal.
     <BR><BR>
 
-        Страница заказа: <a href='http://givin.school/g/4099824594/ea19aaff?v=NA0cjM1ATOy8CZp9SZ0FGZwV3LsFWZk9CbvJHdu92YvMXZsF2cvw2bvh2Yz5ibpZXan9yL6MHc0RHa'>https://givin.school/sales/control/deal/update/id/29052744</a>
+        Страница заказа: <a href='http://givin.school/g/4093964694/e079641a?v=MA3QzM1cDOy8CZp9SZ0FGZwV3LsFWZk9CbvJHdu92YvMXZsF2cvw2bvh2Yz5ibpZXan9yL6MHc0RHa'>https://givin.school/sales/control/deal/update/id/28753470</a>
     <BR><BR>
 
-    Клиент: Аделия Утешева<BR>
+    Клиент: Диана Потёмкина<BR>
                                                                                             <br />
     Состав заказа:<br /><br />
-            1. Друзья Школы - 1 месяц (1 990 руб.)<br />
+            1. Интенсив "Жажда Жизни" Бад-Майнберг 11-15.03.2020 (380€)<br />
         <br />
 					</td>
 	</tr>
 	<tr>
 		<td colspan="2">
-									<a href="http://givin.school/g/4099824594/ea19aaff?v=NA0cjM1ATOyYkMlQWaGJTJlRXYkBXdGJTJsFWZkZkMlw2byRnbvNmRyUyclxWYzZkMlw2bvh2Yz5ibpZXanZkMlYkMlE0MlMHc0RHa9wmc1ZSM0ETOxkjNyYTPkl2PrNWasN2Lz52bpRXYjlmZpR3bu9ycu9Wa0F2YpZWa09mbvw2bvh2Yz5ibpZXan9yL6MHc0RHa" style="font-family: arial; border: 0px; background: #428bca; font-size: 14px; padding: 7px 20px; color: white; display: inline-block; text-decoration: none;">Перейти</a>
+									<a href="http://givin.school/g/4093964694/e079641a?v=MA3QzM1cDOyYkMlQWaGJTJlRXYkBXdGJTJsFWZkZkMlw2byRnbvNmRyUyclxWYzZkMlw2bvh2Yz5ibpZXanZkMlYkMlE0MlMHc0RHa9wmc1ZyMyAzMwEjNyYTPkl2PrNWasN2Lz52bpRXYjlmZpR3bu9ycu9Wa0F2YpZWa09mbvw2bvh2Yz5ibpZXan9yL6MHc0RHa" style="font-family: arial; border: 0px; background: #428bca; font-size: 14px; padding: 7px 20px; color: white; display: inline-block; text-decoration: none;">Перейти</a>
 					</td>
 	</tr>
 </table>
@@ -41,10 +41,52 @@ body_html = """
 			<BR>
 			<span
 				style="font-size: 0.8em; color: #999">Если вы не хотите получать письма от нас, вы можете				<a style="color: #999; "
-				   href='http://givin.school/notifications/unsubscribe/message/id/4099824594/h/6308d'> отписаться</a></span>
-									<img src="http://givin.school/notifications/messagePublic/view/id/4099824594/hash/ea19aaff" style="width: 0; height: 0; border: 0;" width="0" height="0" border="0" />
+				   href='http://givin.school/notifications/unsubscribe/message/id/4093964694/h/c1342'> отписаться</a></span>
+									<img src="http://givin.school/notifications/messagePublic/view/id/4093964694/hash/e079641a" style="width: 0; height: 0; border: 0;" width="0" height="0" border="0" />
 			</div>
 </div>
+
+2020-02-10 17:47:00,066|   ERROR| TASK ERROR:
+Traceback (most recent call last):
+  File "/home/robot/MyGit/GivinToolsPython/Email2.py", line 173, in sort_mail
+    payment = Parser.parse_getcourse_html(body['body_html'], self.logger)
+  File "/home/robot/MyGit/GivinToolsPython/Parser.py", line 104, in parse_getcourse_html
+    payment["Оплаченная сумма"] = re.findall(r'на сумму.*руб.', line)[0] \
+IndexError: list index out of range
+
+2020-02-10 17:47:00,066|   ERROR| UUID: 1712
+2020-02-10 17:47:00,066|   ERROR| FROM: info@givin.school
+2020-02-10 17:47:00,066|   ERROR| SUBJECT: Поступил платеж - 150€ (PayPal)
+2020-02-10 17:47:00,066|   ERROR| BODY
+:  		 Поступила оплата по заказу 1517 на
+сумму 150€ через PayPal. 
+
+Страница заказа:
+https://givin.school/sales/control/deal/update/id/28753470
+[http://givin.school/g/4093964694/e079641a?v=MA3QzM1cDOy8CZp9SZ0FGZwV3LsFWZk9CbvJHdu92YvMXZsF2cvw2bvh2Yz5ibpZXan9yL6MHc0RHa]
+
+
+Клиент: Диана Потёмкина
+
+Состав заказа:
+
+1. Интенсив "Жажда Жизни" Бад-Майнберг
+11-15.03.2020 (380€)
+
+ 		 Перейти
+[http://givin.school/g/4093964694/e079641a?v=MA3QzM1cDOyYkMlQWaGJTJlRXYkBXdGJTJsFWZkZkMlw2byRnbvNmRyUyclxWYzZkMlw2bvh2Yz5ibpZXanZkMlYkMlE0MlMHc0RHa9wmc1ZyMyAzMwEjNyYTPkl2PrNWasN2Lz52bpRXYjlmZpR3bu9ycu9Wa0F2YpZWa09mbvw2bvh2Yz5ibpZXan9yL6MHc0RHa]
+
+
+Вы получили это письмо, потому что
+регистрировались в проекте «givinschoolru» 
+Если вы не хотите получать письма от
+нас, вы можете отписаться
+[http://givin.school/notifications/unsubscribe/message/id/4093964694/h/c1342]
+ 
+Вы можете ознакомиться с HTML версией письма
+пройдя по ссылке
+[https://givin.school/pl/notifications/control/messages/html-version?id=4093964694&hash=e079641a]
+
 """
 now = datetime.now().strftime("%Y%m%d%H%M")
 logger = Log.setup_logger('__main__', gtp_config.config['log_dir'], f'gtp_school_friends_{now}.log',

@@ -91,8 +91,8 @@ class Email:
             self.logger.error("Exit with error")
             sys.exit(1)
         session_id = postgres.session_begin()
-        self.logger.info('=' * 45)
         self.logger.info(f'Session begin (session_id={session_id})')
+        self.logger.info('#' * 45)
         messages = self.client.search('ALL')
         """We go through the cycle in all letters"""
         for uid, message_data in self.client.fetch(messages, 'RFC822').items():
@@ -220,12 +220,14 @@ class Email:
             self.logger.info(f"Task end: ID={uuid}|NEW={task_is_new}")
             print(uuid)
             # print('-' * 45)
-            self.logger.info('-' * 45)
+            self.logger.info('=' * 45)
+            self.logger.info('=' * 45)
+            self.logger.info('=' * 45)
             # -----------------------------------------------------------------
         self.client.expunge()
         postgres.session_end(session_id)
+        self.logger.info('#' * 45)
         self.logger.info(f'Session end')
-        self.logger.info('=' * 45)
         self.logger.info("sort_mail end")
         # TODO: Сводка не нужна. Если всё хорошо то мне об этом и знать не нужно,
         #  нужны только ошибки и оповещения о работа которые мне нужно выполнить

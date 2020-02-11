@@ -85,11 +85,11 @@ DB: Закрываю сессию работы
             Получить список тех у кого просрочка более 30 дней:
                 Список отослать менеджерам (Павлу) по почте или Телеграм
 """
-from Log import Log
-import gtp_config
 import PASSWORDS
 import traceback
 import sys
+from Log import Log
+from log_config import log_dir, log_level
 from datetime import datetime
 from imapclient import IMAPClient
 from Email2 import Email
@@ -98,8 +98,8 @@ from alert_to_mail import send_mail
 
 # Текущая дата для имени лог файла (без %S)
 now = datetime.now().strftime("%Y%m%d%H%M")
-logger = Log.setup_logger('__main__', gtp_config.config['log_dir'], f'gtp_school_friends_{now}.log',
-                          gtp_config.config['log_level'])
+logger = Log.setup_logger('__main__', log_dir, f'gtp_school_friends_{now}.log',
+                          log_level)
 logger.info('START gtp_school_friends')
 
 

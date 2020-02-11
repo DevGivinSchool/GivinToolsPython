@@ -1,6 +1,6 @@
 import requests
 import re
-import gtp_config
+import log_config
 import PASSWORDS
 import traceback
 import time
@@ -302,8 +302,8 @@ if __name__ == "__main__":
     import logging
 
     now = datetime.now().strftime("%Y%m%d%H%M")
-    logger = Log.setup_logger('__main__', gtp_config.config['log_dir'], f'gtp_school_friends_{now}.log',
-                              gtp_config.config['log_level'])
+    logger = Log.setup_logger('__main__', log_dir, f'gtp_school_friends_{now}.log',
+                              log_level)
     payment = get_clear_payment()
     parse_getcourse_page("https://givin.school/sales/control/deal/update/id/24611232", payment, logger)
     print(payment)

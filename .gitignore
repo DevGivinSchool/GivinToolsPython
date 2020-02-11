@@ -3,6 +3,7 @@ list.py
 PASSWORDS.py
 log/
 chromedriver.exe
+log_config.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

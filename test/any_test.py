@@ -10,7 +10,7 @@ import datetime
 import string
 import re
 import PASSWORDS
-import gtp_config
+import log_config
 from DBPostgres import DBPostgres
 from utils import is_eng
 from utils import is_rus

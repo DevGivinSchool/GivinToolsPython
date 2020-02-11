@@ -1,8 +1,8 @@
 import Parser
-import gtp_config
+import log_config
 from datetime import datetime
 from Log import Log
-
+from log_config import log_dir, log_level
 
 body_html = """
 <div class="message-from-gc">
@@ -89,8 +89,8 @@ https://givin.school/sales/control/deal/update/id/28753470
 
 """
 now = datetime.now().strftime("%Y%m%d%H%M")
-logger = Log.setup_logger('__main__', gtp_config.config['log_dir'], f'gtp_school_friends_{now}.log',
-                          gtp_config.config['log_level'])
+logger = Log.setup_logger('__main__', log_dir, f'gtp_school_friends_{now}.log',
+                          log_level)
 payment = Parser.parse_getcourse_html(body_html, logger)
 
 

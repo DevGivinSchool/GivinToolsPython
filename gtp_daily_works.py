@@ -4,16 +4,17 @@ import traceback
 import xlsxwriter
 import os
 import PASSWORDS
-import gtp_config
+import log_config
 from DBPostgres import DBPostgres
 from Log import Log
+from log_config import log_dir, log_level
 from alert_to_mail import send_mail
 from datetime import datetime
 
 # Текущая дата для имени лог файла (без %S)
 now = datetime.now().strftime("%Y%m%d%H%M")
-logger = Log.setup_logger('__main__', gtp_config.config['log_dir'], f'gtp_daily_works_{now}.log',
-                          gtp_config.config['log_level'])
+logger = Log.setup_logger('__main__', log_dir, f'gtp_daily_works_{now}.log',
+                          log_level)
 logger.info('START gtp_daily_works')
 
 
@@ -115,7 +116,7 @@ order by last_name"""
 
     # now_for_file = datetime.now().strftime("%d%m%Y_%H%M")
     now_for_file = datetime.now().strftime("%Y_%m_%d")
-    xlsx_file_path = os.path.join(gtp_config.config['log_dir'], f'DEBTORS_{now_for_file}.xlsx')
+    xlsx_file_path = os.path.join(log_dir, f'DEBTORS_{now_for_file}.xlsx')
     workbook = xlsxwriter.Workbook(xlsx_file_path)
     worksheet = workbook.add_worksheet('Список')
     # Запись заголовков столбцов

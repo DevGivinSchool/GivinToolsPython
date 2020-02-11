@@ -6,7 +6,7 @@ from email.header import decode_header
 import html2text
 import PASSWORDS
 import Parser
-import gtp_config
+import log_config
 from DBPostgres import DBPostgres
 from Task import Task
 from alert_to_mail import send_mail

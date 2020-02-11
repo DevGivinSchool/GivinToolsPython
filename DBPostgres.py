@@ -240,7 +240,7 @@ class DBPostgres:
 
 
 if __name__ == "__main__":
-    import gtp_config
+    import log_config
     import PASSWORDS
 
     postgres = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],

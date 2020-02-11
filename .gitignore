@@ -4,6 +4,7 @@ PASSWORDS.py
 log/
 chromedriver.exe
 log_config.py
+parser.log
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

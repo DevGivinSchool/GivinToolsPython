@@ -58,7 +58,16 @@ def create_team_mail():
             # print(e.args[0])
             if e.args[0] == 500 or e.args[0] == 409:
                 print(f"Unhandled exception: Такой пользователь уже существует: "
-                      f"{login_ + '@givinschool.org'}")
+                      f"{login_ + '@givinschool.org'}. Пробую еще раз Фамилия+Имя")
+                try:
+                    login_ = get_login(line[0], line[1])
+                    result = yandex_mail.create_yandex_mail(line[0], line[1], login_, password, department_id_=1)
+                except yandex_connect.YandexConnectExceptionY as e:
+                    if e.args[0] == 500 or e.args[0] == 409:
+                        print(f"Unhandled exception: Такой пользователь уже существует: "
+                              f"{login_ + '@givinschool.org'}.")
+                    else:
+                        print("ERROR = " + e.__str__())
             else:
                 print("ERROR = " + e.__str__())
         # print(password)

@@ -220,7 +220,9 @@ class Email:
             self.logger.info(f"Task end: ID={uuid}|NEW={task_is_new}")
             print(uuid)
             # print('-' * 45)
-            self.logger.info(('=' * 45 + '\n')*3)
+            self.logger.info('=' * 45)
+            self.logger.info('=' * 45)
+            self.logger.info('=' * 45)
             # -----------------------------------------------------------------
         self.client.expunge()
         postgres.session_end(session_id)

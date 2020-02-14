@@ -104,7 +104,7 @@ def parse_getcourse_html(body_html, logger):
                 # Так ищет любые суммы и <1000 тоже
                 if len(re.findall(r'на сумму.*руб.', line)) > 0:
                     payment["Оплаченная сумма"] = re.findall(r'на сумму.*руб.', line)[0] \
-                        .replace('на сумму ', '').replace('руб.', '').replace(' ', '')
+                        .replace('на сумму ', '').replace('руб.', '').split('.')[0].replace(' ', '')
                     logger.debug(f'Оплаченная сумма={payment["Оплаченная сумма"]}')
                 else:
                     payment["Оплаченная сумма"] = "0"

@@ -91,7 +91,8 @@ def create_yandex_mail(familia_, name_, login_, password_=None, department_id_=1
 def get_api():
     # Токен Яндекса, действует год
     token = PASSWORDS.logins['token_yandex']
-    api = yandex_connect.YandexConnectDirectory(token, org_id=None)
+    # 'org_id': 2520809, 'name': 'givinschool.org'
+    api = yandex_connect.YandexConnectDirectory(token, org_id=2520809)
     return api
 
 
@@ -101,3 +102,15 @@ def show_groups():
     department_list = api.department_list_full()
     return department_list
     # [{'id': 1, 'name': 'Все сотрудники'}, {'id': 3, 'name': '@СПЕЦПОЧТЫ'}, {'id': 4, 'name': '@ДРУЗЬЯ_ШКОЛЫ'}]
+
+
+def show_organizations():
+    """ Посмотреть список организаций"""
+    api = get_api()
+    organization_list = api.organization_list()
+    return organization_list
+    # [{'id': 3742649, 'name': 'probuzdenie.org'}, {'id': 2520809, 'name': 'givinschool.org'}]
+
+if __name__ == "__main__":
+    # show_groups()
+    print(show_organizations())

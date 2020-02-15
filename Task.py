@@ -124,7 +124,7 @@ class Task:
             self.logger.warning("+" * 60)
             # TODO Создать участнику учётку Zoom
             self.logger.info("TODO: Создать участнику учётку Zoom")
-            mail_text = f"Создать учётку zoom участнику {self.payment['Фамилия'].title()} " \
+            mail_text = f"Создать учётку zoom участнику\nID={self.payment['participant_id']}\n{self.payment['Фамилия'].title()} " \
                         f"{self.payment['Имя'].title()}\nLogin: {self.login_}\nPassword: {self.password_}"
             mail_text += f"\nСведения по участнику и платежу можно посмотреть по ссылке - {self.payment['Кассовый чек 54-ФЗ']}"
             # TODO Отправить Telegram участнику
@@ -198,7 +198,7 @@ class Task:
             values_tuple = (self.payment["Время проведения"], self.payment["number_of_days"],
                             self.payment["deadline"], participant_type, self.password_, self.payment["participant_id"])
             self.logger.info("Уведомление администратора о разблокировке пользователя")
-            mail_text = f"Разблокировать участника {self.payment['Фамилия Имя']}:" \
+            mail_text = f"Разблокировать участника\nID={self.payment['participant_id']}\n{self.payment['Фамилия Имя']}:" \
                         f"\nLogin: {self.login_}\nPassword: {self.password_}"
             send_mail(PASSWORDS.logins['admin_emails'], "UNBLOCK PARTICIPANT", mail_text, self.logger)
             self.participant_notification()

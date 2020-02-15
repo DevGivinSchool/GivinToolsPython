@@ -7,7 +7,7 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 
 import PASSWORDS
-import gtp_config
+import log_config
 from email.mime.text import MIMEText
 from email.header import Header
 from Log import Log
@@ -66,8 +66,8 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None, sen
 
 
 if __name__ == "__main__":
-    logger = Log.setup_logger('__main__', gtp_config.config['log_dir'], f'gtp_alert_to_mail.log',
-                              gtp_config.config['log_level'])
+    logger = Log.setup_logger('__main__', log_dir, f'gtp_alert_to_mail.log',
+                              log_level)
     """mail_text = f"Создать учётку zoom участнику Иванов " \
                 f"Иван\nLogin: ivanov_ivan@givinschool.org\nPassword: X2#FQDIcur"
     send_mail(PASSWORDS.logins['admin_emails'], "CREATE ZOOM", mail_text)"""

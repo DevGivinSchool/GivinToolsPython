@@ -1,4 +1,4 @@
-﻿# GivinToolsPython
+﻿# GivinToolsPython (GTP)
 Utilities for Givin School
 
 Все утилиты имеют префикс gtp_ остальные файлы вспомогательные.

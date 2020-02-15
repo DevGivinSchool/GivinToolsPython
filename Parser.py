@@ -1,6 +1,6 @@
 import requests
 import re
-import gtp_config
+import log_config
 import PASSWORDS
 import traceback
 import time
@@ -12,6 +12,7 @@ from utils import is_rus
 from alert_to_mail import send_mail
 from selenium import webdriver
 from Log import Log
+
 
 def get_clear_payment():
     payment_zero = {
@@ -80,7 +81,7 @@ def payment_computation(payment):
 
 def parse_getcourse_html(body_html, logger):
     logger.info("Парсинг parse_getcourse_html")
-    logger.info(f"body_html=\n{body_html}\n")
+    logger.debug(f"body_html=\n{body_html}\n")
     payment = get_clear_payment()
     tree = html.fromstring(body_html)
     td = tree.xpath('//div/table/tr[1]/td[2]')
@@ -101,15 +102,19 @@ def parse_getcourse_html(body_html, logger):
                 logger.debug(f'ID платежа={payment["ID платежа"]}')
                 # print(line)
                 # Так ищет любые суммы и <1000 тоже
-                payment["Оплаченная сумма"] = re.findall(r'на сумму.*руб.', line)[0] \
-                    .replace('на сумму ', '').replace('руб.', '').replace(' ', '')
-                logger.debug(f'Оплаченная сумма={payment["Оплаченная сумма"]}')
+                if len(re.findall(r'на сумму.*руб.', line)) > 0:
+                    payment["Оплаченная сумма"] = re.findall(r'на сумму.*руб.', line)[0] \
+                        .replace('на сумму ', '').replace('руб.', '').split('.')[0].replace(' ', '')
+                    logger.debug(f'Оплаченная сумма={payment["Оплаченная сумма"]}')
+                else:
+                    payment["Оплаченная сумма"] = "0"
+                    logger.warning(f'Оплаченная сумма не в рублях = {line}')
                 # print('1')
                 # result = re.findall(r'\d{4}', line)
                 # print(result[0])
                 # result2 = re.findall(r'\d+ \d+', line)
                 # print(result2[0])
-            elif line.startswith('Страница заказ:'):
+            elif line.startswith('Страница заказ:') or line.startswith('Страница заказа:'):
                 payment["Кассовый чек 54-ФЗ"] = line.split(' ')[2].strip()
                 logger.debug(f'Кассовый чек 54-ФЗ={payment["Кассовый чек 54-ФЗ"]}')
                 # link = line.split(' ')[2].strip()
@@ -159,6 +164,7 @@ def parse_getcourse_html(body_html, logger):
 
 def parse_paykeeper_html(body_html, logger):
     logger.info("Парсинг parse_paykeeper_html")
+    logger.debug(f"body_html=\n{body_html}\n")
     payment = get_clear_payment()
     tree = html.fromstring(body_html)
     # print(tree)
@@ -296,8 +302,8 @@ if __name__ == "__main__":
     import logging
 
     now = datetime.now().strftime("%Y%m%d%H%M")
-    logger = Log.setup_logger('__main__', gtp_config.config['log_dir'], f'gtp_school_friends_{now}.log',
-                              gtp_config.config['log_level'])
+    logger = Log.setup_logger('__main__', log_dir, f'gtp_school_friends_{now}.log',
+                              log_level)
     payment = get_clear_payment()
     parse_getcourse_page("https://givin.school/sales/control/deal/update/id/24611232", payment, logger)
     print(payment)

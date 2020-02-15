@@ -4,16 +4,17 @@ import traceback
 import xlsxwriter
 import os
 import PASSWORDS
-import gtp_config
+import log_config
 from DBPostgres import DBPostgres
 from Log import Log
+from log_config import log_dir, log_level
 from alert_to_mail import send_mail
 from datetime import datetime
 
 # Текущая дата для имени лог файла (без %S)
 now = datetime.now().strftime("%Y%m%d%H%M")
-logger = Log.setup_logger('__main__', gtp_config.config['log_dir'], f'gtp_daily_works_{now}.log',
-                          gtp_config.config['log_level'])
+logger = Log.setup_logger('__main__', log_dir, f'gtp_daily_works_{now}.log',
+                          log_level)
 logger.info('START gtp_daily_works')
 
 
@@ -88,6 +89,7 @@ order by last_name"""
         print(mail_text)
         logger.info(mail_text)
         send_mail([p[3]], r"[ШКОЛА ГИВИНА]. Напоминание об оплате ДШ", mail_text, logger)
+        logger.info(('=' * 45 + '\n')*3)
 
 
 def getting_list_debtors(dbconnect):
@@ -115,7 +117,7 @@ order by last_name"""
 
     # now_for_file = datetime.now().strftime("%d%m%Y_%H%M")
     now_for_file = datetime.now().strftime("%Y_%m_%d")
-    xlsx_file_path = os.path.join(gtp_config.config['log_dir'], f'DEBTORS_{now_for_file}.xlsx')
+    xlsx_file_path = os.path.join(log_dir, f'DEBTORS_{now_for_file}.xlsx')
     workbook = xlsxwriter.Workbook(xlsx_file_path)
     worksheet = workbook.add_worksheet('Список')
     # Запись заголовков столбцов
@@ -133,7 +135,7 @@ order by last_name"""
     worksheet.write(0, 8, 'Оплачено до', heading)
     worksheet.write(0, 9, 'Отсрочка до', heading)
     worksheet.write(0, 10, 'Коментарий', heading)
-    table_text = "id | type | Фамилия | Имя | email | telegram | Дата оплаты | Дней | Оплачено до | Отсрочка до | Коментарий"
+    table_text = "id | type | Фамилия | Имя | email | telegram | Дата оплаты | Дней | Оплачено до | Отсрочка до | Коментарий\n"
     table = [[2, 4, 7, 3, 5, 8, 11, 4, 11, 11, 10], ]
     # Начинаем со второй строки.
     date_format = workbook.add_format({'num_format': 'dd.mm.yyyy'})
@@ -211,12 +213,12 @@ def main():
         send_error("DAILY WORKS ERROR: Can't connect to DB!!!")
         logger.error("Exit with error")
         sys.exit(1)
-
+    logger.info('#' * 45)
     try:
         participants_notification(dbconnect)
     except Exception:
         send_error("DAILY WORKS ERROR: participants_notification()")
-
+    logger.info('#' * 45)
     try:
         getting_list_debtors(dbconnect)
     except Exception:
@@ -225,7 +227,7 @@ def main():
     # TODO Процедура удаления пользователей у которых последний платёж год назад вместе со всеми их платёжками и письмами
 
     # TODO Процедура удаления писем из почты старше 1 года
-
+    logger.info('#' * 45)
     logger.info('END gtp_daily_works')
 
 

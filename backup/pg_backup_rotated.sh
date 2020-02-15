@@ -1,4 +1,11 @@
 #!/bin/bash
+echo SHELL: $SHELL
+echo PATH: $PATH
+echo PGUSER: $PGUSER
+echo PGDATABASE: $PGDATABASE
+echo PGHOST: $PGHOST
+echo PGPASSFILE: $PGPASSFILE
+echo PGDATA: $PGDATA
 
 ###########################
 ####### LOAD CONFIG #######

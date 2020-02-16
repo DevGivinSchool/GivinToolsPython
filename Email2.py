@@ -46,7 +46,7 @@ def verification_for_school_friends(text):
     """Проверяем что назначение платежа - Друзья школы"""
     text_lower = text.lower().strip()
     # print(f'text_lower={text_lower}')
-    list_ofstrs = ['дш', 'друзья школы', 'д.ш.']
+    list_ofstrs = ['дш', 'друзья школы', 'д.ш.', 'друзей школы']
     # print(f'list_ofstrs={list_ofstrs}')
     # Check if all strings from the list exists in given string
     result = False

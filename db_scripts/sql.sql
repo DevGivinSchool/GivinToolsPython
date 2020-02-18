@@ -73,18 +73,22 @@ order by last_name;
 -- ===============================================================
 -- Создать участника
 INSERT INTO public.participants(
-	last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, type)
-	VALUES (upper('last_name'),
+	last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, type, comment)
+	VALUES (
+	upper('last_name'),
 	upper('first_name'),
 	upper('fio'),
 	lower('email'),
 	lower('telegram'),
 	'login',
 	'password',
-	to_date('15.10.2019', 'dd.mm.yyyy'),
+	to_date('18.02.2020', 'dd.mm.yyyy'),
 	30,
-	to_date('15.10.2019', 'dd.mm.yyyy') + INTERVAL '30 day', 'N');
-
+	--to_date('01.03.2020', 'dd.mm.yyyy') + INTERVAL '30 day',
+	to_date('01.03.2020', 'dd.mm.yyyy'),
+	'N',
+	'' -- comment
+	);
 -- ===============================================================
 --Получение списка участников (как регулярных так и заблокированных)
 SELECT id, last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, until_date, comment

@@ -1,6 +1,8 @@
 from zoomus import ZoomClient
 import json
 import PASSWORDS
+import pprint
+
 
 client = ZoomClient(PASSWORDS.logins['zoom_api_key'], PASSWORDS.logins['zoom_api_secret'])
 
@@ -12,6 +14,7 @@ client = ZoomClient(PASSWORDS.logins['zoom_api_key'], PASSWORDS.logins['zoom_api
 # print(json.loads(client.user.list().content)['users'])
 # print("=" * 80)
 for user in json.loads(client.user.list().content)['users']:
+    # pprint.pprint(user)
     if user['email'].startswith('zoom'):
         # pp.pprint(user)
         print(f"email={user['email']}")

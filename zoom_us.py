@@ -9,6 +9,24 @@ zoom_api_endpoint_client_url = zoom_api_base_url + "/users"
 
 
 def zoom_users_create(email, first_name, last_name, password, logger=None):
+    """
+    Процедура создания пользователя zoom
+    :param email:
+    :param first_name:
+    :param last_name:
+    :param password:
+    :param logger:
+    :return: При удачном создании пользователя
+    {"id":"C1v4imjgTF6Ce0GQ89AaUw","first_name":"Дмитрий","last_name":"Салтыков Щедрин","email":"test777_test777@givinschool.org","type":1}
+    response=<Response [201]>
+    response.headers={'Date': 'Mon, 24 Feb 2020 16:25:05 GMT', 'Content-Type': 'application/json;charset=UTF-8', 'Content-Length': '156', 'Connection': 'keep-alive', 'Server': 'ZOOM', 'x-zm-trackingid': 'WEB_e681aa4e4c55a1acbc9fbd46f94f580a', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-cache, no-store, must-revalidate, no-transform', 'Pragma': 'no-cache', 'Expires': 'Thu, 01 Jan 1970 00:00:00 GMT', 'Set-Cookie': 'cred=2D7435E5E38A01DF79F90A1327FD9464; Path=/; Secure; HttpOnly', 'Strict-Transport-Security': 'max-age=31536000', 'X-XSS-Protection': '1; mode=block', 'Referrer-Policy': 'strict-origin-when-cross-origin'}
+    response.request.headers={'User-Agent': 'python-requests/2.22.0', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'authorization': 'Bearer XXX', 'content-type': 'application/json', 'Content-Length': '282'}
+    response.request.path_url=/v2/users
+    response.text={"id":"C1v4imjgTF6Ce0GQ89AaUw","first_name":"Дмитрий","last_name":"Салтыков Щедрин","email":"test777_test777@givinschool.org","type":1}
+    response.url=https://api.zoom.us/v2/users
+    response.status_code=201
+
+    """
     user = {
         "action": "autoCreate",
         "user_info": {
@@ -33,13 +51,14 @@ def zoom_users_create(email, first_name, last_name, password, logger=None):
                      f"response={response}\n" + \
                      f"response.headers={response.headers}\n" + \
                      f"response.request.headers={response.request.headers}\n" + \
-                     f"response.request.path_url={response.request.path_url}" + \
-                     f"response.text={response.text}" + \
-                     f"response.url={response.url}" + \
+                     f"response.request.path_url={response.request.path_url}\n" + \
+                     f"response.text={response.text}\n" + \
+                     f"response.url={response.url}\n" + \
                      f"response.status_code={response.status_code}"
         # print(debug_text)
         logger.debug(debug_text)
     # 201 = ОК если нет тогда из str:response.text можно вытащить дополнительный код и сообщение
+
     if response.status_code == 201:
         logger.debug("Пользователь создан = ОК")
         return None
@@ -65,7 +84,8 @@ def generate_jwt(key, secret):
 
 
 if __name__ == '__main__':
-    import logging
+
+    """import logging
     from Log import Log
     from log_config import log_dir, log_level
     logger = Log.setup_logger('__main__', log_dir, f'zoom_us.log', logging.DEBUG)
@@ -74,4 +94,5 @@ if __name__ == '__main__':
                                  "Салтыков Щедрин",
                                  "ANps11CDkz",
                                  logger=logger)
-    print(response)
+    print(response)"""
+    print(generate_jwt(PASSWORDS.logins['zoom_api_key'], PASSWORDS.logins['zoom_api_secret']))

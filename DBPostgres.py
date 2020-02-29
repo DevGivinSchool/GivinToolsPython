@@ -225,8 +225,7 @@ class DBPostgres:
             records = self.execute_select(sql_text, values_tuple)
             # print(records)
             if len(records) > 1:
-                raise (f"Поиск участника по {criterion}={value} "
-                       f"возвращает больше одной строки. Возможно дублирование.")
+                raise (f"Поиск участника по {criterion}={value} возвращает больше одной строки. Возможно дублирование!")
             elif len(records) == 0:
                 id_ = None
                 type_ = None

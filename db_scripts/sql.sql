@@ -73,11 +73,14 @@ order by last_name;
 -- ===============================================================
 -- Создать участника
 INSERT INTO public.participants(
-	last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, type, comment)
+	last_name, first_name, fio, last_name_eng, first_name_eng, fio_eng, email, telegram, login, password, payment_date, number_of_days, deadline, type, comment)
 	VALUES (
 	upper('last_name'),
 	upper('first_name'),
 	upper('fio'),
+	upper('last_name_eng'),
+	upper('first_name_eng'),
+	upper('fio_eng'),
 	lower('email'),
 	lower('telegram'),
 	'login',

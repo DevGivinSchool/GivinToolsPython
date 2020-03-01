@@ -67,6 +67,31 @@ def zoom_users_create(email, first_name, last_name, password, logger=None):
         return response.text
 
 
+def zoom_userstatus(login, action, logger=None):
+    """
+    Процедура изменения статуса пользователя activate/deactivate
+    :param login: Login zoom
+    :param action: activate/deactivate
+    :param logger: logger
+    :return:
+    """
+    payload = {
+        "action": action}
+    payload = json.dumps(payload)
+    logger.debug(f"payload={payload}")
+    headers = get_headers()
+    logger.debug(f"headers={headers}")
+    url = zoom_api_endpoint_client_url + "/" + login + "/status"
+    logger.debug(f"url={url}")
+    response = requests.request("POST", url, data=payload, headers=headers)
+    if response.status_code == 201:
+        logger.debug("Изменение статуса = ОК")
+        return None
+    else:
+        logger.error(f"ERROR:{response.text}")
+        return response.text
+
+
 def get_headers():
     bearer = "Bearer " + generate_jwt(PASSWORDS.logins['zoom_api_key'], PASSWORDS.logins['zoom_api_secret'])
     headers = {
@@ -84,7 +109,6 @@ def generate_jwt(key, secret):
 
 
 if __name__ == '__main__':
-
     """import logging
     from Log import Log
     from log_config import log_dir, log_level

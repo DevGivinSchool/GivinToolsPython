@@ -68,7 +68,7 @@ for p in list_participants.splitlines():
             values_tuple = (id_,)
             rows = postgres.execute_select(sql_text, values_tuple)
             print(rows)
-            # TODO Послать письмо админу чтобы сменил пароль Zoom
+            # TODO Вставить процедуру блокировки пользователя Zoom
     elif p_type == 'B':
         print("ЭТОТ УЧАСТНИК УЖЕ ЗАБЛОКИРОВАН")
     else:

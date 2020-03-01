@@ -122,16 +122,32 @@ class Task:
             values_tuple = (self.login_, self.password_, self.payment["participant_id"])
             self.database.execute_dml(sql_text, values_tuple)
             self.logger.info(self.select_participant(self.payment["participant_id"]))
-            self.logger.warning("+" * 60)
-            # TODO Создать участнику учётку Zoom
-            self.logger.info("TODO: Создать участнику учётку Zoom")
-            mail_text = f"Создать учётку zoom участнику\nID={self.payment['participant_id']}\n{self.payment['Фамилия'].title()} " \
-                        f"{self.payment['Имя'].title()}\nLogin: {self.login_}\nPassword: {self.password_}"
-            mail_text += f"\nСведения по участнику и платежу можно посмотреть по ссылке - {self.payment['Кассовый чек 54-ФЗ']}"
+
+            # Создание учётки Zoom участнику
+            self.logger.info("Создание учётки Zoom участнику")
+            mail_text = ""
+            subject = "SEND TELEGRAM"
+            zoom_result = zoom_us.zoom_users_create(self.login_, self.payment['Имя'].title(),
+                                                    self.payment['Фамилия'].title(), self.password_, logger=self.logger)
+            if zoom_result is not None:
+                self.logger.error("+" * 60)
+                subject = "CREATE ZOOM ERROR"
+                mail_text = f"\nПроцедура не смогла создать учётку Zoom с ошибкой:\n" \
+                            f"{zoom_result}\n\n" \
+                            f"Создать учётку zoom участнику\nID={self.payment['participant_id']}\n" \
+                            f"{self.payment['Фамилия'].title()}\n{self.payment['Имя'].title()}\n" \
+                            f"Login: {self.login_}\nPassword: {self.password_}\n" \
+                            f"Сведения по участнику и платежу можно посмотреть по ссылке - " \
+                            f"{self.payment['Кассовый чек 54-ФЗ']}"
+                self.logger.error(mail_text)
+                self.logger.error("+" * 60)
+            else:
+                self.logger.info("Учётка Zoom успешно создана")
             # TODO Отправить Telegram участнику
+            self.logger.warning("+" * 60)
             self.logger.info("TODO: Отправить уведомление участнику в Telegram.")
             mail_text += f"\nОтправить Telegram участнику {self.payment['telegram']}"
-            send_mail(PASSWORDS.logins['admin_emails'], "CREATE ZOOM", mail_text, self.logger)
+            send_mail(PASSWORDS.logins['admin_emails'], subject, mail_text, self.logger)
             self.logger.warning("+" * 60)
             self.participant_notification()
         else:
@@ -198,10 +214,20 @@ class Task:
             WHERE id=%s;"""
             values_tuple = (self.payment["Время проведения"], self.payment["number_of_days"],
                             self.payment["deadline"], participant_type, self.password_, self.payment["participant_id"])
-            self.logger.info("Уведомление администратора о разблокировке пользователя")
-            mail_text = f"Разблокировать участника\nID={self.payment['participant_id']}\n{self.payment['Фамилия Имя']}:" \
-                        f"\nLogin: {self.login_}\nPassword: {self.password_}"
-            send_mail(PASSWORDS.logins['admin_emails'], "UNBLOCK PARTICIPANT", mail_text, self.logger)
+            # Измение статуса в zoom
+            zoom_result = zoom_us.zoom_userstatus(self.login_, "activate", logger=self.logger)
+            if zoom_result is not None:
+                self.logger.error("+" * 60)
+                mail_text = f"\nПроцедура не смогла автоматически разблокировать участника. Ошибка:\n" \
+                            f"{zoom_result}" \
+                            f"ID={self.payment['participant_id']}\n{self.payment['Фамилия Имя']}:" \
+                            f"\nLogin: {self.login_}\nPassword: {self.password_}"
+                send_mail(PASSWORDS.logins['admin_emails'], "UNBLOCK PARTICIPANT ERROR", mail_text, self.logger)
+                self.logger.error(mail_text)
+                self.logger.error("+" * 60)
+            else:
+                self.logger.info("Учётка Zoom успешно активирована")
+
             self.participant_notification()
         else:
             sql_text = """UPDATE participants 

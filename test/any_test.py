@@ -1,80 +1,18 @@
-"""
-import datetime
-
-print(datetime.date(2019, 10, 10) + datetime.timedelta(days=97))
-"""
-
-
 # процедура блокировки пользователя
-import datetime
-import string
-import re
-import PASSWORDS
-import log_config
-from DBPostgres import DBPostgres
-from utils import is_eng
-from utils import is_rus
-
-list_participants = """
+import gtp_participant_block
+from Log import Log
+from log_config import log_dir, log_level
+from datetime import datetime
+list_participants = """@Maximilinz
+@Jurij85
+@ZSad16
 """
 
-# Подключение к БД
-postgres = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
-                      password=PASSWORDS.logins['postgres_password'], host=PASSWORDS.logins['postgres_host'],
-                      port=PASSWORDS.logins['postgres_port'])
-for p in list_participants.splitlines():
-    print(f"Попытка блокировки участника {p}")
-    p = p.strip()
-    participant_id = None
-    if p[0] == '@':
-        # Ищем участника по Telegram
-        sql_instr = "telegram"
-        p = p.lower()
-        print(f"Ищем участника по Telegram - {p}")
-        participant_id, p_type = postgres.find_participant_by('telegram', p)
-    elif '@' in p:
-        # Ищем участника по email
-        sql_instr = "email"
-        p = p.lower()
-        print(f"Ищем участника по email - {p}")
-        participant_id, p_type = postgres.find_participant_by('email', p)
-    elif is_rus(p):
-        # Ищем участника по fio
-        sql_instr = "fio"
-        p = p.upper()
-        print(f"Ищем участника по fio - {p}")
-        participant_id, p_type = postgres.find_participant_by('fio', p)
-    elif is_eng(p):
-        # Ищем участника по fio_eng
-        sql_instr = "fio_eng"
-        p = p.upper()
-        print(f"Ищем участника по fio_eng - {p}")
-        participant_id, p_type = postgres.find_participant_by('fio_eng', p)
-    if participant_id is None:
-        print(f"******* ВНИМАНИЕ: По значению {p} ничего не нашлось")
-        print("-" * 45)
-        continue
-    if p_type == 'N' or p_type == 'P':
-        # Блокируем пользователя
-        sql_text = f"UPDATE participants SET type='B', password=password||'55' where {sql_instr}=%s RETURNING id;"
-        values_tuple = (p,)
-        id_ = postgres.execute_dml_id(sql_text, values_tuple)
-        if id_ is None:
-            print(f"******* ВНИМАНИЕ: UPDATE для {p} не отработал")
-        else:
-            print(f"Заблокирован участник ID={id_}")
-            # Состояние участник
-            sql_text = 'SELECT id, fio, login, password, type FROM participants where id=%s;'
-            values_tuple = (id_,)
-            rows = postgres.execute_select(sql_text, values_tuple)
-            print(rows)
-            # TODO Вставить процедуру блокировки пользователя Zoom
-    elif p_type == 'B':
-        print("ЭТОТ УЧАСТНИК УЖЕ ЗАБЛОКИРОВАН")
-    else:
-        print(f"Неизвестный тип участника type={p_type}")
-    print("-"*45)
-postgres.disconnect()
+now = datetime.now().strftime("%Y%m%d%H%M")
+logger = Log.setup_logger('__main__', log_dir, f'gtp_block_participant_{now}.log',
+                          log_level)
+
+gtp_participant_block.participant_block(list_participants, logger)
 
 
 """

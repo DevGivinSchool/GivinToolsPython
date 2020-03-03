@@ -89,7 +89,7 @@ order by last_name"""
         print(mail_text)
         logger.info(mail_text)
         send_mail([p[3]], r"[ШКОЛА ГИВИНА]. Напоминание об оплате ДШ", mail_text, logger)
-        logger.info(('=' * 45 + '\n')*3)
+        logger.info('=' * 60)
 
 
 def getting_list_debtors(dbconnect):
@@ -213,12 +213,12 @@ def main():
         send_error("DAILY WORKS ERROR: Can't connect to DB!!!")
         logger.error("Exit with error")
         sys.exit(1)
-    logger.info('#' * 45)
+    logger.info('#' * 60)
     try:
         participants_notification(dbconnect)
     except Exception:
         send_error("DAILY WORKS ERROR: participants_notification()")
-    logger.info('#' * 45)
+    logger.info('#' * 60)
     try:
         getting_list_debtors(dbconnect)
     except Exception:
@@ -227,7 +227,7 @@ def main():
     # TODO Процедура удаления пользователей у которых последний платёж год назад вместе со всеми их платёжками и письмами
 
     # TODO Процедура удаления писем из почты старше 1 года
-    logger.info('#' * 45)
+    logger.info('#' * 60)
     logger.info('END gtp_daily_works')
 
 

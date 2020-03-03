@@ -25,6 +25,7 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None, sen
     :param int port: Порт
     :return:
     """
+    logger.info(f"Отправка почтовых оповещений")
     # Все письма отправляются на почту robot для хранения.
     if PASSWORDS.logins['ymail_login'] not in receiver_emails:
         receiver_emails.append(PASSWORDS.logins['ymail_login'])
@@ -54,8 +55,8 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None, sen
         msg.attach(xlsx)
     logger.info(f"Список адресов: {receiver_emails}")
     for one_receiver in receiver_emails:
-        print(f"Send email to {one_receiver}")
-        logger.info(f"Send email to {one_receiver}")
+        # print(f"Send email to {one_receiver}")
+        # logger.info(f"Send email to {one_receiver}")
         # print(f"LOGGER = {logger}")
         msg['To'] = one_receiver
         try:

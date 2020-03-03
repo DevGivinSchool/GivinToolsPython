@@ -54,12 +54,13 @@ def zoom_users_create(email, first_name, last_name, password, logger=None):
                      f"response.request.path_url={response.request.path_url}\n" + \
                      f"response.text={response.text}\n" + \
                      f"response.url={response.url}\n" + \
-                     f"response.status_code={response.status_code}"
+                     f"response.status_code={response.status_code}\n" + \
+                     f"response.ok={response.ok}"
         # print(debug_text)
         logger.debug(debug_text)
     # 201 = ОК если нет тогда из str:response.text можно вытащить дополнительный код и сообщение
 
-    if response.status_code == 201:
+    if response.ok:
         logger.debug("Пользователь создан = ОК")
         return None
     else:
@@ -83,8 +84,21 @@ def zoom_userstatus(login, action, logger=None):
     logger.debug(f"headers={headers}")
     url = zoom_api_endpoint_client_url + "/" + login + "/status"
     logger.debug(f"url={url}")
-    response = requests.request("POST", url, data=payload, headers=headers)
-    if response.status_code == 201:
+    response = requests.request("PUT", url, data=payload, headers=headers)
+    if logger.level == 10:
+        debug_text = "\n" + response.text + "\n" + \
+                     f"response={response}\n" + \
+                     f"response.headers={response.headers}\n" + \
+                     f"response.request.headers={response.request.headers}\n" + \
+                     f"response.request.path_url={response.request.path_url}\n" + \
+                     f"response.text={response.text}\n" + \
+                     f"response.url={response.url}\n" + \
+                     f"response.status_code={response.status_code}\n" + \
+                     f"response.ok={response.ok}"
+        # print(debug_text)
+        logger.debug(debug_text)
+    # 200 и 204 = ОК если нет тогда из str:response.text можно вытащить дополнительный код и сообщение
+    if response.ok:
         logger.debug("Изменение статуса = ОК")
         return None
     else:

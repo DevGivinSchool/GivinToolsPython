@@ -11,11 +11,11 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
 
-def connect_zoom_login(login, password):
+def connect_zoom_login(login, password, type):
     try:
-        # chromeOptions = webdriver.ChromeOptions()
-        # chromeOptions.add_argument("--headless")
-        browser = webdriver.Chrome(r'c:\MyGit\GivinToolsPython\chromedriver.exe')
+        chromeOptions = webdriver.ChromeOptions()
+        chromeOptions.add_argument("--headless")
+        browser = webdriver.Chrome(r'c:\MyGit\GivinToolsPython\chromedriver.exe', options=chromeOptions)
         # browser = webdriver.Chrome(r'/usr/local/bin/chromedriver', options=chromeOptions)
         # browser = webdriver.Chrome(r'chromedriver.exe')
         # browser = webdriver.Chrome(r'c:\Windows\System32\chromedriver.exe')
@@ -29,16 +29,17 @@ def connect_zoom_login(login, password):
         button.click()
         time.sleep(4)
         try:
+            error_text = 'error_txt'
             error_label = browser.find_element_by_css_selector("#error_msg")
             error_text = error_label.text
-            print(f"{login}/{password} - {error_text}")
+            print(f"{login},{password},{type},{error_text}")
         except NoSuchElementException:
             checkbox1 = browser.find_element_by_css_selector("#choose-option1")
             checkbox1.click()
             button = browser.find_element_by_css_selector("#btn-continue")
             browser.execute_script("return arguments[0].scrollIntoView(true);", button)
             button.click()
-            print(f"SUCCESS:{login}/{password}")
+            print(f"{login},{password},{type}")
     except:
         print(traceback.format_exc())
     finally:
@@ -48,11 +49,11 @@ def connect_zoom_login(login, password):
 
 if __name__ == '__main__':
     import csv
-    file = r'd:\!SAVE\GS\data-1583232224727.csv'
+    file = r'd:\YandexDisk\TEMP\GS\blocked.csv'
     # file = r'd:\!SAVE\GS\test.csv'
     with open(file, newline='') as f:
         reader = csv.reader(f)
         headers = next(reader, None)
         for row in reader:
-            print(row)
-            connect_zoom_login(row[0], row[1])
+            # print(row)
+            connect_zoom_login(row[0], row[1], row[2])

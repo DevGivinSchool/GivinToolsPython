@@ -10,7 +10,8 @@ https://marketplace.zoom.us/docs/api-reference/introduction
 
 client = ZoomClient(PASSWORDS.logins['zoom_api_key'], PASSWORDS.logins['zoom_api_secret'])
 print(f"Текущие встречи на {date.today()}:\n")
-for user in sorted(json.loads(client.user.list().content)['users'], key=lambda i: i['email']):
+user_list = json.loads(client.user.list().content)['users']
+for user in sorted(user_list, key=lambda i: i['email']):
     if re.match(r"zoom\d{2}@givinschool.org", user['email']) is not None:
         print(user['email'])
         for meet in json.loads(client.meeting.list(user_id=user['id']).content)['meetings']:

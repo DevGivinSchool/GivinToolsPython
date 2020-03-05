@@ -69,7 +69,7 @@ def participant_block(list_participants, logger):
                 print(participant)
                 logger.debug(f"participant={participant}")
                 # Измение статуса в zoom (блокировка участника)
-                zoom_result = zoom_us.zoom_userstatus(participant[2], "deactivate", logger=logger)
+                zoom_result = zoom_us.zoom_users_userstatus(participant[2], "deactivate", logger=logger)
                 print(zoom_result)
                 logger.debug(f"zoom_result={zoom_result}")
                 if zoom_result is not None:

@@ -127,8 +127,8 @@ class Task:
             self.logger.info("Создание учётки Zoom участнику")
             mail_text = ""
             subject = "SEND TELEGRAM"
-            zoom_result = zoom_us.zoom_users_create(self.login_, self.payment['Имя'].title(),
-                                                    self.payment['Фамилия'].title(), self.password_, logger=self.logger)
+            zoom_result = zoom_us.zoom_users_usercreate(self.login_, self.payment['Имя'].title(),
+                                                        self.payment['Фамилия'].title(), self.password_, logger=self.logger)
             if zoom_result is not None:
                 self.logger.error("+" * 60)
                 subject = "CREATE ZOOM ERROR"
@@ -215,7 +215,7 @@ class Task:
             values_tuple = (self.payment["Время проведения"], self.payment["number_of_days"],
                             self.payment["deadline"], participant_type, self.password_, self.payment["participant_id"])
             # Измение статуса в zoom
-            zoom_result = zoom_us.zoom_userstatus(self.login_, "activate", logger=self.logger)
+            zoom_result = zoom_us.zoom_users_userstatus(self.login_, "activate", logger=self.logger)
             if zoom_result is not None:
                 self.logger.error("+" * 60)
                 mail_text = f"\nПроцедура не смогла автоматически разблокировать участника. Ошибка:\n" \

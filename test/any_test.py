@@ -3,9 +3,7 @@ import gtp_participant_block
 from Log import Log
 from log_config import log_dir, log_level
 from datetime import datetime
-list_participants = """@Maximilinz
-@Jurij85
-@ZSad16
+list_participants = """
 """
 
 now = datetime.now().strftime("%Y%m%d%H%M")

@@ -11,7 +11,7 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
 
-def connect_zoom_login(login, password, type):
+def connect_zoom_login(login, password):
     try:
         chromeOptions = webdriver.ChromeOptions()
         chromeOptions.add_argument("--headless")
@@ -39,7 +39,7 @@ def connect_zoom_login(login, password, type):
             button = browser.find_element_by_css_selector("#btn-continue")
             browser.execute_script("return arguments[0].scrollIntoView(true);", button)
             button.click()
-            print(f"{login},{password},{type}")
+            print(f"{login},{password}")
     except:
         print(traceback.format_exc())
     finally:
@@ -49,11 +49,11 @@ def connect_zoom_login(login, password, type):
 
 if __name__ == '__main__':
     import csv
-    file = r'd:\YandexDisk\TEMP\GS\blocked.csv'
+    file = r'd:\YandexDisk\TEMP\GS\3.txt'
     # file = r'd:\!SAVE\GS\test.csv'
     with open(file, newline='') as f:
         reader = csv.reader(f)
         headers = next(reader, None)
         for row in reader:
             # print(row)
-            connect_zoom_login(row[0], row[1], row[2])
+            connect_zoom_login(row[0], row[1])

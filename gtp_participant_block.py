@@ -78,7 +78,7 @@ def participant_block(list_participants, logger):
                                 f"{zoom_result}" \
                                 f"ID={participant[0]}\n{participant[1]}:" \
                                 f"\nLogin: {participant[2]}\nPassword: {participant[3]}"
-                    send_mail(PASSWORDS.logins['admin_emails'], "UNBLOCK PARTICIPANT ERROR", mail_text, logger)
+                    send_mail(PASSWORDS.logins['admin_emails'], "BLOCK PARTICIPANT ERROR", mail_text, logger)
                     print(mail_text)
                     logger.error(mail_text)
                     logger.error("+" * 60)

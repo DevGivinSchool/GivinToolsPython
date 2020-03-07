@@ -23,6 +23,8 @@ def get_clear_payment():
         "fio_lang": "RUS",
         "participant_type": "",
         "login": "",
+        "password": "",
+        "auto": True,
         "Фамилия": "",
         "Имя": "",
         "Фамилия Имя": "",
@@ -49,10 +51,16 @@ def payment_normalization(payment):
     Last Name, First Name, LN+FN = to UPPER
     Email = to LOVER
     """
-    payment["Оплаченная сумма"] = int(payment["Оплаченная сумма"])
+    if payment["Оплаченная сумма"]:
+        payment["Оплаченная сумма"] = int(payment["Оплаченная сумма"])
+    else:
+        payment["Оплаченная сумма"] = 0
     payment["Фамилия"] = payment["Фамилия"].upper()
     payment["Имя"] = payment["Имя"].upper()
-    payment["Фамилия Имя"] = payment["Фамилия Имя"].upper()
+    if not payment["Фамилия Имя"]:
+        payment["Фамилия Имя"] = payment["Фамилия"] + " " + payment["Имя"]
+    else:
+        payment["Фамилия Имя"] = payment["Фамилия Имя"].upper()
     payment_normalization2(payment)
     if is_rus(payment["Фамилия Имя"]):
         payment["fio_lang"] = "RUS"
@@ -71,7 +79,9 @@ def payment_normalization2(payment):
 
 def payment_computation(payment):
     # По сумме оплаты вычислить за сколько месяцев оплачено
-    if payment["Оплаченная сумма"] > 10000:
+    if payment["Оплаченная сумма"] == 0:
+        payment["number_of_days"] = 30
+    elif payment["Оплаченная сумма"] > 10000:
         payment["number_of_days"] = 180
     elif payment["Оплаченная сумма"] > 5000:  # от 5000 до 10000
         payment["number_of_days"] = 90

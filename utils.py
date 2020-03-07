@@ -45,10 +45,10 @@ def split_str(line):
     :return:
     """
     line_ = line.split('\t', maxsplit=1)
-    print(line_, len(line_))
+    # print(line_, len(line_))
     if len(line_) < 2:
         line_ = line.split(' ', maxsplit=1)
         if len(line_) < 2:
-            raise Exception("ERROR: Строка ФИО не разделяется ни через пробел ни через табуляцию")
-    print(f"line_={line_}; line_[0]={line_[0]}; line_[1]={line_[1]}")
+            raise Exception(f"ERROR: Строка ФИО '{line_}' не разделяется ни через пробел ни через табуляцию")
+    # print(f"line_={line_}; line_[0]={line_[0]}; line_[1]={line_[1]}")
     return line_

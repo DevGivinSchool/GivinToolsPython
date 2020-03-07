@@ -96,7 +96,7 @@ def random_password(strong=False, long=10, zoom=False):
     if zoom:
         password = password + random.choice(ascii_lowercase_chars) + random.choice(ascii_lowercase_chars)
         # print(f"password 10={password} - Два последних символа - два маленькие буквы для Zoom")
-    print(f"password 11={password} - ТАКОЙ БУДЕТ ПАРОЛЬ")
+    # print(f"password 11={password} - ТАКОЙ БУДЕТ ПАРОЛЬ")
     # print("-" * 45)
     return password
 

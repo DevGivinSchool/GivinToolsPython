@@ -3,6 +3,7 @@ import yandex_connect
 import password_generator
 import PASSWORDS
 import zoom_us
+import gtp_participant_create
 from utils import get_login
 from alert_to_mail import send_mail
 
@@ -45,6 +46,9 @@ class Task:
         self.logger.info(f'task_run payment = {self.payment}')
         if self.payment["participant_id"] is None:
             # This is new participant
+            gtp_participant_create.create_sf_participant(self.payment, self.database, self.logger)
+
+##################################################################################
             # Participant must have Name, Surname, Email
             if self.payment["Фамилия"] is None or not self.payment["Фамилия"]:
                 self.logger.error("The participant must have a Surname")
@@ -75,12 +79,6 @@ class Task:
                                 self.payment["telegram"], 'N',
                                 self.payment["Фамилия"], self.payment["Имя"], self.payment["Фамилия Имя"])
             self.payment["participant_id"] = self.database.execute_dml_id(sql_text, values_tuple)
-            # print(type(self.payment["participant_id"]))
-            # print(self.payment["participant_id"])
-            # print(participants_create_result[1])
-            # self.logger.info(type(self.payment["participant_id"]))
-            # self.logger.info(self.payment["participant_id"])
-            # self.logger.info(participants_create_result[1])
             self.logger.info(self.select_participant(self.payment["participant_id"]))
 
             # Отмечаем оплату в БД этому участнику
@@ -109,6 +107,8 @@ class Task:
                           f'{login_ + "@givinschool.org"}')
                     self.logger.info(f'Unhandled exception: Такая почта уже существует: '
                                      f'{login_ + "@givinschool.org"}')
+                    # Т.к. это может быть однофамилец, то ситуация требует разрешения, поэтому тут тоже падаем
+                    raise
                 else:
                     raise
             # Для удобства создания учётки zoom записать в лог фамилию и имя
@@ -150,6 +150,8 @@ class Task:
             send_mail(PASSWORDS.logins['admin_emails'], subject, mail_text, self.logger)
             self.logger.warning("+" * 60)
             self.participant_notification()
+
+##################################################################################
         else:
             # Отмечаем оплату в БД
             self.mark_payment_into_db()
@@ -240,11 +242,7 @@ class Task:
         # Состояние участника после отметки
         self.logger.info(self.select_participant(self.payment["participant_id"]))
 
-    def select_participant(self, participant_id):
-        sql_text = 'SELECT * FROM participants where id=%s;'
-        values_tuple = (participant_id,)
-        rows = self.database.execute_select(sql_text, values_tuple)
-        return rows
+
 
     def select_payment(self, task_uuid):
         sql_text = 'SELECT * FROM payments where task_uuid=%s;'

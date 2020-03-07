@@ -168,10 +168,12 @@ if __name__ == '__main__':
     # print(generate_jwt(PASSWORDS.logins['zoom_api_key'], PASSWORDS.logins['zoom_api_secret']))
 
     import logging
+    from datetime import datetime
     from Log import Log
     from log_config import log_dir, log_level
 
-    logger = Log.setup_logger('__main__', log_dir, f'zoom_us.log', logging.DEBUG)
+    now = datetime.now().strftime("%Y%m%d%H%M")
+    logger = Log.setup_logger('__main__', log_dir, f'zoom_us_{now}.log', logging.DEBUG)
     response = eval(zoom_users_users(3, 1, 1, 'active', logger=logger))
     print(f"response={response}")
     import math

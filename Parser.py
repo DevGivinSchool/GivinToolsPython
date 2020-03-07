@@ -22,6 +22,7 @@ def get_clear_payment():
         "deadline": "",
         "fio_lang": "RUS",
         "participant_type": "",
+        "login": "",
         "Фамилия": "",
         "Имя": "",
         "Фамилия Имя": "",
@@ -288,7 +289,7 @@ def parse_getcourse_page(link, payment, logger):
         # закрываем браузер после всех манипуляций
         browser.quit()
         payment_normalization(payment)
-    except Exception as e:
+    except:
         mail_text = f'Ошибка парсинга страницы заказа GetCourse\n' + traceback.format_exc()
         logger.error(mail_text)
         send_mail(PASSWORDS.logins['admin_emails'], "ERROR PARSING", mail_text, logger)

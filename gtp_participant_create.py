@@ -81,6 +81,7 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
     database.execute_dml(sql_text, values_tuple)
     # Состояние участника после отметки
     # logger.info(select_participant(payment["participant_id"], database))
+    logger.info("Оплата в БД отмечена")
 
 
 def participant_notification(payment, logger):
@@ -157,10 +158,16 @@ def create_sf_participant(payment, database, logger):
         raise Exception("The participant must have a Name")
     if not payment["Электронная почта"]:
         logger.warning("+" * 60)
-        logger.warning("The participant must have a Email!!!")
+        logger.warning("ВНИМАНИЕ: У участника нет Email!!!")
         logger.warning("+" * 60)
         # raise Exception("The participant must have a Email")
         mail_text += "\nВНИМАНИЕ: У участника нет Email!!!"
+    if not payment["telegram"]:
+        logger.warning("+" * 60)
+        logger.warning("ВНИМАНИЕ: У участника нет Telegram!!!")
+        logger.warning("+" * 60)
+        # raise Exception("The participant must have a Email")
+        mail_text += "\nВНИМАНИЕ: У участника нет Telegram!!!"
 
     # Создаём нового пользователя в БД
     logger.info(f"Создаём нового пользователя в БД ({payment['fio_lang']})")
@@ -196,17 +203,16 @@ def create_sf_participant(payment, database, logger):
     try:
         result = yandex_mail.create_yandex_mail(payment["Фамилия"], payment["Имя"], payment["login"], department_id_=4)
         # print(f"Email created:{result['email']}")
-        # login_ = result['email']
-        line = f'\nСоздана почта в домене @givinschool.org\nLogin: {payment["login"]}'
-        mail_text += line
-        logger.info(line)
+        payment["login"] = result['email']
+        mail_text += f'\nСоздана почта в домене @givinschool.org\nLogin: {payment["login"]}'
+        logger.info(f'Создана почта в домене @givinschool.org')
+        logger.info(f'Login: {payment["login"]}')
         # Отдел 4 = @ДРУЗЬЯ_ШКОЛЫ
     except yandex_connect.YandexConnectExceptionY as e:
         # print(e.args[0])
         if e.args[0] == 500:
-            print(f'Unhandled exception: Такая почта уже существует: '
-                  f'{payment["login"] + "@givinschool.org"}')
-            logger.info(f'Unhandled exception: Такая почта уже существует: {payment["login"] + "@givinschool.org"}')
+            # print(f'Unhandled exception: Такая почта уже существует: {payment["login"]}')
+            logger.info(f'Unhandled exception: Такая почта уже существует: {payment["login"]}')
             # Т.к. это может быть однофамилец, то ситуация требует разрешения, поэтому тут тоже падаем
             raise
         else:
@@ -216,39 +222,39 @@ def create_sf_participant(payment, database, logger):
     # logger.info(f"Имя: {payment['Имя'].title()}")
     # Генерация пароля для Zoom (для всех почт пароль одинаковый)
     payment["password"] = password_generator.random_password(strong=True, zoom=True)
-    line = f'\nPassword: {payment["password"]}'
-    mail_text += line
-    logger.info(line)
+    mail_text += f'\nPassword: {payment["password"]}'
+    logger.info(f'Password: {payment["password"]}')
     logger.info("Обновляем участнику логин и пароль в БД")
     sql_text = """UPDATE participants SET login=%s, password=%s WHERE id=%s;"""
     values_tuple = (payment["login"], payment["password"], payment["participant_id"])
     database.execute_dml(sql_text, values_tuple)
     # Окончательный вид участника в БД
-    line = f'Участник в БД:\n{select_participant(payment["participant_id"], database)}'
-    mail_text += line
-    logger.info(line)
+    line = f'{select_participant(payment["participant_id"], database)}'
+    mail_text += f'\nУчастник в БД:\n{line}'
+    logger.info(f'Участник в БД:')
+    logger.info(f'{line}')
 
     # Создание учётки Zoom участнику
     logger.info("Создание учётки Zoom участнику")
-
     zoom_result = zoom_us.zoom_users_usercreate(payment["login"], payment['Имя'].title(),
                                                 payment['Фамилия'].title(), payment["password"], logger=logger)
     if zoom_result is not None:
         logger.error("+" * 60)
         subject += " + !ZOOM ERROR"
-        mail_text += f"ERROR:\nПроцедура не смогла создать учётку Zoom с ошибкой:\n" \
-                    f"{zoom_result}\n\n" \
-                    f"Создать учётку zoom участнику\nID={payment['participant_id']}\n" \
-                    f"{payment['Фамилия'].title()}\n{payment['Имя'].title()}\n" \
-                    f"Login: {payment['login']}\nPassword: {payment['password']}\n" \
-                    f"Сведения по участнику и платежу можно посмотреть по ссылке - " \
-                    f"{payment['Кассовый чек 54-ФЗ']}"
-        logger.error(mail_text)
+        error_text = f"\nПрограмма не смогла создать учётку Zoom.\n" \
+                     f"ВНИМАНИЕ: Необходимо создать участнику учётку в Zoom вручную." \
+                     f"Создать учётку zoom участнику\nID={payment['participant_id']}\n" \
+                     f"{payment['Фамилия'].title()}\n{payment['Имя'].title()}\n" \
+                     f"Login: {payment['login']}\nPassword: {payment['password']}\n" \
+                     f"Сведения по участнику и платежу можно посмотреть по ссылке - " \
+                     f"{payment['Кассовый чек 54-ФЗ']}" \
+                     f"\nERROR:\n{zoom_result}\n\n"
+        mail_text += error_text
+        logger.error(error_text)
         logger.error("+" * 60)
     else:
-        line = "\nУчётка Zoom успешно создана"
-        mail_text += line
-        logger.info(line)
+        mail_text += "\nУчётка Zoom успешно создана"
+        logger.info("Учётка Zoom успешно создана")
 
     # Почтовые оповещения
     # TODO Отправить Telegram участнику
@@ -260,6 +266,9 @@ def create_sf_participant(payment, database, logger):
         participant_notification(payment, logger)
     else:
         mail_text += f"\nВНИМАНИЕ: Отправить почтовое уведомление (email) участнику"
+        logger.warning("+" * 60)
+        logger.warning(f"ВНИМАНИЕ: Отправить почтовое уведомление (email) участнику")
+        logger.warning("+" * 60)
     send_mail(PASSWORDS.logins['admin_emails'], subject, mail_text, logger)
     # Вычитаю из списка почт менеджеров список почт админов, чтобы не было повторных писем
     list_ = [item for item in PASSWORDS.logins['manager_emails'] if item not in PASSWORDS.logins['admin_emails']]

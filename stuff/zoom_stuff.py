@@ -4,6 +4,12 @@ import requests
 
 
 def zoom_users_password(login, password):
+    """
+    Изменить пароль участнику в Zoom
+    :param login:
+    :param password:
+    :return:
+    """
     payload = {
         "password": password}
     payload = json.dumps(payload)
@@ -35,6 +41,12 @@ def zoom_users_password(login, password):
 
 
 def change_zoom_password(login, password):
+    """
+    Изменить пароль участнику в Zoom если он оканчивается на 55.
+    :param login:
+    :param password:
+    :return:
+    """
     # print(login, password)
     if password.endswith('55'):
         # print(login, password)

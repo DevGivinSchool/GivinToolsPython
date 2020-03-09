@@ -111,6 +111,19 @@ def show_organizations():
     return organization_list
     # [{'id': 3742649, 'name': 'probuzdenie.org'}, {'id': 2520809, 'name': 'givinschool.org'}]
 
+
+def show_user_list_full():
+    """ Списко почт ДШ"""
+    api = get_api()
+    user_list = api.user_list_full(fields='email', department_id=4)
+    return user_list
+
+
 if __name__ == "__main__":
     # show_groups()
-    print(show_organizations())
+    # print(show_organizations())
+    list = show_user_list_full()
+    print(len(list))
+    # print(list)
+    for user in list:
+        print(user["email"])

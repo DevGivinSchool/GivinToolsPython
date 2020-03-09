@@ -106,10 +106,12 @@ def zoom_users_userstatus(login, action, logger=None):
         return response.text
 
 
-def zoom_users_users(page_count, page_number, page_size, status, logger=None):
+def zoom_users_users(page_number, page_size, status, logger=None):
+    # def zoom_users_users(page_count, page_number, page_size, status, logger=None):
     # querystring = {"page_count": page_count, "page_number": page_number, "page_size": page_size, "status": status}
     querystring = {"page_number": page_number, "page_size": page_size, "status": status}
     # querystring = {"page_size": page_size, "status": status}
+    # querystring = {"page_size": page_size}
     # При этом возвращается
     # "page_count": 12, "page_number": 1, "page_size": 30, "total_records": 331
     logger.debug(f"querystring={querystring}")
@@ -167,6 +169,8 @@ if __name__ == '__main__':
 
     # print(generate_jwt(PASSWORDS.logins['zoom_api_key'], PASSWORDS.logins['zoom_api_secret']))
 
+# Список участников
+# https://marketplace.zoom.us/docs/api-reference/zoom-api/users/users
     import logging
     from datetime import datetime
     from Log import Log
@@ -174,18 +178,27 @@ if __name__ == '__main__':
 
     now = datetime.now().strftime("%Y%m%d%H%M")
     logger = Log.setup_logger('__main__', log_dir, f'zoom_us_{now}.log', logging.DEBUG)
-    response = eval(zoom_users_users(3, 1, 1, 'active', logger=logger))
+    # Полный вызов
+    # response = eval(zoom_users_users(page_count=3, page_number=1, page_size=1, status='active', logger=logger))
+    # Выборка одной строки, только для того, чтобы получить общее количество записей.
+    response = eval(zoom_users_users(page_number=1, page_size=1, status='active', logger=logger))
+    # Вот такой ответ получается,
+    # response={'page_count': 334, 'page_number': 1, 'page_size': 1, 'total_records': 334, 'users': [...
     print(f"response={response}")
     import math
 
-    print(response["total_records"])
-    print(type(response["total_records"]))
+    print(f'total_records={response["total_records"]}')
+    # print(type(response["total_records"]))
     page_count = math.ceil(response["total_records"] / 300)
+    print(f"page_count={page_count}")
     user_list = []
-    for page in range(1, page_count):
-        response = eval(zoom_users_users(3, page, 300, 'pending', logger=logger))
+    for page in range(1, page_count+1):
+        # print(f"page={page}")
+        response = eval(zoom_users_users(page_number=page, page_size=300, status='active', logger=logger))
         for user in response["users"]:
-            print(f'{user["email"]}|{user["type"]}')
-            if user["type"] == 2:
-                 user_list.append(user["email"])
-    print(user_list)
+            # type {1:Basic, 2:Licensed, 3:On-prem}
+            if user["type"] == 1:  # Print only Basic users
+                print(f'{user["email"]}|{user["status"]}')
+    #         if user["type"] == 2:  # List only Licensed users - zoom03
+    #             user_list.append(user["email"])
+    # print(user_list)

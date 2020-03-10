@@ -84,8 +84,7 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
     logger.info("Оплата в БД отмечена")
 
 
-def participant_notification(payment, logger):
-    logger.info("Уведомление участника")
+def get_participant_notification_text(payment):
     mail_text2 = f"""Здравствуйте, {payment['Фамилия Имя'].title()}!  
 
 Поздравляем, Вы оплатили абонемент на месяц совместных занятий в онлайн-формате "Друзья Школы Гивина". 
@@ -109,6 +108,12 @@ def participant_notification(payment, logger):
 
 С благодарностью и сердечным теплом,
 команда Школы Гивина."""
+    return mail_text2
+
+
+def participant_notification(payment, logger):
+    logger.info("Уведомление участника")
+    mail_text2 = get_participant_notification_text(payment)
     logger.info(mail_text2)
     send_mail([payment["Электронная почта"]],
               r"[ШКОЛА ГИВИНА]. Поздравляем, Вы приняты в Друзья Школы", mail_text2, logger)
@@ -269,6 +274,8 @@ def create_sf_participant(payment, database, logger):
         logger.warning("+" * 60)
         logger.warning(f"ВНИМАНИЕ: Отправить почтовое уведомление (email) участнику")
         logger.warning("+" * 60)
+    notification_text = get_participant_notification_text(payment)
+    mail_text += "\n\n\n" + notification_text
     send_mail(PASSWORDS.logins['admin_emails'], subject, mail_text, logger)
     # Вычитаю из списка почт менеджеров список почт админов, чтобы не было повторных писем
     list_ = [item for item in PASSWORDS.logins['manager_emails'] if item not in PASSWORDS.logins['admin_emails']]

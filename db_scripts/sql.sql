@@ -1,9 +1,9 @@
 -- ===============================================================
 -- Поиск участника
-SELECT
+select
 *
 --id, last_name, first_name, fio, email, telegram, time_begin, time_end, login, password, payment_date, number_of_days, deadline, comment, until_date, type
-FROM public.participants
+from public.participants
 where
 --telegram=lower('ххххх')
 --last_name like upper('%ххххх%')
@@ -13,7 +13,7 @@ id=1234
 
 -- ===============================================================
 -- Обновить участника
-UPDATE participants SET
+update participants set
 email=lower('@')
 ,telegram=lower('@')
 where
@@ -25,13 +25,13 @@ id=1234
 
 -- ===============================================================
 -- Проставить дату оплаты
-UPDATE participants SET
+update participants set
 payment_date=to_date('18.10.2019', 'DD.MM.YYYY'),
 --payment_date=NOW(),
 number_of_days=30,
 deadline=to_date('18.10.2019', 'DD.MM.YYYY')+interval '1' day * 30,
 --deadline=NOW()+interval '1' day * 30,
-comment=NULL, type='P', until_date=NULL
+comment=NULL, type='P', until_date=null
 where
 --telegram=lower('ххххх')
 --last_name like upper('%ххххх%')
@@ -41,7 +41,7 @@ id=1234
 
 -- ===============================================================
 -- Получение списка должников
-SELECT
+select
 --deadline, until_date,
 --CURRENT_TIMESTAMP,
 --deadline - CURRENT_TIMESTAMP as "INTERVAL",
@@ -66,13 +66,13 @@ order by last_name;
 
 -- ===============================================================
 -- Удаление task чтобы обойти - ВНИМАНИЕ: Это письмо уже обрабатывалось!
---select count(*) from tasks;
---select * from tasks where task_uuid=1021;
---delete from tasks where task_uuid=1014;
+----select count(*) from tasks;
+----select * from tasks where task_uuid=1021;
+----delete from tasks where task_uuid=1014;
 
 -- ===============================================================
 -- Создать участника
-INSERT INTO public.participants(
+insert into public.participants(
 	last_name, first_name, fio, last_name_eng, first_name_eng, fio_eng, email, telegram, login, password, payment_date, number_of_days, deadline, type, comment)
 	VALUES (
 	upper('last_name'),
@@ -94,7 +94,7 @@ INSERT INTO public.participants(
 	);
 -- ===============================================================
 --Получение списка участников (как регулярных так и заблокированных)
-SELECT id, last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, until_date, comment
+select id, last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, until_date, comment
 	FROM public.participants
 	where type='P'
 	--where type='B'
@@ -105,7 +105,7 @@ order by last_name;
 select * from participants where payment_date=to_date('05.10.2019', 'dd.mm.yyyy');
 
 -- Получение списка новичков
-SELECT
+select
 --deadline, until_date,
 --CURRENT_TIMESTAMP,
 --deadline - CURRENT_TIMESTAMP as "INTERVAL",
@@ -122,8 +122,8 @@ order by last_name;
 
 -- ===============================================================
 -- Нормализация БД
-UPDATE public.participants
-	SET last_name=trim(upper(last_name)), first_name=trim(upper(first_name)),
+update public.participants
+	set last_name=trim(upper(last_name)), first_name=trim(upper(first_name)),
 	    fio=trim(upper(fio)), email=trim(lower(email)),
 	    telegram=trim(lower(telegram)), login=trim(lower(login)),
 	    last_name_eng=trim(upper(last_name_eng)), first_name_eng=trim(upper(first_name_eng)),
@@ -137,8 +137,8 @@ select
 --p.*
 p.id, p.last_name, p.first_name, p.type
 from participants as "p",
-(SELECT last_name, first_name, count(last_name) as "ct"
-FROM participants
+(select last_name, first_name, count(last_name) as "ct"
+from participants
 group by last_name, first_name
 having count(last_name)>1
 order by last_name) as "tab1"
@@ -156,8 +156,8 @@ p.id
 --p.*
 --p.id, p.last_name, p.first_name, p.type
 from participants as "p",
-(SELECT last_name, first_name, count(last_name) as "ct"
-FROM participants
+(select last_name, first_name, count(last_name) as "ct"
+from participants
 group by last_name, first_name
 having count(last_name)>1
 order by last_name) as "tab1"
@@ -185,7 +185,7 @@ psql.exe -U postgres -d gs -f d:\YandexDisk\TEMP\gs20190906.sql
 
 -- Clear scheme
 DO $$
-BEGIN
+begin
     TRUNCATE sessions_tasks;
 	TRUNCATE task_steps;
 	TRUNCATE payments;
@@ -193,6 +193,6 @@ BEGIN
 	TRUNCATE tasks CASCADE;
 	TRUNCATE sessions CASCADE;
 	commit;
-END $$;
+end $$;
 
 -- ===============================================================

@@ -195,7 +195,7 @@ def create_sf_participant(payment, database, logger):
         sql_text = """UPDATE payments SET participant_id=%s WHERE task_uuid=%s;"""
         values_tuple = (payment["participant_id"], payment["task_uuid"])
         database.execute_dml(sql_text, values_tuple)
-        logger.info(select_payment(payment["task_uuid"]))
+        logger.info(select_payment(payment["task_uuid"], database))
 
     # Создаём почту новому участнику в домене @givinschool.org
     logger.info("Создаём почту новому участнику в домене @givinschool.org")

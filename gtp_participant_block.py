@@ -12,8 +12,8 @@ def participant_block(list_participants, logger):
                           password=PASSWORDS.logins['postgres_password'], host=PASSWORDS.logins['postgres_host'],
                           port=PASSWORDS.logins['postgres_port'])
     for p in list_participants.splitlines():
-        print(f"Попытка блокировки участника {p}")
-        logger.info(f"Попытка блокировки участника {p}")
+        print(f"Попытка блокировки участника |{p}|")
+        logger.info(f"Попытка блокировки участника |{p}|")
         p = p.strip()
         participant_id = None
         if p[0] == '@':
@@ -94,3 +94,18 @@ def participant_block(list_participants, logger):
         print("-" * 45)
         logger.info("-" * 45)
     postgres.disconnect()
+
+
+if __name__ == '__main__':
+    from Log import Log
+    from log_config import log_dir, log_level
+    from datetime import datetime
+
+    list_participants = """
+"""
+
+    now = datetime.now().strftime("%Y%m%d%H%M")
+    logger = Log.setup_logger('__main__', log_dir, f'gtp_block_participant_{now}.log',
+                              log_level)
+
+    participant_block(list_participants, logger)

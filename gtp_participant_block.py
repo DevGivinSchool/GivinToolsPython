@@ -100,12 +100,10 @@ if __name__ == '__main__':
     from Log import Log
     from log_config import log_dir, log_level
     from datetime import datetime
-
-    list_participants = """
-"""
+    from list import list_fio
 
     now = datetime.now().strftime("%Y%m%d%H%M")
     logger = Log.setup_logger('__main__', log_dir, f'gtp_block_participant_{now}.log',
                               log_level)
 
-    participant_block(list_participants, logger)
+    participant_block(list_fio, logger)

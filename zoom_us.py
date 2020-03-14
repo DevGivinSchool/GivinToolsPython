@@ -70,7 +70,8 @@ def zoom_users_usercreate(email, first_name, last_name, password, logger=None):
 
 def zoom_users_userstatus(login, action, logger=None):
     """
-    Процедура изменения статуса пользователя activate/deactivate
+    Процедура изменения статуса пользователя activate/deactivate - разблокировка/блокировка
+    https://marketplace.zoom.us/docs/api-reference/zoom-api/users/userstatus
     :param login: Login zoom
     :param action: activate/deactivate
     :param logger: logger
@@ -106,7 +107,37 @@ def zoom_users_userstatus(login, action, logger=None):
         return response.text
 
 
+def bulk_user_status_change(list_fio, status, logger=None):
+    for login in list_fio.splitlines():
+        print(f"Попытка блокировки участника |{login}|")
+        logger.info(f"Попытка блокировки участника |{login}|")
+        # Измение статуса в zoom (блокировка участника)
+        zoom_result = zoom_users_userstatus(login, status, logger=logger)
+        print(zoom_result)
+        logger.debug(f"zoom_result={zoom_result}")
+        if zoom_result is not None:
+            logger.error("+" * 60)
+            mail_text = f"\nПроцедура не смогла автоматически заблокировать участника. Ошибка:\n" \
+                        f"{zoom_result}" \
+                        f"\nLogin: {login}"
+            # send_mail(PASSWORDS.logins['admin_emails'], "BLOCK PARTICIPANT ERROR", mail_text, logger)
+            # print(mail_text)
+            logger.error(mail_text)
+            logger.error("+" * 60)
+        else:
+            print("Учётка Zoom успешно заблокирована")
+            logger.info("Учётка Zoom успешно заблокирована")
+
+
 def zoom_users_users(page_number, page_size, status, logger=None):
+    """
+    Получение списка участников
+    :param page_number: Номер страницы
+    :param page_size: Количество пользователей на странице
+    :param status: Статус участника active/inactive
+    :param logger: Логгер
+    :return:
+    """
     # def zoom_users_users(page_count, page_number, page_size, status, logger=None):
     # querystring = {"page_count": page_count, "page_number": page_number, "page_size": page_size, "status": status}
     querystring = {"page_number": page_number, "page_size": page_size, "status": status}
@@ -156,7 +187,12 @@ def generate_jwt(key, secret):
 
 
 if __name__ == '__main__':
-    """import logging
+    # Создание Bearer
+    # print(generate_jwt(PASSWORDS.logins['zoom_api_key'], PASSWORDS.logins['zoom_api_secret']))
+    # ==========================================================================================
+    """
+    # Создание пользователя Zoom
+    import logging
     from Log import Log
     from log_config import log_dir, log_level
     logger = Log.setup_logger('__main__', log_dir, f'zoom_us.log', logging.DEBUG)
@@ -166,11 +202,10 @@ if __name__ == '__main__':
                                  "ANps11CDkz",
                                  logger=logger)
     print(response)"""
-
-    # print(generate_jwt(PASSWORDS.logins['zoom_api_key'], PASSWORDS.logins['zoom_api_secret']))
-
-# Список участников
-# https://marketplace.zoom.us/docs/api-reference/zoom-api/users/users
+    # ==========================================================================================
+    """
+    # Список участников
+    # https://marketplace.zoom.us/docs/api-reference/zoom-api/users/users
     import logging
     from datetime import datetime
     from Log import Log
@@ -192,7 +227,7 @@ if __name__ == '__main__':
     page_count = math.ceil(response["total_records"] / 300)
     print(f"page_count={page_count}")
     user_list = []
-    for page in range(1, page_count+1):
+    for page in range(1, page_count + 1):
         # print(f"page={page}")
         response = eval(zoom_users_users(page_number=page, page_size=300, status='active', logger=logger))
         for user in response["users"]:
@@ -202,3 +237,16 @@ if __name__ == '__main__':
     #         if user["type"] == 2:  # List only Licensed users - zoom03
     #             user_list.append(user["email"])
     # print(user_list)
+    """
+    # ==========================================================================================
+    # Блокировка пользователей zoom по списку логинов
+    import logging
+    from datetime import datetime
+    from Log import Log
+    from log_config import log_dir, log_level
+    from list import list_fio
+
+    now = datetime.now().strftime("%Y%m%d%H%M")
+    logger = Log.setup_logger('__main__', log_dir, f'zoom_us_{now}.log', logging.DEBUG)
+    action = 'deactivate'
+    bulk_user_status_change(list_fio, action, logger)

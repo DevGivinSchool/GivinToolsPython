@@ -44,26 +44,26 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         payment["Фамилия Имя"] = result[2]
         payment["Электронная почта"] = result[3]
         payment["telegram"] = result[4]
-        login_ = result[5]
-        password_ = result[6]
+        payment["login"] = result[5]
+        payment["password"] = result[6]
         # [('ИВАНОВ', 'ИВАН', 'ИВАНОВ ИВАН', 'xxx@mail.ru', '@xxxx', 'ivanov_ivan@givinschool.org', '43RFji1r48')]
         # Исправление пароля (вырезать 55 в конце)
-        if password_[-2:] == "55":
-            password_ = password_[:-2]
+        if payment["password"][-2:] == "55":
+            payment["password"] = payment["password"][:-2]
         logger.info("Разблокировка пользователя")
         sql_text = """UPDATE participants 
         SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s, password=%s
         WHERE id=%s;"""
         values_tuple = (payment["Время проведения"], payment["number_of_days"],
-                        payment["deadline"], participant_type, password_, payment["participant_id"])
+                        payment["deadline"], participant_type, payment["password"], payment["participant_id"])
         # Измение статуса в zoom
-        zoom_result = zoom_us.zoom_users_userstatus(login_, "activate", logger=logger)
+        zoom_result = zoom_us.zoom_users_userstatus(payment["login"], "activate", logger=logger)
         if zoom_result is not None:
             logger.error("+" * 60)
             mail_text = f"\nПроцедура не смогла автоматически разблокировать участника. Ошибка:\n" \
                         f"{zoom_result}" \
                         f"ID={payment['participant_id']}\n{payment['Фамилия Имя']}:" \
-                        f"\nLogin: {login_}\nPassword: {password_}"
+                        f"\nLogin: {payment['login']}\nPassword: {payment['password']}"
             send_mail(PASSWORDS.logins['admin_emails'], "UNBLOCK PARTICIPANT ERROR", mail_text, logger)
             logger.error(mail_text)
             logger.error("+" * 60)
@@ -103,7 +103,9 @@ def get_participant_notification_text(payment):
 5) Введите логин и пароль, предоставленные вам в этом письме .
 6) Поставьте птичку (галку) в поле Keep me logged in ("Не выходить из системы").
 7) Нажмите Sign In ("Войти"). 
-8) Далее из чата Объявлений в телеграмме найдет сообщение с ссылкой на занятия. Нажмите на неё. Она будет открываться в браузере, появится сверху сообщение с кнопкой, жмём на кнопку Open ZOOM Meetings (либо Открыть ZOOM)
+8) Далее из чата Объявлений в телеграмме найдет сообщение с ссылкой на занятия. 
+   Нажмите на неё. Она будет открываться в браузере, появится сверху сообщение с кнопкой, 
+   жмём на кнопку Open ZOOM Meetings (либо Открыть ZOOM)
 9) Появится окно для ввода пароля конференции. Здесь вводим три цифры 355. 
 
 С благодарностью и сердечным теплом,
@@ -119,15 +121,17 @@ def participant_notification(payment, logger):
               r"[ШКОЛА ГИВИНА]. Поздравляем, Вы приняты в Друзья Школы", mail_text2, logger)
 
 
-def from_list_create_sf_participants(list_fio, database, logger):
+def from_list_create_sf_participants(list_, database, logger):
     """
     Создание нескольких участников ДШ по списку 
-    :param list_fio: 
+    :param logger:
+    :param database:
+    :param list_:
     :return: 
     """
     # TODO Сделать возможность обрабатывать либо строку Ф+И либо словарь
     logger.info("Начинаю обработку списка")
-    for line in list_fio.splitlines():
+    for line in list_.splitlines():
         payment = Parser.get_clear_payment()
         # Когда копирую из Google Sheets разделитель = Tab
         # Иванов	Иван
@@ -140,9 +144,10 @@ def from_list_create_sf_participants(list_fio, database, logger):
         payment["auto"] = False
         Parser.payment_normalization(payment)
         Parser.payment_computation(payment)
+        # noinspection PyBroadException
         try:
             create_sf_participant(payment, database, logger)
-        except:
+        except:  # noinspection PyBroadException
             mail_text = f'Ошибка создания участника\n' + traceback.format_exc()
             logger.error(mail_text)
             send_mail(PASSWORDS.logins['admin_emails'], "ERROR CREATE PARTICIPANT", mail_text, logger)
@@ -183,8 +188,9 @@ def create_sf_participant(payment, database, logger):
                         payment["Фамилия Имя"], payment["Электронная почта"],
                         payment["telegram"], 'N')
     else:
-        sql_text = """INSERT INTO participants(last_name, first_name, fio, email, telegram, type, last_name_eng, first_name_eng, fio_eng) 
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
+        sql_text = """INSERT INTO participants(last_name, first_name, fio, email, telegram, type, last_name_eng, 
+        first_name_eng, fio_eng) 
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
         values_tuple = (payment["Фамилия"], payment["Имя"],
                         payment["Фамилия Имя"], payment["Электронная почта"],
                         payment["telegram"], 'N',
@@ -284,27 +290,28 @@ def create_sf_participant(payment, database, logger):
 
 if __name__ == '__main__':
     import logging
-    from list import list_fio
+    from list_ import list_fio
     from datetime import datetime
     from Log import Log
-    from log_config import log_dir, log_level
+    from log_config import log_dir
 
     now = datetime.now().strftime("%Y%m%d%H%M")
-    logger = Log.setup_logger('__main__', log_dir, f'gtp_create_login_{now}.log', logging.DEBUG)
+    log = Log.setup_logger('__main__', log_dir, f'gtp_create_login_{now}.log', logging.DEBUG)
+    # noinspection PyBroadException
     try:
-        logger.info("Try connect to DB")
-        database = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
-                              password=PASSWORDS.logins['postgres_password'],
-                              host=PASSWORDS.logins['postgres_host'],
-                              port=PASSWORDS.logins['postgres_port'], logger=logger)
+        log.info("Try connect to DB")
+        db = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
+                        password=PASSWORDS.logins['postgres_password'],
+                        host=PASSWORDS.logins['postgres_host'],
+                        port=PASSWORDS.logins['postgres_port'], logger=log)
     except Exception:
         # TODO Вынести процедуру опопвещения MAIN ERROR в отдельную процедуру
-        error_text = \
+        main_error_text = \
             f"MAIN ERROR (Postgres):\n{traceback.format_exc()}"
-        print(error_text)
-        logger.error(error_text)
-        logger.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
-        send_mail(PASSWORDS.logins['admin_emails'], "MAIN ERROR (Postgres)", error_text, logger)
-        logger.error("Exit with error")
+        print(main_error_text)
+        log.error(main_error_text)
+        log.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
+        send_mail(PASSWORDS.logins['admin_emails'], "MAIN ERROR (Postgres)", main_error_text, log)
+        log.error("Exit with error")
         sys.exit(1)
-    from_list_create_sf_participants(list_fio, database, logger=logger)
+    from_list_create_sf_participants(list_fio, db, logger=log)

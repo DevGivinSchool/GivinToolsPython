@@ -2,7 +2,7 @@ import yandex_mail
 import password_generator
 import yandex_connect
 # На вход подаються строки: Фамилия;Имя (пока из list.py)
-from list import list_fio
+from list_ import list_fio
 from utils import get_login
 from utils import split_str
 

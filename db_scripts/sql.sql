@@ -2,7 +2,7 @@
 -- Поиск участника
 select
 *
---id, last_name, first_name, fio, email, telegram, time_begin, time_end, login, password, payment_date, number_of_days, deadline, comment, until_date, type
+--id, last_name, first_name, fio, email, telegram, time_begin, time_end, login, password, payment_date, number_of_days, deadline, regexp_replace(comment, E'[\n\r]+', ' ', 'g' ), until_date, type
 from public.participants
 where
 --telegram=lower('ххххх')
@@ -49,7 +49,7 @@ select
 id, type,
 last_name as "Фамилия", first_name as "Имя", email, telegram,
 payment_date "Дата оплаты", number_of_days as "Дней", deadline "Оплачено до",
-until_date as "Отсрочка до", comment
+until_date as "Отсрочка до", regexp_replace(comment, E'[\n\r]+', ' ', 'g' )
 FROM public.participants
 WHERE type in ('P', 'N')
 --and number_of_days <> 45
@@ -94,9 +94,9 @@ insert into public.participants(
 	);
 -- ===============================================================
 --Получение списка участников (как регулярных так и заблокированных)
-select id, last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, until_date, comment
+select id, last_name, first_name, fio, email, telegram, login, password, payment_date, number_of_days, deadline, until_date, regexp_replace(comment, E'[\\n\\r]+', ' ', 'g' )
 	FROM public.participants
-	where type='P'
+	where type in ('P', 'N')
 	--where type='B'
 order by last_name;
 
@@ -113,7 +113,7 @@ select
 id, type,
 last_name as "Фамилия", first_name as "Имя", email, telegram,
 payment_date "Дата оплаты", number_of_days as "Дней", deadline "Оплачено до",
-until_date as "Отсрочка до", comment
+until_date as "Отсрочка до", regexp_replace(comment, E'[\n\r]+', ' ', 'g' )
 FROM public.participants
 WHERE type in ('N')
 --and number_of_days <> 45

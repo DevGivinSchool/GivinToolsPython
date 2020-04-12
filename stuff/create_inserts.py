@@ -1,4 +1,10 @@
-def main():
+"""
+Для Друзей Школы
+"""
+import csv
+
+
+def gsf():  # Givin School Friends
     f = open(r"d:\!SAVE\table\1.tsv", "r", encoding="utf-8")
     f1 = f.readlines()
     f1 = f1[1:]
@@ -42,5 +48,74 @@ def main():
         filehandle.writelines("%s\n" % place for place in result)
 
 
+def tm():  # Team Members
+    f = open(r"c:\!SAVE\list2.csv", "r", encoding="utf-8")
+    f1 = f.readlines()
+    result = []
+    for line in f1:
+        line = line.split(";")
+        # print(line)
+        fio = line[0].split(" ")
+        last_name = fio[0].upper()
+        first_name = fio[1].upper()
+        email = line[1].lower()
+        password = line[2]
+        if line[3] == "\n":
+            telegram = "NULL"
+        else:
+            telegram = line[3].lower().replace("\n", "")
+        result.append(f"INSERT INTO public.team_members(last_name, first_name, email, password, telegram) "
+                      f"VALUES ('{last_name}', '{first_name}', '{email}', '{password}', '{telegram}');")
+    # for x in result:
+    #     print(x)
+    with open(r'c:\!SAVE\inserts1.sql', 'w') as file:
+        file.writelines("%s\n" % place for place in result)
+
+
+def tm2(file):  # Team Members
+    result = []
+    with open(file, "r", encoding="utf-8") as csv_file:
+        reader = csv.reader(csv_file, delimiter=';')
+        for line in reader:
+            # print(line)
+            # ['Агафонова Ксения', 'Москва', '@Ksenya_Agafonova', 'жен', 'Сентябрята']
+            fio = line[0].split(" ")
+            last_name = fio[0].upper()
+            first_name = fio[1].upper()
+            filial = line[1]
+            telegram = line[2].lower()
+            if line[3] == "муж":
+                sex = True
+            else:
+                sex = False
+            retrit = line[4]
+            result.append(f"INSERT INTO public.team_members(last_name, first_name, sex, filial, retrit, telegram) "
+                          f"VALUES ('{last_name}', '{first_name}', {sex}, '{filial}', '{retrit}', '{telegram}');")
+    # for x in result:
+    #     print(x)
+    with open(r'c:\!SAVE\inserts1.sql', 'w') as file:
+        file.writelines("%s\n" % place for place in result)
+
+
+def zoom_member(file):  # Join zoom conference and team member
+    result = []
+    with open(file, "r", encoding="utf-8") as csv_file:
+        reader = csv.reader(csv_file)
+        for line in reader:
+            # print(line)
+            # ['MYROSLAVA XXXXX', 'xxx@gmail.com']
+            zoom_name = line[0]
+            zoom_name_norm = line[0].strip().lower()
+            zoom_email = line[1].strip().lower()
+            result.append(f"INSERT INTO public.zoom_join_zoom_and_members(zoom_name, zoom_name_norm, zoom_email, "
+                          f"member_id) VALUES ('{zoom_name}', '{zoom_name_norm}', '{zoom_email}', 7777);")
+    # for x in result:
+    #     print(x)
+    with open(r'c:\!SAVE\inserts1.sql', 'w') as file:
+        file.writelines("%s\n" % place for place in result)
+
 if __name__ == "__main__":
-    main()
+    file_name = r"c:\!SAVE\data-1586684131740.txt"
+    # gsf()
+    # tm2(file_name)
+    zoom_member(file_name)

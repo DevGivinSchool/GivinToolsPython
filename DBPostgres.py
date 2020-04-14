@@ -1,5 +1,5 @@
 import datetime
-
+import utils
 import psycopg2
 import logging
 import Parser
@@ -73,7 +73,6 @@ class DBPostgres:
         sql_text = f"select last_name, first_name, fio, email, telegram, login, password from participants where id=%s;"
         values_tuple = (value,)
         return self.execute_select(sql_text, values_tuple)
-
 
     def create_task(self, session_id, task):
         """
@@ -195,6 +194,26 @@ class DBPostgres:
         self.logger.info(f"----------- Процедура DBPostgres.create_payment end")
         return id_, participant_id, p_type
 
+    def mark_zoom_attendance(self, col_name, pid, participant, logger):
+        count = 0
+        self.logger.info(f"Отмечаем присутствие {col_name}|{pid}")
+        for i in pid:
+            # Можно проставлять суммарное время, только столбец должен быть integer и время не правильно ссумируется
+            # видно из-за дублирования или проставлять какой-то символ
+            # ВАРИАНТ 1: столбец типа integer
+            self.logger.info(
+                f"    UPDATE public.zoom_table SET {col_name}=coalesce({col_name}, 0)+{participant[4]} WHERE id={i[0]};")
+            sql_text = f"UPDATE public.zoom_table SET {col_name}=coalesce({col_name}, 0)+%s WHERE id=%s;"
+            values_tuple = (participant[4], i[0])
+            # ВАРИАНТ 2: столбец типа varchar
+            # sql_text = f"UPDATE public.zoom_table SET {col_name}='+' WHERE id=%s;"
+            # values_tuple = (pid,)
+            # DEBUG
+            # self.logger.info(values_tuple)
+            self.execute_dml(sql_text, values_tuple)
+            count += 1
+        return count
+
     ################################################################
     def find_zoom_participant_by(self, participant):
         """
@@ -202,12 +221,13 @@ class DBPostgres:
         :param participant: Кортеж участника
         :return: [(405,)]
         """
+        res = None
         records = []
         # Ищем сначала по email, если она есть она сразу в lower
         if participant[1]:
             sql_text = f"select member_id from zoom_join_zoom_and_members where zoom_email=%s;"
             values_tuple = (participant[1],)
-            self.logger.info(f"select member_id from zoom_join_zoom_and_members where zoom_email='{participant[1]}''';")
+            self.logger.info(f"select member_id from zoom_join_zoom_and_members where zoom_email='{participant[1]}';")
             records = self.execute_select(sql_text, values_tuple)
         # Если по email не нашлось ищем по zoom_name
         if len(records) == 0:
@@ -219,19 +239,19 @@ class DBPostgres:
             # zoom_name это позволит обойти опечатки или двойные пробелы или т.п.
             if len(records) == 0:
                 sql_text = f"select member_id from zoom_join_zoom_and_members where zoom_name_norm=%s;"
-                zoom_name_norm = participant[0].lower().replace(" ", "")
+                zoom_name_norm = utils.str_normalization1(participant[0])
                 values_tuple = (zoom_name_norm,)
                 self.logger.info(
                     f"select member_id from zoom_join_zoom_and_members where zoom_name_norm='{zoom_name_norm}';")
                 records = self.execute_select(sql_text, values_tuple)
-                if len(records) == 0:
-                    return None  # Ничего не нашлось
-                else:
-                    return records
-            else:
-                return records
+        if len(records) == 0:
+            res = None  # Ничего не нашлось
         else:
-            return records
+            res = set(records)
+        # print(f"par={participant}")
+        # print(f"rec={records}")
+        # print(f"res={res}")
+        return res
 
     def find_participant_by(self, criterion, value):
         """
@@ -284,12 +304,15 @@ if __name__ == "__main__":
                           password=PASSWORDS.logins['postgres_password'], host=PASSWORDS.logins['postgres_host'],
                           port=PASSWORDS.logins['postgres_port'])
 
-    # id2 = postgres.find_participant_by('email', 'tikitikishik@gmail.com')
-    # id3 = postgres.find_participant_by('telegram', '@rikitikishik')
-    # id4 = postgres.find_participant_by('fio', 'ЛОГИНОВА ДАРЬЯ')
-    # id5 = postgres.find_participant_by('fio_eng', 'MILA KIM VULFOV')
+    # id2 = postgres.find_participant_by('email', 'xxxx@gmail.com')
+    # id3 = postgres.find_participant_by('telegram', '@xxxx')
+    # id4 = postgres.find_participant_by('fio', 'xxxx')
+    # id5 = postgres.find_participant_by('fio_eng', 'xxxx')
     # print(f"id2={id2}, id3={id3}, id4={id4}, id5={id5}")
 
-    p = ('Михаил Стасюков', '', datetime.datetime(2020, 4, 10, 20, 48, 52), datetime.datetime(2020, 4, 10, 20, 59, 32), 11, 305)
+    p = (
+        'Иванов Иван', '', datetime.datetime(2020, 4, 10, 20, 48, 52), datetime.datetime(2020, 4, 10, 20, 59, 32),
+        11,
+        305)
     res = postgres.find_zoom_participant_by(p)
     print(res)

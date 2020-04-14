@@ -3,15 +3,30 @@ import re
 
 
 def translit_name(text):
+    """
+    Транслитерация строки
+    :param text:
+    :return:
+    """
     return transliterate.translit(text, reversed=True).replace("'", "").strip()
 
 
 def is_eng(text):
+    """
+    Проверка что текст английский
+    :param text:
+    :return:
+    """
     pattern_eng = re.compile("[A-Za-z]+")
     return pattern_eng.match(text.replace(' ', ''))
 
 
 def is_rus(text):
+    """
+    Проверка что текст русский
+    :param text:
+    :return:
+    """
     pattern_rus = re.compile("[А-Яа-я]+")
     return pattern_rus.match(text.replace(' ', ''))
 
@@ -52,3 +67,21 @@ def split_str(line):
             raise Exception(f"ERROR: Строка ФИО '{line_}' не разделяется ни через пробел ни через табуляцию")
     # print(f"line_={line_}; line_[0]={line_[0]}; line_[1]={line_[1]}")
     return line_
+
+
+def str_normalization1(text):
+    """
+    Нормализация строки = удалить все пробелы и привести к нижнему регистру
+    :param text:
+    :return:
+    """
+    return text.lower().replace(" ", "")
+
+
+def str_normalization2(text):
+    """
+    Нормализация строки 2 = оставить только буквы, все остальные символы удаляются
+    :param text:
+    :return:
+    """
+    return ''.join(c for c in text if c.isalpha())

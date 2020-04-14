@@ -27,6 +27,7 @@ import csv
 import traceback
 import PASSWORDS
 import sys
+import utils
 from Log import Log
 from log_config import log_dir, log_level
 from datetime import datetime
@@ -92,11 +93,12 @@ def get_participants_list(file, conference_id, logger):
             # print(row)
             logger.info(row)
             # ['Павел Павлов', 'xxxx@gmail.com', '04/10/2020 07:21:08 PM', '04/10/2020 08:48:53 PM', '88']
-            row[1] = row[1].trim().lower()
+            row[1] = row[1].strip().lower()
             row[2] = convert_zoom_datetime(row[2])
             row[3] = convert_zoom_datetime(row[3])
             row[4] = int(row[4])
             row.append(conference_id)
+            # ['Павел Павлов', 'xxxx@gmail.com', '04/10/2020 07:21:08 PM', '04/10/2020 08:48:53 PM', 88, 305]
             participants_list.append(tuple(row))
         logger.info("Список участников:")
         logger.info(participants_list)
@@ -135,24 +137,44 @@ def mark_attendance(file, db, col_name, logger):
         error_fixing(f"ERROR: Can't get participants list:\n{traceback.format_exc()}", logger)
     logger.info(f"Вставка списка участников в базу данных")
     list_p = []  # Список участников для которых не нашлось соответсвия и их нужно вставить вручную
+    participants_count = len(participants_list)
+    print(f"Всего {participants_count} участников")
+    ii = 0
     for p in participants_list:
         logger.info(f"Создать участника:{p}")
         try:
             sql_text = """INSERT INTO public.zoom_conference_participants(zoom_name, zoom_email, time_begin, 
             time_end, conference_duration, conference_id) VALUES (%s, %s, %s, %s, %s, %s); """
             db.execute_dml(sql_text, p)
+            # Выяснить какие члены команды связаны с этим участником
+            pid = db.find_zoom_participant_by(p)
+            if pid is None:
+                logger.warning(f"Соответствие не нашлось")
+                list_p.append(p)
+            else:
+                # Отметить присутствие в таблице
+                row_count = db.mark_zoom_attendance(col_name, pid, p, logger)
+                if row_count == 0:
+                    logger.warning(f"Ничего не отметилось")
         except:
             error_text = f"ERROR: Create participant:\n{traceback.format_exc()}"
             print(error_text)
             logger.error(error_text)
-        # Выяснить какие члены команды связаны с этим участником
-        list_id = db.find_zoom_participant_by(p)
-        if list_id is None or len(list_id) == 0:
-            logger.warning(f"Соответсвие не нашлось")
-            list_p.clear(p)
-        else:
-            # Отметить присутствие в таблице
-            pass
+        ii += 1
+        print(f"обработано {ii} участников из {participants_count}")
+    logger.info("=" * 80)
+    logger.info("=" * 80)
+    if len(list_p) > 0:
+        print("ВНИМАНИЕ! Есть несоответсвия")
+        logger.info("Списко участников для которых не нашлось соотвествия с членами команды")
+        for i in list_p:
+            print(i)
+            logger.info(i)
+        buffer = "\n"
+        for i in list_p:
+            buffer += f"INSERT INTO public.zoom_join_zoom_and_members(zoom_name, zoom_email, zoom_name_norm, " \
+                      f"member_id) VALUES ('{i[0]}', '{i[1]}', '{utils.str_normalization1(i[0])}', 7777);\n"
+        logger.info(buffer)
 
 
 def error_fixing(error_text, logger):
@@ -165,12 +187,9 @@ def error_fixing(error_text, logger):
 
 
 if __name__ == '__main__':
-    file_path = r"c:\!SAVE\participants_452675859 (1).csv"
-    col_name = "D1204_2000"
-    """
-    ALTER TABLE public.zoom_table
-    ADD COLUMN D1204_2000 character varying(2000) COLLATE pg_catalog."default";
-    """
+    file_path = r"c:\!SAVE\Посещение\1404-1.csv"
+    col_name = "D1404_1"
+
     now = datetime.now().strftime("%Y%m%d%H%M")
     logger = Log.setup_logger('__main__', log_dir, f'gtp_attend_class_{now}.log',
                               log_level)

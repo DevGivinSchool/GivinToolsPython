@@ -194,6 +194,26 @@ class DBPostgres:
         self.logger.info(f"----------- Процедура DBPostgres.create_payment end")
         return id_, participant_id, p_type
 
+    def create_column(self, col_name, logger):
+        sql_text = f"SELECT column_name FROM information_schema.columns WHERE table_name='zoom_table' and column_name" \
+                   f"=%s; "
+        values_tuple = (col_name,)
+        self.logger.info(f"SELECT column_name FROM information_schema.columns WHERE table_name='zoom_table' and "
+                         f"column_name='{col_name}'")
+        records = self.execute_select(sql_text, values_tuple)
+        if len(records) == 0:
+            # Если такого столбца нет - добавить его
+            sql_text = f"ALTER TABLE public.zoom_table ADD COLUMN {col_name} integer;"
+            values_tuple = None
+            self.logger.info(f"ALTER TABLE public.zoom_table ADD COLUMN {col_name} integer;")
+            self.execute_dml(sql_text, values_tuple)
+        else:
+            # Если столбец уже есть - обнулить его
+            sql_text = f"update zoom_table set {col_name}=null;"
+            values_tuple = None
+            self.logger.info(f"update zoom_table set {col_name}=null;")
+            self.execute_dml(sql_text, values_tuple)
+
     def mark_zoom_attendance(self, col_name, pid, participant, logger):
         count = 0
         self.logger.info(f"Отмечаем присутствие {col_name}|{pid}")

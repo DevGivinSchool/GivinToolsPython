@@ -67,9 +67,10 @@ def get_header(file, logger):
     return header
 
 
-def get_participants_list(file, conference_id, logger):
+def get_participants_list(file, event_time_begin, event_time_end, conference_id, logger):
     """
     Получение списка участников конференции из файла отчёта.
+    Фильтрация времени участия.
     :param conference_id: ID конференции
     :param file: Файл отчёта
     :param logger: логгер
@@ -93,10 +94,28 @@ def get_participants_list(file, conference_id, logger):
             # print(row)
             logger.info(row)
             # ['Павел Павлов', 'xxxx@gmail.com', '04/10/2020 07:21:08 PM', '04/10/2020 08:48:53 PM', '88']
+            # Проверить время участия
+            pb = row[2] = convert_zoom_datetime(row[2])
+            pe = row[3] = convert_zoom_datetime(row[3])
+            if pb > event_time_end or pe < event_time_begin:
+                # Участник вне диапазона мероприятия - такого не учитываем
+                logger.info("Вне диапазона. Этого участника не учитываем.")
+                continue
+            elif pb > event_time_begin and pe < event_time_end:
+                # Диапазон участника полностью входит в диапазон мероприятия - учитываем всё время.
+                row[4] = int(row[4])
+            elif pb < event_time_begin and pe > event_time_end:
+                # Диапазон участника больше всего диапазона мероприятия (включает его) - учитываем только вермя мероприятия
+                row[4] = int(round((event_time_end - event_time_begin).total_seconds() / 60))
+            # Т.к. первыми двумя проверками мы исключили некоторые варианты, далее можно очень строго не проверять
+            elif pb < event_time_begin and pe < event_time_end:
+                # Диапазон участника начинается раньше мероприятия и заканчивается в мероприятии
+                row[4] = int(round((pe - event_time_begin).total_seconds() / 60))
+            elif pb < event_time_end and pe > event_time_end:
+                # Диапазон участника начинается в мероприятии и заканчивается после него
+                row[4] = int(round((event_time_end - pb).total_seconds() / 60))
             row[1] = row[1].strip().lower()
-            row[2] = convert_zoom_datetime(row[2])
-            row[3] = convert_zoom_datetime(row[3])
-            row[4] = int(row[4])
+            # row[4] = int(row[4])
             row.append(conference_id)
             # ['Павел Павлов', 'xxxx@gmail.com', '04/10/2020 07:21:08 PM', '04/10/2020 08:48:53 PM', 88, 305]
             participants_list.append(tuple(row))
@@ -105,13 +124,22 @@ def get_participants_list(file, conference_id, logger):
     return participants_list
 
 
-def mark_attendance(file, db, col_name, logger):
+def mark_attendance(event, db, logger):
     """
     Читает отчёт zoom, парсит его и заносит все полученные данные в БД
     :param file: Файл отчёта
     :param logger: логгер
     :param db: Экземляр DBPostgres для работы с БД
     """
+    col_name = event[0]
+    file = event[1]
+    event_time_begin = event[2]
+    event_time_end = event[3]
+    # Создание столбца
+    try:
+        db.create_column(col_name, logger)
+    except:
+        raise
     # Парсинг заголовка отчёта
     header = None
     conference_id = None
@@ -132,14 +160,15 @@ def mark_attendance(file, db, col_name, logger):
         error_fixing(f"ERROR: Can't create conference:\n{traceback.format_exc()}", logger)
     # Парсинг и получение списка участников
     try:
-        participants_list = get_participants_list(file, conference_id, logger)
+        participants_list = get_participants_list(file, event_time_begin, event_time_end, conference_id, logger)
     except:
         error_fixing(f"ERROR: Can't get participants list:\n{traceback.format_exc()}", logger)
     logger.info(f"Вставка списка участников в базу данных")
     list_p = []  # Список участников для которых не нашлось соответсвия и их нужно вставить вручную
     participants_count = len(participants_list)
     print(f"Всего {participants_count} участников")
-    ii = 0
+    logger.info(f"Всего {participants_count} участников")
+    # ii = 0
     for p in participants_list:
         logger.info(f"Создать участника:{p}")
         try:
@@ -160,21 +189,23 @@ def mark_attendance(file, db, col_name, logger):
             error_text = f"ERROR: Create participant:\n{traceback.format_exc()}"
             print(error_text)
             logger.error(error_text)
-        ii += 1
-        print(f"обработано {ii} участников из {participants_count}")
+        # ii += 1
+        # print(f"обработано {ii} участников из {participants_count}")
     logger.info("=" * 80)
     logger.info("=" * 80)
     if len(list_p) > 0:
         print("ВНИМАНИЕ! Есть несоответсвия")
         logger.info("Списко участников для которых не нашлось соотвествия с членами команды")
         for i in list_p:
-            print(i)
+            # print(i)
             logger.info(i)
         buffer = "\n"
         for i in list_p:
             buffer += f"INSERT INTO public.zoom_join_zoom_and_members(zoom_name, zoom_email, zoom_name_norm, " \
                       f"member_id) VALUES ('{i[0]}', '{i[1]}', '{utils.str_normalization1(i[0])}', 7777);\n"
         logger.info(buffer)
+        return buffer
+    return ""
 
 
 def error_fixing(error_text, logger):
@@ -187,14 +218,57 @@ def error_fixing(error_text, logger):
 
 
 if __name__ == '__main__':
-    file_path = r"c:\!SAVE\Посещение\1404-1.csv"
-    col_name = "D1404_1"
+    table_of_events = [
+        # ("_1204_1", r"c:\!SAVE\Посещение\1204-1.csv", datetime(2020, 4, 12, 15, 00, 00),
+        #  datetime(2020, 4, 12, 16, 00, 00)),
+        # ("_1204_2", r"c:\!SAVE\Посещение\1204-2.csv", datetime(2020, 4, 12, 20, 00, 00),
+        #  datetime(2020, 4, 12, 21, 00, 00)),
+        #
+        # ("_1304_1", r"c:\!SAVE\Посещение\1304-1.csv", datetime(2020, 4, 13, 8, 00, 00),
+        #  datetime(2020, 4, 13, 9, 30, 00)),
+        # ("_1304_2", r"c:\!SAVE\Посещение\1304-2.csv", datetime(2020, 4, 13, 15, 00, 00),
+        #  datetime(2020, 4, 13, 16, 00, 00)),
+        # ("_1304_3", r"c:\!SAVE\Посещение\1304-3.csv", datetime(2020, 4, 13, 19, 30, 00),
+        #  datetime(2020, 4, 13, 20, 30, 00)),
+        #
+        # ("_1404_1", r"c:\!SAVE\Посещение\1404-1.csv", datetime(2020, 4, 14, 8, 00, 00),
+        #  datetime(2020, 4, 14, 9, 30, 00)),
+        # ("_1404_2", r"c:\!SAVE\Посещение\1404-2.csv", datetime(2020, 4, 14, 15, 00, 00),
+        #  datetime(2020, 4, 14, 16, 00, 00)),
+        ("_1404_3", r"c:\!SAVE\Посещение\1404-3.csv", datetime(2020, 4, 14, 19, 30, 00),
+         datetime(2020, 4, 14, 20, 30, 00))
+
+        # ("_1504_1", r"c:\!SAVE\Посещение\1504-1.csv", datetime(2020, 4, 15, 8, 00, 00),
+        #  datetime(2020, 4, 15, 9, 30, 00)),
+        # ("_1504_2", r"c:\!SAVE\Посещение\1504-2.csv", datetime(2020, 4, 15, 15, 00, 00),
+        #  datetime(2020, 4, 15, 16, 00, 00)),
+        # ("_1504_3", r"c:\!SAVE\Посещение\1504-3.csv", datetime(2020, 4, 15, 19, 30, 00),
+        #  datetime(2020, 4, 15, 20, 30, 00)),
+        #
+        # ("_1604_1", r"c:\!SAVE\Посещение\1604-1.csv", datetime(2020, 4, 16, 11, 00, 00),
+        #  datetime(2020, 4, 16, 12, 00, 00)),
+        # ("_1604_2", r"c:\!SAVE\Посещение\1604-2.csv", datetime(2020, 4, 16, 19, 30, 00),
+        #  datetime(2020, 4, 16, 20, 30, 00)),
+        #
+        # ("_1704_1", r"c:\!SAVE\Посещение\1704-1.csv", datetime(2020, 4, 17, 7, 00, 00),
+        #  datetime(2020, 4, 17, 8, 00, 00)),
+        # ("_1704_2", r"c:\!SAVE\Посещение\1704-2.csv", datetime(2020, 4, 17, 14, 00, 00),
+        #  datetime(2020, 4, 17, 15, 00, 00)),
+        # ("_1704_3", r"c:\!SAVE\Посещение\1704-3.csv", datetime(2020, 4, 17, 19, 30, 00),
+        #  datetime(2020, 4, 17, 20, 30, 00)),
+        #
+        # ("_1804_1", r"c:\!SAVE\Посещение\1804-1.csv", datetime(2020, 4, 18, 7, 00, 00),
+        #  datetime(2020, 4, 18, 8, 00, 00)),
+        # ("_1804_2", r"c:\!SAVE\Посещение\1804-2.csv", datetime(2020, 4, 18, 14, 00, 00),
+        #  datetime(2020, 4, 18, 15, 00, 00)),
+        # ("_1804_3", r"c:\!SAVE\Посещение\1804-3.csv", datetime(2020, 4, 18, 19, 30, 00),
+        #  datetime(2020, 4, 18, 20, 30, 00))
+    ]
 
     now = datetime.now().strftime("%Y%m%d%H%M")
-    logger = Log.setup_logger('__main__', log_dir, f'gtp_attend_class_{now}.log',
-                              log_level)
-    logger.info(f"Обрабатываю файл отчёта:{file_path}")
-    logger.info("Try connect to DB")
+    main_logger = Log.setup_logger('__main__', log_dir, f'gtp_attend_class_{now}.log', log_level)
+
+    main_logger.info("Try connect to DB")
     db = None
     try:
         db = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'],
@@ -202,9 +276,32 @@ if __name__ == '__main__':
                         password=PASSWORDS.logins['postgres_password'],
                         host=PASSWORDS.logins['postgres_host'],
                         port=PASSWORDS.logins['postgres_port'],
-                        logger=logger)
+                        logger=main_logger)
     except:
-        error_fixing(f"ERROR: Connect to Postgres:\n{traceback.format_exc()}", logger)
-    logger.info("Connect to DB is OK")
-    mark_attendance(file_path, db, col_name, logger)
-    logger.info(f"Обработка отчёта закончена.")
+        error_fixing(f"ERROR: Connect to Postgres:\n{traceback.format_exc()}", main_logger)
+    main_logger.info("Connect to DB is OK")
+    list_columns = []
+    buffer = ""
+    for event in table_of_events:
+        logger = Log.setup_logger(event[0], log_dir, f'{event[0]}_{now}.log', log_level)
+        main_logger.info(f"Обрабатываю файл отчёта: {event[1]}")
+        print(f"Обрабатываю файл отчёта:{event[1]}")
+        try:
+            db.logger = logger
+            buffer += mark_attendance(event, db, logger)
+        except:
+            error_fixing(f"ERROR: Ошибка при обработке отчёта:\n{traceback.format_exc()}", main_logger)
+        list_columns.append(event[0])
+        main_logger.info(f"Обработка отчёта закончена.")
+        # print(f"Обработка отчёта закончена.")
+    # Общий Список несоответсвий, точнее готовых insert
+    print("=" * 80)
+    print(buffer)
+    main_logger.info(buffer)
+    # Формирование sql запроса на получение табеля
+    print("=" * 80)
+    list_columns = ','.join(list_columns)
+    sql_text = f"\nSELECT id,last_name,first_name,{list_columns} FROM public.zoom_table where id<>1 order by last_name;"
+    print(sql_text)
+    main_logger.info(sql_text)
+    print("=" * 80)

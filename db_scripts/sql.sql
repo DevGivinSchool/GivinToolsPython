@@ -51,18 +51,18 @@ last_name as "Фамилия", first_name as "Имя", email, telegram,
 payment_date "Дата оплаты", number_of_days as "Дней", deadline "Оплачено до",
 until_date as "Отсрочка до", regexp_replace(comment, E'[\n\r]+', ' ', 'g' )
 FROM public.participants
-WHERE type in ('P', 'N')
+where type in ('P', 'N')
 --and number_of_days <> 45
-and ((deadline - CURRENT_TIMESTAMP < INTERVAL '0 days' and until_date is NULL)
-or (until_date - CURRENT_TIMESTAMP < INTERVAL '0 days' and until_date is not NULL))
+and ((deadline - CURRENT_TIMESTAMP < interval '0 days' and until_date is null)
+or (until_date - CURRENT_TIMESTAMP < interval '0 days' and until_date is not null))
 order by last_name;
 
 -- ===============================================================
 -- Удаление участника
---select * from payments where participant_id=xxxx;
---update payments set participant_id=xxxx where participant_id=xxxx;
---select * from participants where id=xxxx;
---delete from participants where id=xxxx;
+----select * from payments where participant_id=xxxx;
+----update payments set participant_id=xxxx where participant_id=xxxx;
+----select * from participants where id=xxxx;
+----delete from participants where id=xxxx;
 
 -- ===============================================================
 -- Удаление task чтобы обойти - ВНИМАНИЕ: Это письмо уже обрабатывалось!
@@ -115,9 +115,9 @@ last_name as "Фамилия", first_name as "Имя", email, telegram,
 payment_date "Дата оплаты", number_of_days as "Дней", deadline "Оплачено до",
 until_date as "Отсрочка до", regexp_replace(comment, E'[\n\r]+', ' ', 'g' )
 FROM public.participants
-WHERE type in ('N')
+where type in ('N')
 --and number_of_days <> 45
-and CURRENT_TIMESTAMP - payment_date < INTERVAL '3 days'
+and CURRENT_TIMESTAMP - payment_date < interval '3 days'
 order by last_name;
 
 -- ===============================================================

@@ -235,8 +235,8 @@ if __name__ == '__main__':
         #  datetime(2020, 4, 14, 9, 30, 00)),
         # ("_1404_2", r"c:\!SAVE\Посещение\1404-2.csv", datetime(2020, 4, 14, 15, 00, 00),
         #  datetime(2020, 4, 14, 16, 00, 00)),
-        ("_1404_3", r"c:\!SAVE\Посещение\1404-3.csv", datetime(2020, 4, 14, 19, 30, 00),
-         datetime(2020, 4, 14, 20, 30, 00))
+        # ("_1404_3", r"c:\!SAVE\Посещение\1404-3.csv", datetime(2020, 4, 14, 19, 30, 00),
+        #  datetime(2020, 4, 14, 20, 30, 00))
 
         # ("_1504_1", r"c:\!SAVE\Посещение\1504-1.csv", datetime(2020, 4, 15, 8, 00, 00),
         #  datetime(2020, 4, 15, 9, 30, 00)),
@@ -263,6 +263,13 @@ if __name__ == '__main__':
         #  datetime(2020, 4, 18, 15, 00, 00)),
         # ("_1804_3", r"c:\!SAVE\Посещение\1804-3.csv", datetime(2020, 4, 18, 19, 30, 00),
         #  datetime(2020, 4, 18, 20, 30, 00))
+
+        # ("_1904_1", r"c:\!SAVE\Посещение\1904-1.csv", datetime(2020, 4, 19, 8, 00, 00),
+        #  datetime(2020, 4, 19, 9, 00, 00)),
+        ("_1904_2", r"c:\!SAVE\Посещение\1904-2.csv", datetime(2020, 4, 19, 15, 00, 00),
+         datetime(2020, 4, 19, 16, 30, 00)),
+        # ("_1904_3", r"c:\!SAVE\Посещение\1904-3.csv", datetime(2020, 4, 19, 19, 30, 00),
+        #  datetime(2020, 4, 19, 20, 30, 00))
     ]
 
     now = datetime.now().strftime("%Y%m%d%H%M")
@@ -300,8 +307,14 @@ if __name__ == '__main__':
     main_logger.info(buffer)
     # Формирование sql запроса на получение табеля
     print("=" * 80)
-    list_columns = ','.join(list_columns)
-    sql_text = f"\nSELECT id,last_name,first_name,{list_columns} FROM public.zoom_table where id<>1 order by last_name;"
-    print(sql_text)
-    main_logger.info(sql_text)
+    # TODO: Запрос исправить, нужно получать список всех столбцов из таблицы типа _NN_N
+    # list_columns = ','.join(list_columns)
+    # sql_text = f"\nSELECT id,last_name,first_name,{list_columns} FROM public.zoom_table where id<>1 order by last_name;"
+    # print(sql_text)
+    # main_logger.info(sql_text)
     print("=" * 80)
+    # TODO: Реализовать выгрузку таблицы отчёта в Excel
+
+    # TODO: Реализовать веб-сервис с веб-интерфесом который сам всё будет делать полностью автоматически: По вебхукку
+    #  забирать отчёт, сверяться с графиком мероприятий, если время встречи вписывается в график, значит это нужное
+    #  мероприятие и его обрабатывать, результат выгружать сразу в какую-то google таблицу или Excel.

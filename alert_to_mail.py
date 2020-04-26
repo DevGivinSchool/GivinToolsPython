@@ -13,7 +13,8 @@ from email.header import Header
 from Log import Log
 
 
-def send_mail(receiver_emails, subject, message, logger, attached_file=None, sender_email="robot@givinschool.org", port=465):
+def send_mail(receiver_emails, subject, message, logger, attached_file=None,
+              sender_email="robot@givinschool.org", port=465):
     """
     Отправка почтового сообщения
     :param logger: Логгер
@@ -67,6 +68,7 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None, sen
 
 
 if __name__ == "__main__":
+    from log_config import log_dir, log_level
     logger = Log.setup_logger('__main__', log_dir, f'gtp_alert_to_mail.log',
                               log_level)
     """mail_text = f"Создать учётку zoom участнику Иванов " \

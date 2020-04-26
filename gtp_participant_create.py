@@ -284,9 +284,11 @@ def create_sf_participant(payment, database, logger):
         logger.warning("+" * 60)
     notification_text = get_participant_notification_text(payment)
     mail_text += "Текст уведомления:\n\n\n" + notification_text
-    send_mail(PASSWORDS.logins['admin_emails'], subject, mail_text, logger)
+    # send_mail(PASSWORDS.logins['admin_emails'], subject, mail_text, logger)
     # Вычитаю из списка почт менеджеров список почт админов, чтобы не было повторных писем
-    list_ = [item for item in PASSWORDS.logins['manager_emails'] if item not in PASSWORDS.logins['admin_emails']]
+    list_ = PASSWORDS.logins['admin_emails']
+    list_.extend(item for item in PASSWORDS.logins['manager_emails'] if item not in PASSWORDS.logins['admin_emails'])
+    logger.info(f"list_={list_}")
     send_mail(list_, subject, mail_text, logger)
 
 

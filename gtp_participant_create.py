@@ -215,8 +215,10 @@ def create_sf_participant(payment, database, logger):
         result = yandex_mail.create_yandex_mail(payment["Фамилия"], payment["Имя"], payment["login"], department_id_=4)
         # print(f"Email created:{result['email']}")
         payment["login"] = result['email']
-        mail_text += f'\nСоздана почта в домене @givinschool.org\nLogin: {payment["login"]}'
-        logger.info(f'Создана почта в домене @givinschool.org')
+        mail_text += f'\nЯндекс почта в домене @givinschool.org успешно создана (пароль стандартный)\nЛогин для ' \
+                     f'Zoom:\nLogin: {payment["login"]} '
+        logger.info(f'Яндекс почта в домене @givinschool.org успешно создана (пароль стандартный)')
+        logger.info(f'Логин для Zoom:')
         logger.info(f'Login: {payment["login"]}')
         # Отдел 4 = @ДРУЗЬЯ_ШКОЛЫ
     except yandex_connect.YandexConnectExceptionY as e:
@@ -241,8 +243,8 @@ def create_sf_participant(payment, database, logger):
     database.execute_dml(sql_text, values_tuple)
     # Окончательный вид участника в БД
     line = f'{select_participant(payment["participant_id"], database)}'
-    mail_text += f'\nУчастник в БД:\n{line}'
-    logger.info(f'Участник в БД:')
+    mail_text += f'\nСведения об участнике успешно внесены в БД:\n{line}'
+    logger.info(f'Сведения об участнике успешно внесены в БД:')
     logger.info(f'{line}')
 
     # Создание учётки Zoom участнику
@@ -272,7 +274,7 @@ def create_sf_participant(payment, database, logger):
     logger.warning("+" * 60)
     logger.warning("TODO: Отправить уведомление участнику в Telegram.")
     logger.warning("+" * 60)
-    mail_text += f"\nВНИМАНИЕ: Отправить Telegram участнику {payment['telegram']}"
+    mail_text += f"\nВНИМАНИЕ: Необходимо отправить оповещение участнику {payment['telegram']} в Telegram вручную."
     if payment["Электронная почта"]:
         participant_notification(payment, logger)
     else:
@@ -281,7 +283,7 @@ def create_sf_participant(payment, database, logger):
         logger.warning(f"ВНИМАНИЕ: Отправить почтовое уведомление (email) участнику")
         logger.warning("+" * 60)
     notification_text = get_participant_notification_text(payment)
-    mail_text += "\n\n\n" + notification_text
+    mail_text += "Текст уведомления:\n\n\n" + notification_text
     send_mail(PASSWORDS.logins['admin_emails'], subject, mail_text, logger)
     # Вычитаю из списка почт менеджеров список почт админов, чтобы не было повторных писем
     list_ = [item for item in PASSWORDS.logins['manager_emails'] if item not in PASSWORDS.logins['admin_emails']]

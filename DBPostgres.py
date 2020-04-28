@@ -285,17 +285,18 @@ class DBPostgres:
             return None, None
         else:
             # Нормализация value под БД
-            if criterion == 'email':
-                value = value.lower()
-            elif criterion == 'telegram':
-                value = value.lower()
-            elif criterion == 'fio':
-                value = value.upper()
-            elif criterion == 'fio_eng':
-                value = value.upper()
-            else:
-                self.logger.error(f"Это неизвестный критерий поиска участника - {criterion}={value}")
-                raise
+            if criterion != 'id':
+                if criterion == 'email':
+                    value = value.lower()
+                elif criterion == 'telegram':
+                    value = value.lower()
+                elif criterion == 'fio':
+                    value = value.upper()
+                elif criterion == 'fio_eng':
+                    value = value.upper()
+                else:
+                    self.logger.error(f"Это неизвестный критерий поиска участника - {criterion}={value}")
+                    raise
             self.logger.info(f"Осуществляем поиск участника по {criterion}={value}")
             # Искать нужно с любым type т.к. заблокированный участник тоже может вновь оплатить
             sql_text = f"select id, type from participants where {criterion}=%s;"

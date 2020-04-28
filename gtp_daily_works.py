@@ -4,6 +4,7 @@ import traceback
 import xlsxwriter
 import os
 import PASSWORDS
+import gtp_participant_block
 from DBPostgres import DBPostgres
 from Log import Log
 from log_config import log_dir, log_level
@@ -15,6 +16,84 @@ now = datetime.now().strftime("%Y%m%d%H%M")
 logger = Log.setup_logger('__main__', log_dir, f'gtp_daily_works_{now}.log',
                           log_level)
 logger.info('START gtp_daily_works')
+
+
+def block_participants(dbconnect):
+    """
+    Блокировка участников у которых оплата просрочена на 5 дней
+    :param dbconnect: Соединение с БД
+    :return:
+    """
+    logger.info("Блокировка участников у которых оплата просрочена на 5 дней")
+    # Список участников подлежащих блокировке
+    sql_text = """SELECT 
+--current_date,
+until_date - current_date as "INTERVAL2",
+deadline - current_date as "INTERVAL",
+--last_name, 
+--first_name,
+fio, 
+email, 
+telegram,
+payment_date, 
+number_of_days, 
+deadline, 
+until_date,
+--,comment
+id
+FROM public.participants
+WHERE type in ('P', 'N')
+and (
+    ((deadline - current_date = -5 and until_date is NULL) or (until_date - current_date = -5 and until_date is not NULL))
+)
+order by last_name"""
+
+    values_tuple = (None,)
+    records = dbconnect.execute_select(sql_text, values_tuple)
+    # (None, 7, 'АЛААА', 'anxxxxx@mail.ru', datetime.date(2019, 12, 31), None)
+    # (None, 7, 'БАРААААА', 'ИРАААА', 'barxxxx.xxx@inbox.ru', '@irinabar6', datetime.date(2019, 12, 8), 30, datetime.date(2020, 1, 7), None)
+    # (None, 7, 'БАРААААА ИРАААА', 'barxxxx.xxx@inbox.ru', '@irinabar6', datetime.date(2019, 12, 8), 30, datetime.date(2020, 1, 7), None)
+    intervals = {3: "3 дня", 7: "7 дней"}
+
+    for p in records:
+        # Определяем что используется Срок оплаты или отсрочка
+        if p[7] is None:
+            until_date = p[8]
+        else:
+            until_date = p[7]
+
+        try:
+            gtp_participant_block.block_one_participant(p[9], dbconnect, logger)
+
+            mail_text = f"""Здравствуйте, {p[2].title()}!  
+    
+    Наша автоматическая система заблокировала вашу учётную запись для Друзей Школы (ДШ),
+    потому что вы {p[5].strftime("%d.%m.%Y")} оплатили период {p[6]} дней Друзей Школы (ДШ) 
+    и ваша оплата просрочена на 5 дней.
+    Система предупреждала вас за 3 и 7 дней до срока, письмом на email - {p[3]}.
+    Для разблокировки достаточно просто оплатить ДШ.
+    Если же вы больше не хотите участвовать в ДШ - система больше не будет вас беспокоить.
+    
+    Вы можете оплатить ДШ через эти платёжные системы (в первых двух вариантах доступен PayPal). Во втором варианте возможна оплата сразу за 3 или 6 месяцев, при этом вы полаете скидки 7% и 13% соответственно:
+    1) (+PayPal) https://givinschoolru.getcourse.ru/friends
+    2) (+PayPal) https://lp.givinschool.org/dsh
+    3) https://givinschoolru.getcourse.ru/paykeeper
+    
+    Пожалуйста, при оплате, указывайте свои Фамилию, Имя, такие же как и при регистрации.
+    В назначение платежа можно написать "друзья школы" или просто "дш".
+    
+    Ваш email:    {p[3]}
+    Ваш telegram: {p[4]}
+    
+    С благодарностью и сердечным теплом,
+    команда Школы Гивина.
+        """
+            print(mail_text)
+            logger.info(mail_text)
+            send_mail([p[3]], r"[ШКОЛА ГИВИНА]. Оповещение о блокировке в ДШ", mail_text, logger)
+        except:
+            send_error(f"DAILY WORKS ERROR: Ошибка при попытке заблокировать участника:\n{p}")
+        logger.info('=' * 60)
 
 
 def participants_notification(dbconnect):
@@ -93,7 +172,7 @@ order by last_name"""
 
 def get_list_debtors(dbconnect):
     """
-    Получение списка долников и отправка его менеджерам
+    Получение списка должников и отправка его менеджерам
     :param dbconnect: Соединение с БД
     :return:
     """
@@ -291,15 +370,23 @@ def main():
         logger.error("Exit with error")
         sys.exit(1)
     logger.info('#' * 60)
+    # Уведомление участников о необходимости оплаты. Здесь падаем при первой же ошибке, т.к. тут скорее всего может
+    # быть только проблема с почтой, а это будет для всех.
     try:
         participants_notification(dbconnect)
     except Exception:
         send_error("DAILY WORKS ERROR: participants_notification()")
     logger.info('#' * 60)
+    # Блокировка участников у которых оплата просрочена на 5 дней. Здесь проверка на ошибку для каждого конкретного
+    # участника.
+    block_participants(dbconnect)
+    logger.info('#' * 60)
+    # Получение списка должников и отправка его менеджерам
     try:
         get_list_debtors(dbconnect)
     except Exception:
         send_error("DAILY WORKS ERROR: get_list_debtors()")
+    # Получение полного списка участников и отправка его менеджерам
     try:
         get_full_list_participants(dbconnect)
     except Exception:

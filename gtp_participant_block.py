@@ -6,14 +6,26 @@ from utils import is_eng
 from utils import is_rus
 
 
-def participant_block(list_participants, logger):
+def participants_block(list_participants, logger):
     # Подключение к БД
     postgres = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
                           password=PASSWORDS.logins['postgres_password'], host=PASSWORDS.logins['postgres_host'],
                           port=PASSWORDS.logins['postgres_port'])
     for p in list_participants.splitlines():
-        print(f"Попытка блокировки участника |{p}|")
-        logger.info(f"Попытка блокировки участника |{p}|")
+        block_one_participant(p, postgres, logger)
+    postgres.disconnect()
+
+
+def block_one_participant(p, postgres, logger):
+    print(f"Попытка блокировки участника |{p}|")
+    logger.info(f"Попытка блокировки участника |{p}|")
+    # Проверяем что p это ID
+    if p.isdigit():
+        participant_id = int(p)
+        print(f"Ищем участника по ID - {p}")
+        logger.info(f"Ищем участника по ID - {p}")
+        participant_id, p_type = postgres.find_participant_by('id', p)
+    else:
         p = p.strip()
         participant_id = None
         if p[0] == '@':
@@ -44,11 +56,11 @@ def participant_block(list_participants, logger):
             print(f"Ищем участника по fio_eng - {p}")
             logger.info(f"Ищем участника по fio_eng - {p}")
             participant_id, p_type = postgres.find_participant_by('fio_eng', p)
-        if participant_id is None:
-            print(f"******* ВНИМАНИЕ: По значению {p} ничего не нашлось")
-            logger.warning(f"******* ВНИМАНИЕ: По значению {p} ничего не нашлось")
-            print("-" * 45)
-            continue
+    if participant_id is None:
+        print(f"******* ВНИМАНИЕ: По значению {p} ничего не нашлось")
+        logger.warning(f"******* ВНИМАНИЕ: По значению {p} ничего не нашлось")
+        print("-" * 45)
+    else:
         if p_type == 'N' or p_type == 'P':
             # Блокируем пользователя
             # sql_text = f"UPDATE participants SET type='B', password=password||'55' where {sql_instr}=%s RETURNING id;"
@@ -90,10 +102,9 @@ def participant_block(list_participants, logger):
             logger.info("ЭТОТ УЧАСТНИК УЖЕ ЗАБЛОКИРОВАН")
         else:
             print(f"Неизвестный тип участника type={p_type}")
-            logger.info(f"Неизвестный тип участника type={p_type}")
+            logger.warning(f"Неизвестный тип участника type={p_type}")
         print("-" * 45)
         logger.info("-" * 45)
-    postgres.disconnect()
 
 
 if __name__ == '__main__':
@@ -106,4 +117,4 @@ if __name__ == '__main__':
     logger = Log.setup_logger('__main__', log_dir, f'gtp_block_participant_{now}.log',
                               log_level)
 
-    participant_block(list_fio, logger)
+    participants_block(list_fio, logger)

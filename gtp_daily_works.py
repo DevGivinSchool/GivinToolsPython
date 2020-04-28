@@ -92,13 +92,13 @@ order by last_name"""
         logger.info('=' * 60)
 
 
-def getting_list_debtors(dbconnect):
+def get_list_debtors(dbconnect):
     """
-    Получение списка долников и отправление его менеджерам
+    Получение списка долников и отправка его менеджерам
     :param dbconnect: Соединение с БД
     :return:
     """
-    logger.info("Получение списка долников и отправление его менеджерам")
+    logger.info("Получение списка долников и отправка его менеджерам")
 
     # Список должников
     sql_text = """SELECT
@@ -133,6 +133,46 @@ order by last_name"""
     send_mail(PASSWORDS.logins['manager_emails'], f"[ШКОЛА ГИВИНА]. Список должников {now_for_text}",
               mail_text, logger, xlsx_file_path)
 
+    # Полный список участников
+    sql_text = """SELECT
+id, type,
+last_name as "Фамилия", first_name as "Имя", email, telegram,
+payment_date "Дата оплаты", number_of_days as "Дней", deadline "Оплачено до",
+until_date as "Отсрочка до", comment
+FROM public.participants
+WHERE type in ('P', 'N')
+order by last_name"""
+    values_tuple = (None,)
+    records = dbconnect.execute_select(sql_text, values_tuple)
+    # (1126, 'P', 'АБРАМОВА', 'ЕЛЕНА', 'el34513543@gmail.com', '@el414342', datetime.date(2019, 8, 7), 45, datetime.date(2019, 9, 21), datetime.date(2019, 10, 15), None)
+
+    # now_for_file = datetime.now().strftime("%d%m%Y_%H%M")
+    now_for_file = datetime.now().strftime("%Y_%m_%d")
+    xlsx_file_path = os.path.join(log_dir, f'PARTICIPANTS_{now_for_file}.xlsx')
+    table_text = get_excel_table(records, xlsx_file_path)
+
+    now_for_text = datetime.now().strftime("%d.%m.%Y")
+    mail_text = f"""Здравствуйте!
+
+Во вложении содержиться полный список участников ДШ на {now_for_text} в формате xlsx.
+Таблица в виде текста:
+{table_text}
+
+С уважением, ваш робот."""
+    print(mail_text)
+    logger.info(mail_text)
+    send_mail(PASSWORDS.logins['full_list_participants_to_emails'],
+              f"[ШКОЛА ГИВИНА]. Полный список участников ДШ на {now_for_text}",
+              mail_text, logger, xlsx_file_path)
+
+
+def get_full_list_participants(dbconnect):
+    """
+    Получение полного списка участников и отправка его менеджерам
+    :param dbconnect: Соединение с БД
+    :return:
+    """
+    logger.info("Получение полного списка участников и отправка его менеджерам")
     # Полный список участников
     sql_text = """SELECT
 id, type,
@@ -258,9 +298,13 @@ def main():
         send_error("DAILY WORKS ERROR: participants_notification()")
     logger.info('#' * 60)
     try:
-        getting_list_debtors(dbconnect)
+        get_list_debtors(dbconnect)
     except Exception:
-        send_error("DAILY WORKS ERROR: getting_list_debtors()")
+        send_error("DAILY WORKS ERROR: get_list_debtors()")
+    try:
+        get_full_list_participants(dbconnect)
+    except Exception:
+        send_error("DAILY WORKS ERROR: get_full_list_participants()")
 
     # TODO Процедура удаления пользователей у которых последний платёж год назад вместе со всеми их платёжками и письмами
 

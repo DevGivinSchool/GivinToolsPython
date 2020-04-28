@@ -4,7 +4,6 @@ import traceback
 import xlsxwriter
 import os
 import PASSWORDS
-import log_config
 from DBPostgres import DBPostgres
 from Log import Log
 from log_config import log_dir, log_level

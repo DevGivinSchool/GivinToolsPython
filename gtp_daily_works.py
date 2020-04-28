@@ -118,6 +118,56 @@ order by last_name"""
     # now_for_file = datetime.now().strftime("%d%m%Y_%H%M")
     now_for_file = datetime.now().strftime("%Y_%m_%d")
     xlsx_file_path = os.path.join(log_dir, f'DEBTORS_{now_for_file}.xlsx')
+    table_text = get_excel_table(records, xlsx_file_path)
+
+    now_for_text = datetime.now().strftime("%d.%m.%Y")
+    mail_text = f"""Здравствуйте!
+
+Во вложении содержиться список должников на сегодня {now_for_text} в формате xlsx.
+Таблица в виде текста:
+{table_text}
+    
+С уважением, ваш робот."""
+    print(mail_text)
+    logger.info(mail_text)
+    send_mail(PASSWORDS.logins['manager_emails'], f"[ШКОЛА ГИВИНА]. Список должников {now_for_text}",
+              mail_text, logger, xlsx_file_path)
+
+    # Полный список участников
+    sql_text = """SELECT
+id, type,
+last_name as "Фамилия", first_name as "Имя", email, telegram,
+payment_date "Дата оплаты", number_of_days as "Дней", deadline "Оплачено до",
+until_date as "Отсрочка до", comment
+FROM public.participants
+WHERE type in ('P', 'N')
+order by last_name"""
+    values_tuple = (None,)
+    records = dbconnect.execute_select(sql_text, values_tuple)
+    # (1126, 'P', 'АБРАМОВА', 'ЕЛЕНА', 'el34513543@gmail.com', '@el414342', datetime.date(2019, 8, 7), 45, datetime.date(2019, 9, 21), datetime.date(2019, 10, 15), None)
+
+    # now_for_file = datetime.now().strftime("%d%m%Y_%H%M")
+    now_for_file = datetime.now().strftime("%Y_%m_%d")
+    xlsx_file_path = os.path.join(log_dir, f'PARTICIPANTS_{now_for_file}.xlsx')
+    table_text = get_excel_table(records, xlsx_file_path)
+
+    now_for_text = datetime.now().strftime("%d.%m.%Y")
+    mail_text = f"""Здравствуйте!
+
+Во вложении содержиться полный список участников ДШ на {now_for_text} в формате xlsx.
+Таблица в виде текста:
+{table_text}
+
+С уважением, ваш робот."""
+    print(mail_text)
+    logger.info(mail_text)
+    send_mail(PASSWORDS.logins['full_list_participants_to_emails'],
+              f"[ШКОЛА ГИВИНА]. Полный список участников ДШ на {now_for_text}",
+              mail_text, logger, xlsx_file_path)
+
+
+# Получение списка participants на основе переданного набора данных record из select
+def get_excel_table(records, xlsx_file_path):
     workbook = xlsxwriter.Workbook(xlsx_file_path)
     worksheet = workbook.add_worksheet('Список')
     # Запись заголовков столбцов
@@ -176,19 +226,7 @@ order by last_name"""
     worksheet.set_column(8, 9, 12)
     worksheet.set_column(10, 10, 40)
     workbook.close()
-
-    now_for_text = datetime.now().strftime("%d.%m.%Y")
-    mail_text = f"""Здравствуйте!
-
-Во вложении содержиться список должников на сегодня {now_for_text} в формате xlsx.
-Таблица в виде текста:
-{table_text}
-    
-С уважением, ваш робот."""
-    print(mail_text)
-    logger.info(mail_text)
-    send_mail(PASSWORDS.logins['manager_emails'], f"[ШКОЛА ГИВИНА]. Список должников {now_for_text}",
-              mail_text, logger, xlsx_file_path)
+    return table_text
 
 
 def main():

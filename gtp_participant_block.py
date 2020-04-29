@@ -20,14 +20,15 @@ def block_one_participant(p, postgres, logger):
     print(f"Попытка блокировки участника |{p}|")
     logger.info(f"Попытка блокировки участника |{p}|")
     # Проверяем что p это ID
-    if p.isdigit():
-        participant_id = int(p)
+    participant_id = None
+    p_type = None
+    if isinstance(p, int):
+        sql_instr = "id"
         print(f"Ищем участника по ID - {p}")
         logger.info(f"Ищем участника по ID - {p}")
         participant_id, p_type = postgres.find_participant_by('id', p)
     else:
         p = p.strip()
-        participant_id = None
         if p[0] == '@':
             # Ищем участника по Telegram
             sql_instr = "telegram"
@@ -71,8 +72,8 @@ def block_one_participant(p, postgres, logger):
                 print(f"******* ВНИМАНИЕ: UPDATE для {p} не отработал")
                 logger.error(f"******* ВНИМАНИЕ: UPDATE для {p} не отработал")
             else:
-                print(f"Заблокирован участник ID={id_}")
-                logger.info(f"Заблокирован участник ID={id_}")
+                print(f"Блокировка участника ID={id_}")
+                logger.info(f"Блокировка участника ID={id_}")
                 # Состояние участник
                 sql_text = 'SELECT id, fio, login, password, type FROM participants where id=%s;'
                 # [(1420, 'ВОЛЬНЫХ НАТАЛЬЯ', 'volnyh_natalja@givinschool.org', 'Z7#A5Ycddq55', 'B')]
@@ -81,6 +82,8 @@ def block_one_participant(p, postgres, logger):
                 print(participant)
                 logger.debug(f"participant={participant}")
                 # Измение статуса в zoom (блокировка участника)
+                print("Блокировка участника в Zoom")
+                logger.info("Блокировка участника в Zoom")
                 zoom_result = zoom_us.zoom_users_userstatus(participant[2], "deactivate", logger=logger)
                 print(zoom_result)
                 logger.debug(f"zoom_result={zoom_result}")

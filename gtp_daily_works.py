@@ -44,7 +44,7 @@ id
 FROM public.participants
 WHERE type in ('P', 'N')
 and (
-    ((deadline - current_date = -5 and until_date is NULL) or (until_date - current_date = -5 and until_date is not NULL))
+    ((deadline - current_date < -5 and until_date is NULL) or (until_date - current_date < -5 and until_date is not NULL))
 )
 order by last_name"""
 
@@ -211,38 +211,6 @@ order by last_name"""
     send_mail(PASSWORDS.logins['manager_emails'], f"[ШКОЛА ГИВИНА]. Список должников {now_for_text}",
               mail_text, logger, xlsx_file_path)
 
-    # Полный список участников
-    sql_text = """SELECT
-id, type,
-last_name as "Фамилия", first_name as "Имя", email, telegram,
-payment_date "Дата оплаты", number_of_days as "Дней", deadline "Оплачено до",
-until_date as "Отсрочка до", comment
-FROM public.participants
-WHERE type in ('P', 'N')
-order by last_name"""
-    values_tuple = (None,)
-    records = dbconnect.execute_select(sql_text, values_tuple)
-    # (1126, 'P', 'АБРАМОВА', 'ЕЛЕНА', 'el34513543@gmail.com', '@el414342', datetime.date(2019, 8, 7), 45, datetime.date(2019, 9, 21), datetime.date(2019, 10, 15), None)
-
-    # now_for_file = datetime.now().strftime("%d%m%Y_%H%M")
-    now_for_file = datetime.now().strftime("%Y_%m_%d")
-    xlsx_file_path = os.path.join(log_dir, f'PARTICIPANTS_{now_for_file}.xlsx')
-    table_text = get_excel_table(records, xlsx_file_path)
-
-    now_for_text = datetime.now().strftime("%d.%m.%Y")
-    mail_text = f"""Здравствуйте!
-
-Во вложении содержиться полный список участников ДШ на {now_for_text} в формате xlsx.
-Таблица в виде текста:
-{table_text}
-
-С уважением, ваш робот."""
-    print(mail_text)
-    logger.info(mail_text)
-    send_mail(PASSWORDS.logins['full_list_participants_to_emails'],
-              f"[ШКОЛА ГИВИНА]. Полный список участников ДШ на {now_for_text}",
-              mail_text, logger, xlsx_file_path)
-
 
 def get_full_list_participants(dbconnect):
     """
@@ -369,28 +337,30 @@ def main():
         send_error("DAILY WORKS ERROR: Can't connect to DB!!!")
         logger.error("Exit with error")
         sys.exit(1)
-    logger.info('#' * 60)
+    logger.info('\n' + '#' * 60)
     # Уведомление участников о необходимости оплаты. Здесь падаем при первой же ошибке, т.к. тут скорее всего может
     # быть только проблема с почтой, а это будет для всех.
     try:
         participants_notification(dbconnect)
     except Exception:
         send_error("DAILY WORKS ERROR: participants_notification()")
-    logger.info('#' * 60)
+    logger.info('\n' + '#' * 60)
     # Блокировка участников у которых оплата просрочена на 5 дней. Здесь проверка на ошибку для каждого конкретного
     # участника.
     block_participants(dbconnect)
-    logger.info('#' * 60)
+    logger.info('\n' + '#' * 60)
     # Получение списка должников и отправка его менеджерам
     try:
         get_list_debtors(dbconnect)
     except Exception:
         send_error("DAILY WORKS ERROR: get_list_debtors()")
+    logger.info('\n' + '#' * 60)
     # Получение полного списка участников и отправка его менеджерам
     try:
         get_full_list_participants(dbconnect)
     except Exception:
         send_error("DAILY WORKS ERROR: get_full_list_participants()")
+    logger.info('\n' + '#' * 60)
 
     # TODO Процедура удаления пользователей у которых последний платёж год назад вместе со всеми их платёжками и письмами
 

@@ -235,7 +235,8 @@ order by last_name"""
     values_tuple = (None,)
     records = dbconnect.execute_select(sql_text, values_tuple)
     # (1126, 'P', 'АБРАМОВА', 'ЕЛЕНА', 'el34513543@gmail.com', '@el414342', datetime.date(2019, 8, 7), 45, datetime.date(2019, 9, 21), datetime.date(2019, 10, 15), None)
-
+    count_participants = len(records)
+    print(f"ВСЕГО {count_participants} УЧАСТНИКОВ")
     # now_for_file = datetime.now().strftime("%d%m%Y_%H%M")
     now_for_file = datetime.now().strftime("%Y_%m_%d")
     xlsx_file_path = os.path.join(log_dir, f'PARTICIPANTS_{now_for_file}.xlsx')
@@ -245,6 +246,8 @@ order by last_name"""
     mail_text = f"""Здравствуйте!
 
 Во вложении содержиться полный список участников ДШ на {now_for_text} в формате xlsx.
+ВСЕГО {count_participants} УЧАСТНИКОВ
+
 Таблица в виде текста:
 {table_text}
 
@@ -252,7 +255,7 @@ order by last_name"""
     print(mail_text)
     logger.info(mail_text)
     send_mail(PASSWORDS.logins['full_list_participants_to_emails'],
-              f"[ШКОЛА ГИВИНА]. Полный список участников ДШ на {now_for_text}",
+              f"[ШКОЛА ГИВИНА]. Полный список участников ДШ на {now_for_text}. Всего {count_participants}.",
               mail_text, logger, xlsx_file_path)
 
 

@@ -53,9 +53,9 @@ order by last_name"""
     # (None, 7, 'АЛААА', 'anxxxxx@mail.ru', datetime.date(2019, 12, 31), None)
     # (None, 7, 'БАРААААА', 'ИРАААА', 'barxxxx.xxx@inbox.ru', '@irinabar6', datetime.date(2019, 12, 8), 30, datetime.date(2020, 1, 7), None)
     # (None, 7, 'БАРААААА ИРАААА', 'barxxxx.xxx@inbox.ru', '@irinabar6', datetime.date(2019, 12, 8), 30, datetime.date(2020, 1, 7), None)
-    intervals = {3: "3 дня", 7: "7 дней"}
 
     for p in records:
+        print(p)
         # Определяем что используется Срок оплаты или отсрочка
         if p[7] is None:
             until_date = p[8]
@@ -88,12 +88,11 @@ order by last_name"""
     С благодарностью и сердечным теплом,
     команда Школы Гивина.
         """
-            print(mail_text)
             logger.info(mail_text)
             send_mail([p[3]], r"[ШКОЛА ГИВИНА]. Оповещение о блокировке в ДШ", mail_text, logger)
         except:
             send_error(f"DAILY WORKS ERROR: Ошибка при попытке заблокировать участника:\n{p}")
-        logger.info('=' * 60)
+        logger.info('\n' + '=' * 120)
 
 
 def participants_notification(dbconnect):
@@ -167,7 +166,7 @@ order by last_name"""
         print(mail_text)
         logger.info(mail_text)
         send_mail([p[3]], r"[ШКОЛА ГИВИНА]. Напоминание об оплате ДШ", mail_text, logger)
-        logger.info('=' * 60)
+        logger.info('\n' + '=' * 120)
 
 
 def get_list_debtors(dbconnect):
@@ -192,24 +191,29 @@ order by last_name"""
     values_tuple = (None,)
     records = dbconnect.execute_select(sql_text, values_tuple)
     # (1126, 'P', 'АБРАМОВА', 'ЕЛЕНА', 'el34513543@gmail.com', '@el414342', datetime.date(2019, 8, 7), 45, datetime.date(2019, 9, 21), datetime.date(2019, 10, 15), None)
-
-    # now_for_file = datetime.now().strftime("%d%m%Y_%H%M")
-    now_for_file = datetime.now().strftime("%Y_%m_%d")
-    xlsx_file_path = os.path.join(log_dir, f'DEBTORS_{now_for_file}.xlsx')
-    table_text = get_excel_table(records, xlsx_file_path)
-
     now_for_text = datetime.now().strftime("%d.%m.%Y")
-    mail_text = f"""Здравствуйте!
-
-Во вложении содержиться список должников на сегодня {now_for_text} в формате xlsx.
-Таблица в виде текста:
-{table_text}
+    if len(records) != 0:
+        # now_for_file = datetime.now().strftime("%d%m%Y_%H%M")
+        now_for_file = datetime.now().strftime("%Y_%m_%d")
+        xlsx_file_path = os.path.join(log_dir, f'DEBTORS_{now_for_file}.xlsx')
+        table_text = get_excel_table(records, xlsx_file_path)
+        mail_text = f"""Здравствуйте!
     
-С уважением, ваш робот."""
-    print(mail_text)
-    logger.info(mail_text)
-    send_mail(PASSWORDS.logins['manager_emails'], f"[ШКОЛА ГИВИНА]. Список должников {now_for_text}",
-              mail_text, logger, xlsx_file_path)
+    Во вложении содержиться список должников на сегодня {now_for_text} в формате xlsx.
+    Таблица в виде текста:
+    {table_text}
+        
+    С уважением, ваш робот."""
+        print(mail_text)
+        logger.info(mail_text)
+        send_mail(PASSWORDS.logins['manager_emails'], f"[ШКОЛА ГИВИНА]. Список должников {now_for_text}",
+                  mail_text, logger, xlsx_file_path)
+    else:
+        mail_text = "Сегодня должников нет."
+        logger.info(mail_text)
+        send_mail(PASSWORDS.logins['manager_emails'], f"[ШКОЛА ГИВИНА]. Список должников {now_for_text}. СЕГОДНЯ "
+                                                      f"ДОЛЖНИКОВ НЕТ.",
+                  mail_text, logger)
 
 
 def get_full_list_participants(dbconnect):
@@ -337,35 +341,35 @@ def main():
         send_error("DAILY WORKS ERROR: Can't connect to DB!!!")
         logger.error("Exit with error")
         sys.exit(1)
-    logger.info('\n' + '#' * 60)
+    logger.info('\n' + '#' * 120)
     # Уведомление участников о необходимости оплаты. Здесь падаем при первой же ошибке, т.к. тут скорее всего может
     # быть только проблема с почтой, а это будет для всех.
     try:
         participants_notification(dbconnect)
     except Exception:
         send_error("DAILY WORKS ERROR: participants_notification()")
-    logger.info('\n' + '#' * 60)
+    logger.info('\n' + '#' * 120)
     # Блокировка участников у которых оплата просрочена на 5 дней. Здесь проверка на ошибку для каждого конкретного
     # участника.
     block_participants(dbconnect)
-    logger.info('\n' + '#' * 60)
+    logger.info('\n' + '#' * 120)
     # Получение списка должников и отправка его менеджерам
     try:
         get_list_debtors(dbconnect)
     except Exception:
         send_error("DAILY WORKS ERROR: get_list_debtors()")
-    logger.info('\n' + '#' * 60)
+    logger.info('\n' + '#' * 120)
     # Получение полного списка участников и отправка его менеджерам
     try:
         get_full_list_participants(dbconnect)
     except Exception:
         send_error("DAILY WORKS ERROR: get_full_list_participants()")
-    logger.info('\n' + '#' * 60)
+    logger.info('\n' + '#' * 120)
 
     # TODO Процедура удаления пользователей у которых последний платёж год назад вместе со всеми их платёжками и письмами
 
     # TODO Процедура удаления писем из почты старше 1 года
-    logger.info('#' * 60)
+    logger.info('#' * 120)
     logger.info('END gtp_daily_works')
 
 

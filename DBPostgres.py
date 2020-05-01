@@ -178,13 +178,13 @@ class DBPostgres:
                     participant_id, p_type = self.find_participant_by('telegram', task.payment["telegram"])
         cursor = self.conn.cursor()
         sql_text = """INSERT INTO payments(task_uuid, name_of_service, payment_id, amount, participant_id, 
-        sales_slip, card_number, card_type, payment_purpose, last_name, first_name, fio, email, payment_system) 
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING task_uuid;"""
+        sales_slip, card_number, card_type, payment_purpose, last_name, first_name, fio, email, payment_system, 
+        log_file) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING task_uuid; """
         values_tuple = (task.uuid, task.payment["Наименование услуги"], task.payment["ID платежа"],
                         task.payment["Оплаченная сумма"], participant_id, task.payment["Кассовый чек 54-ФЗ"],
                         task.payment["Номер карты"], task.payment["Тип карты"], 1, task.payment["Фамилия"],
                         task.payment["Имя"], task.payment["Фамилия Имя"], task.payment["Электронная почта"],
-                        task.payment["Платежная система"])
+                        task.payment["Платежная система"], self.logger.handlers[0].baseFilename)
         # print(values_tuple)
         self.logger.debug(f'values_tuple={values_tuple}')
         cursor.execute(sql_text, values_tuple)

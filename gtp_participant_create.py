@@ -4,8 +4,8 @@ import Parser
 import traceback
 import PASSWORDS
 import sys
-import zoom_us
 import password_generator
+from zoom_us import ZoomUS
 from DBPostgres import DBPostgres
 from alert_to_mail import send_mail
 from utils import split_str
@@ -57,7 +57,8 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         values_tuple = (payment["Время проведения"], payment["number_of_days"],
                         payment["deadline"], participant_type, payment["password"], payment["participant_id"])
         # Измение статуса в zoom
-        zoom_result = zoom_us.zoom_users_userstatus(payment["login"], "activate", logger=logger)
+        zoom_user = ZoomUS(logger)
+        zoom_result = zoom_user.zoom_users_userstatus(payment["login"], "activate")
         if zoom_result is not None:
             logger.error("+" * 60)
             mail_text = f"\nПроцедура не смогла автоматически разблокировать участника. Ошибка:\n" \
@@ -249,8 +250,9 @@ def create_sf_participant(payment, database, logger):
 
     # Создание учётки Zoom участнику
     logger.info("Создание учётки Zoom участнику")
-    zoom_result = zoom_us.zoom_users_usercreate(payment["login"], payment['Имя'].title(),
-                                                payment['Фамилия'].title(), payment["password"], logger=logger)
+    zoom_user = ZoomUS(logger)
+    zoom_result = zoom_user.zoom_users_usercreate(payment["login"], payment['Имя'].title(),
+                                                  payment['Фамилия'].title(), payment["password"])
     if zoom_result is not None:
         logger.error("+" * 60)
         subject += " + !ZOOM ERROR"

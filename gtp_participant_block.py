@@ -1,18 +1,18 @@
 import PASSWORDS
-import zoom_us
+from zoom_us import ZoomUS
 from alert_to_mail import send_mail
 from DBPostgres import DBPostgres
 from utils import is_eng
 from utils import is_rus
 
 
-def participants_block(list_participants, logger):
+def participants_block(list_participants, logger2):
     # Подключение к БД
     postgres = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
                           password=PASSWORDS.logins['postgres_password'], host=PASSWORDS.logins['postgres_host'],
                           port=PASSWORDS.logins['postgres_port'])
     for p in list_participants.splitlines():
-        block_one_participant(p, postgres, logger)
+        block_one_participant(p, postgres, logger2)
     postgres.disconnect()
 
 
@@ -22,6 +22,7 @@ def block_one_participant(p, postgres, logger):
     # Проверяем что p это ID
     participant_id = None
     p_type = None
+    sql_instr = ""
     if isinstance(p, int):
         sql_instr = "id"
         print(f"Ищем участника по ID - {p}")
@@ -84,7 +85,8 @@ def block_one_participant(p, postgres, logger):
                 # Измение статуса в zoom (блокировка участника)
                 print("Блокировка участника в Zoom")
                 logger.info("Блокировка участника в Zoom")
-                zoom_result = zoom_us.zoom_users_userstatus(participant[2], "deactivate", logger=logger)
+                zoom_user = ZoomUS(logger)
+                zoom_result = zoom_user.zoom_users_userstatus(participant[2], "deactivate")
                 print(zoom_result)
                 logger.debug(f"zoom_result={zoom_result}")
                 if zoom_result is not None:
@@ -117,7 +119,6 @@ if __name__ == '__main__':
     from list_ import list_fio
 
     now = datetime.now().strftime("%Y%m%d%H%M")
-    logger = Log.setup_logger('__main__', log_dir, f'gtp_block_participant_{now}.log',
-                              log_level)
+    logger_ = Log.setup_logger('__main__', log_dir, f'gtp_block_participant_{now}.log', log_level)
 
-    participants_block(list_fio, logger)
+    participants_block(list_fio, logger_)

@@ -89,7 +89,7 @@ order by last_name"""
     команда Школы Гивина.
         """
             logger.info(mail_text)
-            send_mail([p[3]], r"[ШКОЛА ГИВИНА]. Оповещение о блокировке в ДШ", mail_text, logger)
+            send_mail([p[3]] + PASSWORDS.logins['manager_emails'], r"[ШКОЛА ГИВИНА]. Оповещение о блокировке в ДШ", mail_text, logger)
         except:
             send_error(f"DAILY WORKS ERROR: Ошибка при попытке заблокировать участника:\n{p}")
         logger.info('\n' + '=' * 120)

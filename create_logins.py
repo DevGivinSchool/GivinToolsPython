@@ -10,12 +10,16 @@ from utils import split_str
 # TODO: На вход везде должно подаваться одно и тоже Фамилия + Имя + Login, если чего-то нет, то оно собирается из друго.
 
 def create_team_mail():
-    """ Русские только Фамилия (для почт тех кто в команде)"""
+    """ Русские только Фамилия (для почт тех кто в команде)
+        В list_.py нужно внести список Фамилия + Имя
+    """
     for line in list_fio.splitlines():
         line = split_str(line)
         # ['Карякина', 'Наталья']
-        login_ = get_login(line[0], None)
+        login_ = get_login(line[0], line[1], type="team")
+        print(f"Фамилия: {line[0]}; Имя: {line[1]}; Email: {login_}@givinschool.org")
         password = password_generator.random_password(strong=True, long=8)
+        print(f"{line}\t{login_}@givinschool.org\t{password}")
         # Отдел 1 = Все сотрудники
         result = None
         try:
@@ -24,7 +28,7 @@ def create_team_mail():
             # print(e.args[0])
             if e.args[0] == 500 or e.args[0] == 409:
                 print(f"Unhandled exception: Такой пользователь уже существует: "
-                      f"{login_ + '@givinschool.org'}. Пробую еще раз Фамилия+Имя")
+                      f"{login_}@givinschool.org. Пробую еще раз Фамилия+Имя")
                 try:
                     login_ = get_login(line[0], line[1])
                     result = yandex_mail.create_yandex_mail(line[0], line[1], login_, password, department_id_=1)

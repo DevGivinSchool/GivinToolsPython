@@ -12,6 +12,7 @@ from utils import split_str
 def create_team_mail():
     """ Русские только Фамилия (для почт тех кто в команде)
         В list_.py нужно внести список Фамилия + Имя
+        Иванов Иван
     """
     for line in list_fio.splitlines():
         line = split_str(line)
@@ -46,7 +47,10 @@ def create_team_mail():
 
 
 def create_login_mail():
-    """ English login (для технических почт)"""
+    """ English login (для технических почт)
+        В list_.py нужно внести список Имя + Login
+        Zoom10 zoom10
+    """
     for line in list_fio.splitlines():
         # На вход подаються Фамилия Имя Логин
         # Отдел Кадров	hr

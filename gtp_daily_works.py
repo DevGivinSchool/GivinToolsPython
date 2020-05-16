@@ -357,11 +357,11 @@ def main():
     block_participants(dbconnect)
     logger.info('\n' + '#' * 120)
     # Получение списка должников и отправка его менеджерам
-    try:
-        get_list_debtors(dbconnect)
-    except Exception:
-        send_error("DAILY WORKS ERROR: get_list_debtors()")
-    logger.info('\n' + '#' * 120)
+    # try:
+    #     get_list_debtors(dbconnect)
+    # except Exception:
+    #     send_error("DAILY WORKS ERROR: get_list_debtors()")
+    # logger.info('\n' + '#' * 120)
     # Получение полного списка участников и отправка его менеджерам
     try:
         get_full_list_participants(dbconnect)

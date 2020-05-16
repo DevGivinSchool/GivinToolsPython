@@ -432,32 +432,30 @@ if __name__ == '__main__':
         zoom_user.bulk_user_status_change(list_fio, action)
 """
 # ==========================================================================================
-"""
-    if __name__ == '__main__':
-        # Список встреч
-        # https://marketplace.zoom.us/docs/api-reference/zoom-api/users/users
-        import logging
-        import traceback
-        import math
-        import datetime
-        from Log import Log
-        from log_config import log_dir
-    
-        now = datetime.datetime.now().strftime("%Y%m%d%H%M")
-        logger = Log.setup_logger('__main__', log_dir, f'zoom_us_{now}.log', logging.DEBUG)
-        print(f"Текущие встречи на {datetime.date.today()}:\n")
-        list_users = ['zoom01@givinschool.org', 'zoom02@givinschool.org', 'zoom03@givinschool.org',
-                      'zoom04@givinschool.org', 'zoom05@givinschool.org', 'zoom06@givinschool.org',
-                      'zoom07@givinschool.org']
-        zoom_user = ZoomUS(logger)
-        for lu in list_users:
-            zoom_user.print_list_meetings_for_user(user_id=lu, meeting_type="upcoming")
-        zoom_user = ZoomUS(logger, PASSWORDS.logins['zoom08_api_key'], PASSWORDS.logins['zoom08_api_secret'])
-        zoom_user.print_list_meetings_for_user(user_id='zoom08@givinschool.org', meeting_type="upcoming")
-        zoom_user = ZoomUS(logger, PASSWORDS.logins['zoom09_api_key'], PASSWORDS.logins['zoom09_api_secret'])
-        zoom_user.print_list_meetings_for_user(user_id='zoom09gs@gmail.com', meeting_type="upcoming")
-    """
 
+if __name__ == '__main__':
+    # Список встреч
+    # https://marketplace.zoom.us/docs/api-reference/zoom-api/users/users
+    import logging
+    import traceback
+    import math
+    import datetime
+    from Log import Log
+    from log_config import log_dir
+
+    now = datetime.datetime.now().strftime("%Y%m%d%H%M")
+    logger = Log.setup_logger('__main__', log_dir, f'zoom_us_{now}.log', logging.DEBUG)
+    print(f"Текущие встречи на {datetime.date.today()}:\n")
+    list_users = ['zoom01@givinschool.org', 'zoom02@givinschool.org', 'zoom03@givinschool.org',
+                  'zoom04@givinschool.org', 'zoom05@givinschool.org', 'zoom06@givinschool.org',
+                  'zoom07@givinschool.org']
+    zoom_user = ZoomUS(logger)
+    for lu in list_users:
+        zoom_user.print_list_meetings_for_user(user_id=lu, meeting_type="upcoming")
+    zoom_user = ZoomUS(logger, PASSWORDS.logins['zoom08_api_key'], PASSWORDS.logins['zoom08_api_secret'])
+    zoom_user.print_list_meetings_for_user(user_id='zoom08@givinschool.org', meeting_type="upcoming")
+    zoom_user = ZoomUS(logger, PASSWORDS.logins['zoom09_api_key'], PASSWORDS.logins['zoom09_api_secret'])
+    zoom_user.print_list_meetings_for_user(user_id='zoom09gs@gmail.com', meeting_type="upcoming")
 
 # ==========================================================================================
 """

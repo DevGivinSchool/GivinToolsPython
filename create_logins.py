@@ -20,7 +20,7 @@ def create_team_mail():
         login_ = get_login(line[0], line[1], type="team")
         print(f"Фамилия: {line[0]}; Имя: {line[1]}; Email: {login_}@givinschool.org")
         password = password_generator.random_password(strong=True, long=8)
-        print(f"{line}\t{login_}@givinschool.org\t{password}")
+        print(f"{line[0]} {line[1]}\t{login_}@givinschool.org\t{password}")
         # Отдел 1 = Все сотрудники
         result = None
         try:

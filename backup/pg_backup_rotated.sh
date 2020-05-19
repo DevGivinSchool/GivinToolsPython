@@ -111,7 +111,7 @@ function perform_backups()
 	echo -e "\n\nPerforming schema-only backups"
 	echo -e "--------------------------------------------\n"
 
-	SCHEMA_ONLY_DB_LIST=`psql -h "$HOSTNAME" -U "$USERNAME" -At -c "$SCHEMA_ONLY_QUERY" postgres`
+	SCHEMA_ONLY_DB_LIST=`psql -h "$HOSTNAME" -U "$USERNAME" -At -c "$SCHEMA_ONLY_QUERY" gs`
 
 	echo -e "The following databases were matched for schema-only backup:\n${SCHEMA_ONLY_DB_LIST}\n"
 
@@ -141,7 +141,7 @@ function perform_backups()
 	echo -e "\n\nPerforming full backups"
 	echo -e "--------------------------------------------\n"
 
-	for DATABASE in `psql -h "$HOSTNAME" -U "$USERNAME" -At -c "$FULL_BACKUP_QUERY" postgres`
+	for DATABASE in `psql -h "$HOSTNAME" -U "$USERNAME" -At -c "$FULL_BACKUP_QUERY" gs`
 	do
 		if [ $ENABLE_PLAIN_BACKUPS = "yes" ]
 		then

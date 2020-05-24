@@ -456,6 +456,12 @@ if __name__ == '__main__':
     zoom_user.print_list_meetings_for_user(user_id='zoom08@givinschool.org', meeting_type="upcoming")
     zoom_user = ZoomUS(logger, PASSWORDS.logins['zoom09_api_key'], PASSWORDS.logins['zoom09_api_secret'])
     zoom_user.print_list_meetings_for_user(user_id='zoom09gs@gmail.com', meeting_type="upcoming")
+    zoom_user = ZoomUS(logger, PASSWORDS.logins['zoom10_api_key'], PASSWORDS.logins['zoom10_api_secret'])
+    zoom_user.print_list_meetings_for_user(user_id='zoom10gs@yandex.ru', meeting_type="upcoming")
+    zoom_user = ZoomUS(logger, PASSWORDS.logins['zoom11_api_key'], PASSWORDS.logins['zoom11_api_secret'])
+    zoom_user.print_list_meetings_for_user(user_id='zoom11gs@gmail.com', meeting_type="upcoming")
+    zoom_user = ZoomUS(logger, PASSWORDS.logins['zoom12_api_key'], PASSWORDS.logins['zoom12_api_secret'])
+    zoom_user.print_list_meetings_for_user(user_id='zoom12gs@gmail.com', meeting_type="upcoming")
 
 # ==========================================================================================
 """

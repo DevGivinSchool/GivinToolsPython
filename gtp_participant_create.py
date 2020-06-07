@@ -9,7 +9,15 @@ from zoom_us import ZoomUS
 from DBPostgres import DBPostgres
 from alert_to_mail import send_mail
 from utils import get_login
-from Email2 import MailMessage
+
+
+class MailMessage:
+    """Класс email сообщения"""
+    __slots__ = ('subject', 'text')
+
+    def __init__(self, subject, text):
+        self.subject = subject
+        self.text = text
 
 
 def select_payment(task_uuid, database):

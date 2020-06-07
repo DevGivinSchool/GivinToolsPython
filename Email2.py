@@ -341,13 +341,3 @@ class Email:
             # raise Exception('Неизвестный формат письма')
             return None
         return body
-
-
-class MailMessage:
-    """Класс email сообщения"""
-    __slots__ = ('subject', 'text')
-
-    def __init__(self, subject, text):
-        self.subject = subject
-        self.text = text
-

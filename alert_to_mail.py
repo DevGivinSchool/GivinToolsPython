@@ -11,6 +11,7 @@ import log_config
 from email.mime.text import MIMEText
 from email.header import Header
 from Log import Log
+from Email2 import MailMessage
 
 
 def send_mail(receiver_emails, subject, message, logger, attached_file=None,

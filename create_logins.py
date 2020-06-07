@@ -119,6 +119,34 @@ def create_info_str(result, password=True, welcome=True):
     return text
 
 
+def create_participant():
+    # Создаём ТОЛЬКО ПОЧТУ новому участнику в домене @givinschool.org
+    # Для отладки или отдельных случаев, иначе использовать gtp_participant_create
+    print("Создаём почту новому участнику в домене @givinschool.org")
+    for line in list_fio.splitlines():
+        line = split_str(line)
+        # ['Карякина', 'Наталья']
+        login_ = get_login(line[0], line[1], type="frend")
+        print(f"Фамилия: {line[0]}; Имя: {line[1]}; Email: {login_}@givinschool.org")
+        try:
+            result = yandex_mail.create_yandex_mail(line[0], line[1], login_, department_id_=4)
+            # print(f"Email created:{result['email']}")
+            login_ = result['email']
+            print(f'\nЯндекс почта в домене @givinschool.org успешно создана (пароль стандартный)\nЛогин для '
+                  f'Zoom:\nLogin: {login_}')
+            # Отдел 4 = @ДРУЗЬЯ_ШКОЛЫ
+        except yandex_connect.YandexConnectExceptionY as e:
+            print(e)
+            print(e.args[0])
+            if e.args[0] == 500:
+                # print(f'Unhandled exception: Такая почта уже существует: {payment["login"]}')
+                print(f'Unhandled exception: Такая почта уже существует: {login_}')
+                # Т.к. это может быть однофамилец, то ситуация требует разрешения, поэтому тут тоже падаем
+                raise
+            else:
+                raise
+
+
 def invalid():
     print("ОШИБОЧНЫЙ ВЫБОР!")
 
@@ -142,7 +170,8 @@ if __name__ == "__main__":
             "3": ("Логин для FTP", create_ftp_login),
             "4": ("Посмотреть список групп", show_groups),
             "5": ("Генерировать пароль", generate_password),
-            "6": ("Выход", exit_fn)
+            "6": ("DEBUG: Создание учётки для ДШ", create_participant),
+            "7": ("Выход", exit_fn)
             }
     for key in sorted(menu.keys()):
         print(key + ":" + menu[key][0])

@@ -135,7 +135,8 @@ def main():
         print(error_text)
         logger.error(error_text)
         logger.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
-        send_mail(PASSWORDS.logins['admin_emails'], "MAIN ERROR (Yandex mail)", error_text, logger)
+        send_mail(PASSWORDS.logins['admin_emails'], "MAIN ERROR (Yandex mail)", error_text, logger,
+                  attached_file=logger.handlers[0].baseFilename)
         logger.error("Exit with error")
         sys.exit(1)
     # First sort_mail() execution then go to idle mode

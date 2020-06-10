@@ -1,5 +1,8 @@
 #!/home/robot/MyGit/GivinToolsPython/venv/bin/python3.8
 
+# TODO Процедуру проверки суммы оплаты нужно изменить под ставку 1990 за месяц + сумма на одностраничниках.
+#      Есть кто платит за 2 месяца - этого нет сейчас в проверке и на одностраничниках.
+
 # Здесь есть полезные фишки для БД - https://github.com/alexey-goloburdin/telegram-finance-bot/blob/master/expenses.py
 
 # TODO процедуру блокировки пользователя Zoom вставить в gtp_daily_works.py.

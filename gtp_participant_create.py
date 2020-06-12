@@ -202,6 +202,10 @@ def create_sf_participant(payment, database, logger):
 
     # Создать участнику ДШ учётку (email) Yandex
     mm = create_sf_participant_yandex(logger, payment, mm)
+    # Генерация пароля для Zoom (для всех почт пароль одинаковый)
+    payment["password"] = password_generator.random_password(strong=True, zoom=True)
+    mm.text += f'\nPassword: {payment["password"]}'
+    logger.info(f'Password: {payment["password"]}')
     # Создать участнику ДШ учётку Zoom
     mm = create_sf_participant_zoom(logger, payment, mm)
     # Создать участника ДШ в БД и отметить ему оплату
@@ -327,10 +331,7 @@ def create_sf_participant_db(database, logger, payment, mm):
         values_tuple = (payment["participant_id"], payment["task_uuid"])
         database.execute_dml(sql_text, values_tuple)
         logger.info(select_payment(payment["task_uuid"], database))
-    # Генерация пароля для Zoom (для всех почт пароль одинаковый)
-    payment["password"] = password_generator.random_password(strong=True, zoom=True)
-    mm.text += f'\nPassword: {payment["password"]}'
-    logger.info(f'Password: {payment["password"]}')
+    # Обновляем участнику логин и пароль в БД
     logger.info("Обновляем участнику логин и пароль в БД")
     sql_text = """UPDATE participants SET login=%s, password=%s WHERE id=%s;"""
     values_tuple = (payment["login"], payment["password"], payment["participant_id"])

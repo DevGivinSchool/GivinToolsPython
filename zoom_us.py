@@ -180,7 +180,7 @@ class ZoomUS:
             if zoom_result is not None:
                 self.logger.error("+" * 60)
                 mail_text = f"\nПроцедура не смогла автоматически заблокировать участника. Ошибка:\n" \
-                            f"{zoom_result}" \
+                            f"{zoom_result}\n" \
                             f"\nLogin: {login}"
                 # send_mail(PASSWORDS.logins['admin_emails'], "BLOCK PARTICIPANT ERROR", mail_text, logger)
                 # print(mail_text)
@@ -378,7 +378,7 @@ if __name__ == '__main__':
 
     # Создание пользователя Zoom
     print(
-        create_zoom_user("test777_test777@givinschool.org", "Дмитрий", "Салтыков Щедрин", "ANps11CDkz", logger=logger))
+        create_zoom_user('xxxx@givinschool.org', "name", "surname", "password", logger=logger))
 
 # ==========================================================================================
 """

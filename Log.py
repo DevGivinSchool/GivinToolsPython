@@ -1,14 +1,16 @@
 import logging
 import os
+from datetime import datetime
 
 
 class Log:
     """Kласс для логирования. log_level передаётся конструктор, по умолчанию logging.INFO"""
 
     @staticmethod
-    def setup_logger(name, log_path=os.path.dirname(os.path.realpath(__file__)), log_name='log.log',
-                     level=logging.INFO):
+    def setup_logger(name, log_path=os.path.dirname(os.path.realpath(__file__)), log_name='log',
+                     level=logging.INFO, dt=None):
         """Create custom loggers.
+        :param dt: Add date time to log_name? or mask datetime, example "%Y%m%d%H%M"
         :param str name: Logger name.
         :param log_path: Directory that create log file.
         Логирование по умолчанию производится в папку где лежит скрипт/log
@@ -25,9 +27,14 @@ class Log:
                 exit(1)
         log_file = ""
         try:
-            log_file = os.path.join(log_path, log_name)
-        except OSError:
+            if dt:
+                now = "_" + datetime.now().strftime(dt)
+            else:
+                now = ""
+            log_file = os.path.join(log_path, f"{log_name}{now}.log")
+        except OSError as err:
             print(f"Creation of the log_file from log_path:'{log_path}' and log_name:'{log_name}' failed")
+            print(err)
             exit(1)
 
         # log_formatter = logging.Formatter('%(asctime)s|%(levelname)s|%(name)s|%(process)d:%(thread)d - %(message)s')

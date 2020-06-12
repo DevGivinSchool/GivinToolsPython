@@ -1,5 +1,6 @@
 import logging
 import os
+import PASSWORDS
 
 """
 Логирование может осуществляться независимо на каждом компьютере где запускаются скрипты, поэтому этот файл 
@@ -9,6 +10,9 @@ import os
 
 # Логирование по умолчанию производится в папку где лежита скрипты/log
 log_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'log')
-log_level = logging.INFO
-# log_level = logging.DEBUG
+if PASSWORDS.DEBUG:
+    log_level = logging.DEBUG
+else:
+    log_level = logging.INFO
+
 

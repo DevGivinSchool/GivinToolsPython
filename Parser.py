@@ -242,14 +242,16 @@ def parse_getcourse_page(link, payment, logger):
     print(response.text)
     """
     try:
-        chromeOptions = webdriver.ChromeOptions()
-        chromeOptions.add_argument("--headless")
-        # prod
-        browser = webdriver.Chrome(r'/usr/local/bin/chromedriver', options=chromeOptions)
-        # ноутбук
-        # browser = webdriver.Chrome(r'chromedriver.exe')
-        # browser = webdriver.Chrome(r'c:\Windows\System32\chromedriver.exe')
-        # browser = webdriver.Chrome(r'c:\Users\MinistrBob\.wdm\drivers\chromedriver\79.0.3945.36\win32\chromedriver.exe')
+        if PASSWORDS.DEBUG:
+            # ноутбук (драйвер устанавливать через install_chromedriver.py (заметка @ Chromedrive)"")
+            ######### browser = webdriver.Chrome(r'chromedriver.exe')
+            ######### browser = webdriver.Chrome(r'c:\Windows\System32\chromedriver.exe')
+            browser = webdriver.Chrome(r'c:\Users\MinistrBob\.wdm\drivers\chromedriver\83.0.4103.39\win32\chromedriver.exe')
+        else:
+            # prod
+            chromeOptions = webdriver.ChromeOptions()
+            chromeOptions.add_argument("--headless")
+            browser = webdriver.Chrome(r'/usr/local/bin/chromedriver', options=chromeOptions)
         # Вход в GetCourse иначе страница заказа будет недоступна
         browser.get(PASSWORDS.logins['getcourse_login_page'])
         input_login = browser.find_element_by_css_selector("input.form-control.form-field-email")
@@ -262,10 +264,12 @@ def parse_getcourse_page(link, payment, logger):
         # Выделить из ссылки заказа ID и открыть страницу заказа (ссылка которая в письме не открывается)
         link_id = link.rsplit("/", 1)
         link = "https://givinschoolru.getcourse.ru/sales/control/deal/update/id/" + link_id[1]
+        logger.debug(f"link={link}")
         browser.get(link)
         time.sleep(10)
         # Поиск email на странице заказа
         email_element = browser.find_element_by_css_selector("div.user-email")
+        logger.debug(f"email_element.text={email_element.text}")
         email = email_element.text
         if len(email) < 0:
             logger.warning(f"PARSING: Не нашел email на странице заказа - {link}")
@@ -277,7 +281,12 @@ def parse_getcourse_page(link, payment, logger):
         # telegram вариант 2 (только первый div может содержать telegram)
         telegram_elements = browser.find_elements_by_xpath(
             "//*[contains(text(), 'Ник телеграмм')]/following-sibling::div")
-        result = get_telegram_from_text(telegram_elements[0].text, logger)
+        result = None
+        if len(telegram_elements) == 0:
+            logger.info(f"PARSING: На странице нет элемента 'Ник телеграмм'")
+        else:
+            logger.debug(f"telegram_elements[0].text={telegram_elements[0].text}")
+            result = get_telegram_from_text(telegram_elements[0].text, logger)
         if not result:
             # telegram вариант 1 (здесь несколько равнозначных блоков из них выделяется телеграм, можно по идее брать
             # только второй блок)
@@ -346,6 +355,11 @@ if __name__ == "__main__":
     # parse_getcourse_page("https://givin.school/sales/control/deal/update/id/24968591", payment, logger)
     # print(payment)
     # telegram вариант 1
+    # payment = get_clear_payment()
+    # parse_getcourse_page("https://givin.school/sales/control/deal/update/id/34128218", payment, logger)
+    # print(payment)
+    # result = get_telegram_from_text(telegram_elements[0].text, logger)
+    # IndexError: list index out of range
     payment = get_clear_payment()
-    parse_getcourse_page("https://givin.school/sales/control/deal/update/id/34128218", payment, logger)
+    parse_getcourse_page("https://givinschoolru.getcourse.ru/sales/control/deal/update/id/43670994", payment, logger)
     print(payment)

@@ -342,29 +342,44 @@ class ZoomUS:
             print(f"    {m}")
 
 
-# ==========================================================================================
-"""
-if __name__ == '__main__':
-    # Создание Bearer
-    print(ZoomUS.generate_jwt(PASSWORDS.logins['zoom03_api_key'], PASSWORDS.logins['zoom03_api_secret']))
-"""
-# ==========================================================================================
-"""
-if __name__ == '__main__':
+####################################################################################
+
+# def get_logger
+# import logging
+# from Log import Log
+# from log_config import log_dir, log_level
+# import datetime
+#
+# now = datetime.datetime.now().strftime("%Y%m%d%H%M")
+# logger = Log.setup_logger('__main__', log_dir, f'zoom_us_{now}.log', logging.DEBUG)
+
+
+def create_zoom_user(login, name, surname, password, logger):
+    """
     # Создание пользователя Zoom
+    :return:
+    """
+    zu = ZoomUS(logger)
+    response = zu.zoom_users_usercreate(login, name, surname, password)
+    return response
+
+
+# ==========================================================================================
+if __name__ == '__main__':
+    # Получение Bearer
+    # print(ZoomUS.generate_jwt(PASSWORDS.logins['zoom03_api_key'], PASSWORDS.logins['zoom03_api_secret']))
+
     import logging
     from Log import Log
-    from log_config import log_dir, log_level
+    from log_config import log_dir
 
-    logger = Log.setup_logger('__main__', log_dir, f'zoom_us.log', logging.DEBUG)
-    zoom_user = ZoomUS(logger)
-    response = zoom_user.zoom_users_create("test777_test777@givinschool.org",
-                                           "Дмитрий",
-                                           "Салтыков Щедрин",
-                                           "ANps11CDkz",
-                                           logger=logger)
-    print(response)
-"""
+    log_level = logging.DEBUG
+    logger = Log.setup_logger('__main__', log_dir, log_name=f'zoom_us', level=log_level, dt="%Y%m%d%H%M")
+
+    # Создание пользователя Zoom
+    print(
+        create_zoom_user("test777_test777@givinschool.org", "Дмитрий", "Салтыков Щедрин", "ANps11CDkz", logger=logger))
+
 # ==========================================================================================
 """
 if __name__ == '__main__':
@@ -432,7 +447,7 @@ if __name__ == '__main__':
         zoom_user.bulk_user_status_change(list_fio, action)
 """
 # ==========================================================================================
-
+"""
 if __name__ == '__main__':
     # Список встреч
     # https://marketplace.zoom.us/docs/api-reference/zoom-api/users/users
@@ -462,7 +477,7 @@ if __name__ == '__main__':
     zoom_user.print_list_meetings_for_user(user_id='zoom11gs@gmail.com', meeting_type="upcoming")
     zoom_user = ZoomUS(logger, PASSWORDS.logins['zoom12_api_key'], PASSWORDS.logins['zoom12_api_secret'])
     zoom_user.print_list_meetings_for_user(user_id='zoom12gs@gmail.com', meeting_type="upcoming")
-
+"""
 # ==========================================================================================
 """
 def change_zoom_password(login, password, zoom_user):

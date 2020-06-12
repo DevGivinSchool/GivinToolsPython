@@ -45,6 +45,8 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None,
     msg['From'] = sender_email
     msg.attach(MIMEText(message, 'plain', 'utf-8'))
     if attached_file is not None:
+        attached_file_name = os.path.basename(attached_file)
+        logger.info(f"Вложение: {attached_file_name}")
         attachment = open(attached_file, 'rb')
         xlsx = MIMEBase('application', 'vnd.ms-excel')
         # xlsx = MIMEBase('application', 'octet-stream')
@@ -52,8 +54,10 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None,
         xlsx.set_payload(attachment.read())
         attachment.close()
         encoders.encode_base64(xlsx)
-        xlsx.add_header('Content-Disposition', 'attachment', filename=os.path.basename(attached_file))
+        xlsx.add_header('Content-Disposition', 'attachment', filename=attached_file_name)
         msg.attach(xlsx)
+    else:
+        logger.info(f"Вложение: НЕТ")
     logger.info(f"Список адресов: {receiver_emails}")
     for one_receiver in receiver_emails:
         # print(f"Send email to {one_receiver}")
@@ -71,34 +75,9 @@ if __name__ == "__main__":
     from log_config import log_dir, log_level
     logger = Log.setup_logger('__main__', log_dir, f'gtp_alert_to_mail.log',
                               log_level)
-    """mail_text = f"Создать учётку zoom участнику Иванов " \
-                f"Иван\nLogin: ivanov_ivan@givinschool.org\nPassword: X2#FQDIcur"
-    send_mail(PASSWORDS.logins['admin_emails'], "CREATE ZOOM", mail_text)"""
-    name = "ДМИТРИЙ"
-    login = "bbbbb_ddsgqwawe@givinschool.org"
-    password = "V4$mWEXCqr"
-    mail_text2 = f"""Здравствуйте, {name.title()}!  
-
-Поздравляем, Вы оплатили абонемент на месяц совместных занятий в онлайн-формате "Друзья Школы Гивина". 
-
-Ваш новый zoom-аккаунт:
-Логин: {login}
-Пароль: {password}
-
-Сохраните себе эти данные, чтобы не потерять их. 
-
-Эти данные вы можете использовать с настоящего момента:
-1) Скачайте приложение Zoom на компьютер, если ещё не cделали это ранее. 
-2) Установите приложение Zoom на ваш компьютер.
-3) Запустите эту программу.
-4) Нажмите кнопку Sign In ("Войти в..").
-5) Введите логин и пароль, предоставленные вам в этом письме .
-6) Поставьте птичку (галку) в поле Keep me logged in ("Не выходить из системы").
-7) Нажмите Sign In ("Войти"). 
-8) Далее из чата Объявлений в телеграмме найдет сообщение с ссылкой на занятия. Нажмите на неё. Она будет открываться в браузере, появится сверху сообщение с кнопкой, жмём на кнопку Open ZOOM Meetings (либо Открыть ZOOM)
-9) Появится окно для ввода пароля конференции. Здесь вводим три цифры 355. 
-
-С благодарностью и сердечным теплом,
-команда Школы Гивина."""
-    send_mail(PASSWORDS.logins['admin_emails'],
-              r"[ШКОЛА ГИВИНА]. Поздравляем, Вы приняты в Друзья Школы", mail_text2, logger)
+    receiver_emails = PASSWORDS.logins['admin_emails']
+    subject = "DEBUG: alert_to_mail.py"
+    message = "DEBUG: alert_to_mail.py"
+    # attached_file = None
+    attached_file = logger.handlers[0].baseFilename
+    send_mail(receiver_emails, subject, message, logger, attached_file)

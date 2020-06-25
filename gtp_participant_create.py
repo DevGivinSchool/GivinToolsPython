@@ -4,11 +4,12 @@ import Parser
 import traceback
 import PASSWORDS
 import sys
-import password_generator
+# import password_generator
 from zoom_us import ZoomUS
 from DBPostgres import DBPostgres
 from alert_to_mail import send_mail
 from utils import get_login
+from password_sf import password_for_sf
 
 
 class MailMessage:
@@ -203,7 +204,7 @@ def create_sf_participant(payment, database, logger):
     # Создать участнику ДШ учётку (email) Yandex
     mm = create_sf_participant_yandex(logger, payment, mm)
     # Генерация пароля для Zoom (для всех почт пароль одинаковый)
-    payment["password"] = password_generator.random_password(strong=True, zoom=True)
+    payment["password"] = password_for_sf()
     mm.text += f'\nPassword: {payment["password"]}'
     logger.info(f'Password: {payment["password"]}')
     # Создать участнику ДШ учётку Zoom

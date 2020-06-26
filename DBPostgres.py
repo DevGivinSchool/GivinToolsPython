@@ -313,6 +313,36 @@ class DBPostgres:
                 type_ = records[0][1]
             return id_, type_
 
+    def find_participant_by_telegram_username(self, value):
+        """
+        Find participant by email or telegram or fio or fio_eng
+        :param criterion: Search criteria
+        :param value: Search value
+        :return: None - if search nothing or ID participant and his type
+        """
+        # Нормализация value под БД
+        value = value.lower()
+        self.logger.info(f"Осуществляем поиск участника по telegram username={value}")
+        # Искать нужно с любым type т.к. заблокированный участник тоже может вновь оплатить
+        sql_text = f"select id, telegram_id, last_name, first_name, login, password from participants where telegram=%s;"
+        values_tuple = (value,)
+        records = self.execute_select(sql_text, values_tuple)
+        # print(records)
+        if len(records) > 1:
+            raise Exception(f"Поиск участника по telegram username={value} возвращает больше одной строки. Возможно дублирование!")
+        elif len(records) == 0:
+            person = None
+        else:
+            person = {
+                'id': records[0][0],
+                'telegram_id': records[0][1],
+                'last_name': records[0][2],
+                'first_name': records[0][3],
+                'login': records[0][4],
+                'password': records[0][5]
+            }
+        return person
+
     def disconnect(self):
         self.conn.close()
 

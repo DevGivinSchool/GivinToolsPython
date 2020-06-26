@@ -29,14 +29,24 @@ def send_error(subject):
 
 
 def birthday_alert(dbconnect):
-    pass
-
+    sql_text = """select last_name, first_name from team_members WHERE
+    DATE_PART('day', birthday) = date_part('day', CURRENT_DATE)
+AND
+    DATE_PART('month', birthday) = date_part('month', CURRENT_DATE)"""
+    values_tuple = (None,)
+    records = dbconnect.execute_select(sql_text, values_tuple)
+    # ('ИВАНОВ', 'ИВАН')
+    congratulation = """** Поздравляем сегодня с днём рождения ❤️🤗🎈:\n"""
+    for rec in records:
+        print(rec)
+        congratulation += f"{rec[0].capitalize()} {rec[1].capitalize()}\n"
+    congratulation += " **"
+    print(congratulation)
 
 
 if __name__ == "__main__":
     """
     Выбираем из БД всех у кого сегодня ДР и шлём оповещение в пару чатов Telegram
-    :return:
     """
     logger.info('START gtp_birthday_alert')
     logger.info("Try connect to DB")
@@ -54,7 +64,7 @@ if __name__ == "__main__":
     try:
         birthday_alert(dbconnect)
     except Exception:
-        send_error("DAILY WORKS ERROR: get_full_list_participants()")
+        send_error("ERROR: gtp_birthday_alert()")
     logger.info('\n' + '#' * 120)
 
     logger.info('#' * 120)

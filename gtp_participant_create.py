@@ -10,6 +10,7 @@ from DBPostgres import DBPostgres
 from alert_to_mail import send_mail
 from utils import get_login
 from password_sf import password_for_sf
+from alert_text import get_participant_notification_text
 
 
 class MailMessage:
@@ -94,38 +95,9 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
     logger.info("Оплата в БД отмечена")
 
 
-def get_participant_notification_text(payment):
-    mail_text2 = f"""Здравствуйте, {payment['Фамилия Имя'].title()}!  
-
-Поздравляем, Вы оплатили абонемент на месяц совместных занятий в онлайн-формате "Друзья Школы Гивина". 
-
-Ваш zoom-аккаунт:
-Логин: {payment['login']}
-Пароль: {payment['password']}
-
-Сохраните себе эти данные, чтобы не потерять их. 
-
-Эти данные вы можете использовать с настоящего момента:
-1) Скачайте приложение Zoom на компьютер, если ещё не cделали это ранее. 
-2) Установите приложение Zoom на ваш компьютер.
-3) Запустите эту программу.
-4) Нажмите кнопку Sign In ("Войти в..").
-5) Введите логин и пароль, предоставленные вам в этом письме .
-6) Поставьте птичку (галку) в поле Keep me logged in ("Не выходить из системы").
-7) Нажмите Sign In ("Войти"). 
-8) Далее из чата Объявлений в телеграмме найдет сообщение с ссылкой на занятия. 
-   Нажмите на неё. Она будет открываться в браузере, появится сверху сообщение с кнопкой, 
-   жмём на кнопку Open ZOOM Meetings (либо Открыть ZOOM)
-9) Появится окно для ввода пароля конференции. Здесь вводим три цифры 355. 
-
-С благодарностью и сердечным теплом,
-команда Школы Гивина."""
-    return mail_text2
-
-
 def participant_notification(payment, logger):
     logger.info("Уведомление участника")
-    mail_text2 = get_participant_notification_text(payment)
+    mail_text2 = get_participant_notification_text(payment['Фамилия'], payment['Имя'], payment['login'], payment['password'])
     logger.info(mail_text2)
     send_mail([payment["Электронная почта"]],
               r"[ШКОЛА ГИВИНА]. Поздравляем, Вы приняты в Друзья Школы", mail_text2, logger)
@@ -225,7 +197,7 @@ def create_sf_participant(payment, database, logger):
         logger.warning("+" * 60)
         logger.warning(f"ВНИМАНИЕ: Отправить почтовое уведомление (email) участнику")
         logger.warning("+" * 60)
-    notification_text = get_participant_notification_text(payment)
+    notification_text = get_participant_notification_text(payment['Фамилия'], payment['Имя'], payment['login'], payment['password'])
     mm.text += "Текст уведомления:\n\n\n" + notification_text
     # send_mail(PASSWORDS.logins['admin_emails'], subject, mail_text, logger)
     # Вычитаю из списка почт менеджеров список почт админов, чтобы не было повторных писем

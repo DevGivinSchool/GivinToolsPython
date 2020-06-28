@@ -87,7 +87,10 @@ if __name__ == '__main__':
     logger.info('\n' + '#' * 120)
 
     tb = TelegramBot(PASSWORDS.logins['telegram_bot_url'], logger)
+    logger.info("Get updates")
     success, updates = tb.get_updates_json()
+    logger.debug(f"success={success}")
+    logger.debug(f"updates=\n{updates}")
     if not success:
         err_text = f"Не могу получить updates\n{updates}"
         send_error_to_admin(err_text)
@@ -113,7 +116,10 @@ if __name__ == '__main__':
                                                                 person['first_name'],
                                                                 person['login'],
                                                                 person['password'])
+                    logger.debug(f"message=\n{message}")
                     success, result = tb.send_text_message(chat_id, message)
+                    logger.debug(f"success={success}")
+                    logger.debug(f"result=\n{result}")
                     if not success:
                         err_text = f"Не могу отправить сообщение\n{result}"
                         send_error_to_admin(err_text)
@@ -122,6 +128,7 @@ if __name__ == '__main__':
                     sql_text = f"UPDATE participants SET telegram_id=%s where id=%s RETURNING id;"
                     values_tuple = (person['telegram_id'], person['id'])
                     id_ = dbconnect.execute_dml_id(sql_text, values_tuple)
+                    logger.debug(f"id_={id_}")
                     if not id_:
                         err_text = f"Не могу обновить telegram_id={person['telegram_id']} для участника id={person['id']}"
                         send_error_to_admin(err_text)
@@ -131,10 +138,17 @@ if __name__ == '__main__':
                     sql_text = f"UPDATE settings SET key=%s where key='telegram_id' RETURNING key;"
                     values_tuple = (person['telegram_id'], person['id'])
                     id_ = dbconnect.execute_dml_id(sql_text, values_tuple)
+                    logger.debug(f"id_={id_}")
+                    if not id_:
+                        err_text = f"Не могу обновить telegram_id={person['telegram_id']} для участника id={person['id']}"
+                        send_error_to_admin(err_text)
+                        raise Exception(err_text)
                     # TODO: переписать процедуру получения updates с последнего update_id
 
 
-# TODO: Везде вставить log.debug
+# TODO: Его можно перенести в Log, т.к. debug теперь определяется в PASSWORS. В остальных модулях переделать log_config после проверки в этом модуле.
+# TODO: Сделать в классе Log получение стандартного логгера с параметрами из log_config.
+# TODO: Переделать Log => custom logger | logging system, там не нужен класс, можно просто пару процедур.
 
 """
 <Response [200]>

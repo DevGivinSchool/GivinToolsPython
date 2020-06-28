@@ -3,6 +3,7 @@ import utils
 import psycopg2
 import logging
 import Parser
+import PASSWORDS
 
 
 class DBPostgres:
@@ -24,7 +25,9 @@ class DBPostgres:
            :param sql_text: Query text.
            :return: List of tuples = List of strings"""
         cursor = self.conn.cursor()
-        # print(cursor.mogrify(sql_text, values_tuple))
+        if PASSWORDS.DEBUG:
+            self.logger.info(cursor.mogrify(sql_text, values_tuple))
+            print(cursor.mogrify(sql_text, values_tuple))
         cursor.execute(sql_text, values_tuple)
         records = cursor.fetchall()
         # print(cursor.rowcount)
@@ -38,7 +41,9 @@ class DBPostgres:
                    :param sql_text: Query text.
                    :return result: (Rows count, ID)"""
         cursor = self.conn.cursor()
-        # print(cursor.mogrify(sql_text, values_tuple))
+        if PASSWORDS.DEBUG:
+            self.logger.info(cursor.mogrify(sql_text, values_tuple))
+            print(cursor.mogrify(sql_text, values_tuple))
         cursor.execute(sql_text, values_tuple)
         self.conn.commit()
         # print(cursor.rowcount)
@@ -51,7 +56,9 @@ class DBPostgres:
                    :param sql_text: Query text.
                    :return: Count ID"""
         cursor = self.conn.cursor()
-        # print(cursor.mogrify(sql_text, values_tuple))
+        if PASSWORDS.DEBUG:
+            self.logger.info(cursor.mogrify(sql_text, values_tuple))
+            print(cursor.mogrify(sql_text, values_tuple))
         cursor.execute(sql_text, values_tuple)
         self.conn.commit()
         # print(cursor.rowcount)
@@ -329,7 +336,8 @@ class DBPostgres:
         records = self.execute_select(sql_text, values_tuple)
         # print(records)
         if len(records) > 1:
-            raise Exception(f"Поиск участника по telegram username={value} возвращает больше одной строки. Возможно дублирование!")
+            raise Exception(
+                f"Поиск участника по telegram username={value} возвращает больше одной строки. Возможно дублирование!")
         elif len(records) == 0:
             person = None
         else:

@@ -5,7 +5,7 @@
 
 # Здесь есть полезные фишки для БД - https://github.com/alexey-goloburdin/telegram-finance-bot/blob/master/expenses.py
 
-# TODO процедуру блокировки пользователя Zoom вставить в gtp_daily_works.py.
+# TODO процедуру блокировки пользователя Zoom вставить в sf_daily_works.py.
 
 # TODO В этом заказе ник Телеграм в поле - Ник телеграмм, нужно в парсинге это учесть. 
 

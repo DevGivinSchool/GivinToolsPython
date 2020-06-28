@@ -1,5 +1,5 @@
 import json
-import zoom_us
+import ZoomUS
 import requests
 
 

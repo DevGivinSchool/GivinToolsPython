@@ -4,7 +4,7 @@ import traceback
 import xlsxwriter
 import os
 import PASSWORDS
-import gtp_participant_block
+import sf_participant_block
 from DBPostgres import DBPostgres
 from Log import Log
 from log_config import log_dir, log_level
@@ -63,7 +63,7 @@ order by last_name"""
             until_date = p[7]
 
         try:
-            gtp_participant_block.block_one_participant(p[9], dbconnect, logger)
+            sf_participant_block.block_one_participant(p[9], dbconnect, logger)
 
             mail_text = f"""Здравствуйте, {p[2].title()}!  
     

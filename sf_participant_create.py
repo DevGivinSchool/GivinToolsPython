@@ -5,11 +5,11 @@ import traceback
 import PASSWORDS
 import sys
 # import password_generator
-from zoom_us import ZoomUS
+from ZoomUS import ZoomUS
 from DBPostgres import DBPostgres
 from alert_to_mail import send_mail
 from utils import get_login
-from password_sf import password_for_sf
+from sf_password_generator import password_for_sf
 from alert_text import get_participant_notification_text
 
 

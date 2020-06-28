@@ -1,4 +1,4 @@
-import gtp_participant_create
+import sf_participant_create
 
 
 class Task:
@@ -35,8 +35,8 @@ class Task:
         self.logger.info(f'task_run payment = {self.payment}')
         if self.payment["participant_id"] is None:
             # This is new participant
-            gtp_participant_create.create_sf_participant(self.payment, self.database, self.logger)
+            sf_participant_create.create_sf_participant(self.payment, self.database, self.logger)
         else:
             # Отмечаем оплату в БД
-            gtp_participant_create.mark_payment_into_db(self.payment, self.database, self.logger)
+            sf_participant_create.mark_payment_into_db(self.payment, self.database, self.logger)
         self.logger.info('Task_run end')

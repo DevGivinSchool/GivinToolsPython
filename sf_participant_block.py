@@ -1,5 +1,5 @@
 import PASSWORDS
-from zoom_us import ZoomUS
+from ZoomUS import ZoomUS
 from alert_to_mail import send_mail
 from DBPostgres import DBPostgres
 from utils import is_eng

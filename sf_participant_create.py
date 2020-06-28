@@ -317,14 +317,12 @@ def create_sf_participant_db(database, logger, payment, mm):
 
 
 if __name__ == '__main__':
-    import logging
+    import logger
+    import os
     from list_ import list_fio
-    from datetime import datetime
-    from Log import Log
-    from log_config import log_dir
 
-    now = datetime.now().strftime("%Y%m%d%H%M")
-    log = Log.setup_logger('__main__', log_dir, f'gtp_create_login_{now}.log', logging.DEBUG)
+    program_file = os.path.realpath(__file__)
+    log = logger.get_logger(program_file=program_file)
     # noinspection PyBroadException
     try:
         log.info("Try connect to DB")

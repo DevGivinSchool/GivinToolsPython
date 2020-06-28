@@ -1,10 +1,15 @@
 import yandex_mail
 import password_generator
 import yandex_connect
+import logger
+import os
 # На вход подаються строки: Фамилия;Имя (пока из list.py)
 from list_ import list_fio
 from utils import get_login
 from utils import split_str
+
+program_file = os.path.realpath(__file__)
+logger = logger.get_logger(program_file=program_file)
 
 
 # TODO: На вход везде должно подаваться одно и тоже Фамилия + Имя + Login, если чего-то нет, то оно собирается из друго.
@@ -24,7 +29,7 @@ def create_team_mail():
         # Отдел 1 = Все сотрудники
         result = None
         try:
-            result = yandex_mail.create_yandex_mail(line[0], line[1], login_, password, department_id_=1)
+            result = yandex_mail.create_yandex_mail(logger, line[0], line[1], login_, password, department_id_=1)
         except yandex_connect.YandexConnectExceptionY as e:
             # print(e.args[0])
             if e.args[0] == 500 or e.args[0] == 409:
@@ -32,7 +37,8 @@ def create_team_mail():
                       f"{login_}@givinschool.org. Пробую еще раз Фамилия+Имя")
                 try:
                     login_ = get_login(line[0], line[1])
-                    result = yandex_mail.create_yandex_mail(line[0], line[1], login_, password, department_id_=1)
+                    result = yandex_mail.create_yandex_mail(logger, line[0], line[1], login_, password,
+                                                            department_id_=1)
                 except yandex_connect.YandexConnectExceptionY as e:
                     if e.args[0] == 500 or e.args[0] == 409:
                         print(f"Unhandled exception: Такой пользователь уже существует: "
@@ -129,7 +135,7 @@ def create_participant():
         login_ = get_login(line[0], line[1], type="frend")
         print(f"Фамилия: {line[0]}; Имя: {line[1]}; Email: {login_}@givinschool.org")
         try:
-            result = yandex_mail.create_yandex_mail(line[0], line[1], login_, department_id_=4)
+            result = yandex_mail.create_yandex_mail(logger, line[0], line[1], login_, department_id_=4)
             # print(f"Email created:{result['email']}")
             login_ = result['email']
             print(f'\nЯндекс почта в домене @givinschool.org успешно создана (пароль стандартный)\nЛогин для '

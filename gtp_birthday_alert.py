@@ -1,17 +1,10 @@
 #!/usr/bin/env python3
-
 import sys
 import traceback
 import PASSWORDS
 from DBPostgres import DBPostgres
-from Log import Log
-from log_config import log_dir, log_level
 from alert_to_mail import send_mail
 from datetime import datetime
-
-# Текущая дата для имени лог файла (без %S)
-now = datetime.now().strftime("%Y%m%d%H%M")
-logger = Log.setup_logger('__main__', log_dir, f'gtp_birthday_alert_{now}.log', log_level)
 
 
 def send_error(subject):
@@ -48,6 +41,11 @@ if __name__ == "__main__":
     """
     Выбираем из БД всех у кого сегодня ДР и шлём оповещение в пару чатов Telegram
     """
+    import logger
+    import os
+
+    program_file = os.path.realpath(__file__)
+    logger = logger.get_logger(program_file=program_file)
     logger.info('START gtp_birthday_alert')
     logger.info("Try connect to DB")
     try:

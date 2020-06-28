@@ -38,7 +38,7 @@ class TelegramBot:
         self.logger = logger
         self.database = database
 
-    def get_updates_json(self, offset=0):
+    def get_text_updates(self, offset=0):
         """
         Get updates from Telegram
         :return: Dictionary Updates
@@ -67,13 +67,11 @@ class TelegramBot:
 
 
 if __name__ == '__main__':
-    import log_config
-    from Log import Log
+    import logger
+    import os
 
-    logger = Log.setup_logger(log_config.prog_name, log_config.log_dir,
-                              log_name=log_config.prog_name_without_ext,
-                              level=log_config.log_level, dt="%Y%m%d%H%M")
-
+    program_file = os.path.realpath(__file__)
+    logger = logger.get_logger(program_file=program_file)
     logger.info("Try connect to DB")
     try:
         dbconnect = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
@@ -85,10 +83,24 @@ if __name__ == '__main__':
         logger.error("Exit with error")
         sys.exit(1)
     logger.info('\n' + '#' * 120)
-
+    # Получить update_id из БД
+    sql_text = f"select value from settings where key='telegram_update_id'"
+    values_tuple = None
+    rows = dbconnect.execute_dml_id(sql_text, values_tuple)
+    logger.debug(f"rows={rows}")
+    if not rows:
+        err_text = f"Не могу получить rows из БД"
+        send_error_to_admin(err_text)
+        raise Exception(err_text)
+    try:
+        telegram_update_id = rows[0][0]
+    except:
+        err_text = f"Не могу получить telegram_update_id"
+        send_error_to_admin(err_text)
+        raise Exception(err_text)
     tb = TelegramBot(PASSWORDS.logins['telegram_bot_url'], logger)
     logger.info("Get updates")
-    success, updates = tb.get_updates_json()
+    success, updates = tb.get_text_updates(telegram_update_id)
     logger.debug(f"success={success}")
     logger.debug(f"updates=\n{updates}")
     if not success:
@@ -134,8 +146,8 @@ if __name__ == '__main__':
                         send_error_to_admin(err_text)
                         raise Exception(err_text)
 
-                    # TODO: нужно получить update_id из БД в начале процедуры
-                    sql_text = f"UPDATE settings SET key=%s where key='telegram_id' RETURNING key;"
+                    # TODO: переписать процедуру получения updates с последнего update_id
+                    sql_text = f"UPDATE settings SET key=%s where key='telegram_update_id' RETURNING key;"
                     values_tuple = (person['telegram_id'], person['id'])
                     id_ = dbconnect.execute_dml_id(sql_text, values_tuple)
                     logger.debug(f"id_={id_}")
@@ -143,8 +155,6 @@ if __name__ == '__main__':
                         err_text = f"Не могу обновить telegram_id={person['telegram_id']} для участника id={person['id']}"
                         send_error_to_admin(err_text)
                         raise Exception(err_text)
-                    # TODO: переписать процедуру получения updates с последнего update_id
-
 
 # TODO: Его можно перенести в Log, т.к. debug теперь определяется в PASSWORS. В остальных модулях переделать log_config после проверки в этом модуле.
 # TODO: Сделать в классе Log получение стандартного логгера с параметрами из log_config.

@@ -8,7 +8,7 @@ import PASSWORDS
 
 class DBPostgres:
 
-    def __init__(self, dbname, host, logger=logging.getLogger('DBPostgres'), port='5432', user='postgres',
+    def __init__(self, dbname, host, logger, port='5432', user='postgres',
                  password='postgres'):
         self.dbname = dbname
         self.host = host
@@ -356,10 +356,14 @@ class DBPostgres:
 
 
 if __name__ == "__main__":
-    import log_config
-    import PASSWORDS
+    import logger
+    import os
+
+    program_file = os.path.realpath(__file__)
+    logger = logger.get_logger(program_file=program_file)
 
     postgres = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
+                          logger=logger,
                           password=PASSWORDS.logins['postgres_password'], host=PASSWORDS.logins['postgres_host'],
                           port=PASSWORDS.logins['postgres_port'])
 

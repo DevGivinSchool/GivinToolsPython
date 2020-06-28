@@ -28,8 +28,6 @@ import traceback
 import PASSWORDS
 import sys
 import utils
-from Log import Log
-from log_config import log_dir, log_level
 from datetime import datetime
 from DBPostgres import DBPostgres
 
@@ -274,8 +272,11 @@ if __name__ == '__main__':
          datetime(2020, 4, 20, 9, 00, 00))
     ]
 
-    now = datetime.now().strftime("%Y%m%d%H%M")
-    main_logger = Log.setup_logger('__main__', log_dir, f'gtp_attend_class_{now}.log', log_level)
+    import logger
+    import os
+
+    program_file = os.path.realpath(__file__)
+    main_logger = logger.get_logger(program_file=program_file)
 
     main_logger.info("Try connect to DB")
     db = None
@@ -292,7 +293,8 @@ if __name__ == '__main__':
     list_columns = []
     buffer = ""
     for event in table_of_events:
-        logger = Log.setup_logger(event[0], log_dir, f'{event[0]}_{now}.log', log_level)
+        log_file = os.path.join(os.path.dirname(main_logger.handlers[0].baseFilename), f'{event[0]}.log')
+        logger.get_logger(log_file=log_file)
         main_logger.info(f"Обрабатываю файл отчёта: {event[1]}")
         print(f"Обрабатываю файл отчёта:{event[1]}")
         try:

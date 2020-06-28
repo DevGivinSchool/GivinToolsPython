@@ -96,21 +96,18 @@ DB: Закрываю сессию работы
 import PASSWORDS
 import traceback
 import sys
-from Log import Log
-from log_config import log_dir, log_level
+import logger
+import os
 from datetime import datetime
 from imapclient import IMAPClient
 from Email2 import Email
 from alert_to_mail import send_mail
 
 
-# Текущая дата для имени лог файла (без %S)
-now = datetime.now().strftime("%Y%m%d%H%M")
-logger = Log.setup_logger('__main__', log_dir, f'gtp_school_friends_{now}.log', log_level)
-logger.info('START gtp_school_friends')
-
-
-def main():
+if __name__ == "__main__":
+    program_file = os.path.realpath(__file__)
+    logger = logger.get_logger(program_file=program_file)
+    logger.info('START gtp_school_friends')
     try:
         client = IMAPClient(host="imap.yandex.ru", use_uid=True)
         client.login(PASSWORDS.logins['ymail_login'], PASSWORDS.logins['ymail_password'])
@@ -141,11 +138,6 @@ def main():
     # First sort_mail() execution then go to idle mode
     email = Email(client, logger)
     email.sort_mail()
-    # TODO Процедура выявления и оповещения должников.  За 7 и 3 дня отправлять оповещения о необходимости оплаты.
     # TODO Процедура чистки: 1) Удалять всех заблокированных пользователей больше года
     client.logout()
     logger.info('END gtp_school_friends')
-
-
-if __name__ == "__main__":
-    main()

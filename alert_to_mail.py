@@ -9,7 +9,6 @@ from email.mime.multipart import MIMEMultipart
 import PASSWORDS
 from email.mime.text import MIMEText
 from email.header import Header
-from Log import Log
 
 
 def send_mail(receiver_emails, subject, message, logger, attached_file=None,
@@ -70,12 +69,14 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None,
     server.quit()
 
 
-def send_error_to_admin(subject, prog_name, logger):
+def send_error_to_admin(subject, logger, prog_name=None):
     """
     Отсылает сообщение об ошибке администратору, так же логирует его и выводит в консоль.
     :param subject: Тема письма
     :return:
     """
+    if not prog_name:
+        prog_name = os.path.basename(logger.handlers[0].baseFilename.split(".")[0])
     subject = f"[{prog_name}]:{subject}"
     error_text = f"{subject}:\n" + traceback.format_exc()
     print(error_text)
@@ -114,9 +115,12 @@ def get_participant_notification_text(last_name, first_name, login, password):
 
 
 if __name__ == "__main__":
-    from log_config import log_dir, log_level
+    import logger
+    import os
 
-    logger = Log.setup_logger('__main__', log_dir, f'gtp_alert_to_mail.log', log_level)
+    program_file = os.path.realpath(__file__)
+    logger = logger.get_logger(program_file=program_file)
+
     receiver_emails = PASSWORDS.logins['admin_emails']
     subject = "DEBUG: alert_to_mail.py"
     message = "DEBUG: alert_to_mail.py"

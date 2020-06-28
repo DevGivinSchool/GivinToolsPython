@@ -6,21 +6,15 @@ import os
 import PASSWORDS
 import sf_participant_block
 from DBPostgres import DBPostgres
-from Log import Log
-from log_config import log_dir, log_level
 from alert_to_mail import send_mail
 from datetime import datetime
-
-# Текущая дата для имени лог файла (без %S)
-now = datetime.now().strftime("%Y%m%d%H%M")
-logger = Log.setup_logger('__main__', log_dir, f'gtp_daily_works_{now}.log',
-                          log_level)
-logger.info('START gtp_daily_works')
+from alert_to_mail import send_error_to_admin
 
 
-def block_participants(dbconnect):
+def block_participants(dbconnect, logger):
     """
     Блокировка участников у которых оплата просрочена на 5 дней
+    :param logger:
     :param dbconnect: Соединение с БД
     :return:
     """
@@ -91,11 +85,11 @@ order by last_name"""
             logger.info(mail_text)
             send_mail([p[3]] + PASSWORDS.logins['manager_emails'], r"[ШКОЛА ГИВИНА]. Оповещение о блокировке в ДШ", mail_text, logger)
         except:
-            send_error(f"DAILY WORKS ERROR: Ошибка при попытке заблокировать участника:\n{p}")
+            send_error_to_admin(f"DAILY WORKS ERROR: Ошибка при попытке заблокировать участника:\n{p}", logger)
         logger.info('\n' + '=' * 120)
 
 
-def participants_notification(dbconnect):
+def participants_notification(dbconnect, logger):
     """
     Уведомление участников о необходимости оплаты
     :param dbconnect: Соединение с БД
@@ -169,7 +163,7 @@ order by last_name"""
         logger.info('\n' + '=' * 120)
 
 
-def get_list_debtors(dbconnect):
+def get_list_debtors(dbconnect, logger):
     """
     Получение списка должников и отправка его менеджерам
     :param dbconnect: Соединение с БД
@@ -195,7 +189,7 @@ order by last_name"""
     if len(records) != 0:
         # now_for_file = datetime.now().strftime("%d%m%Y_%H%M")
         now_for_file = datetime.now().strftime("%Y_%m_%d")
-        xlsx_file_path = os.path.join(log_dir, f'DEBTORS_{now_for_file}.xlsx')
+        xlsx_file_path = os.path.join(os.path.dirname(logger.handlers[0].baseFilename), f'DEBTORS_{now_for_file}.xlsx')
         table_text = get_excel_table(records, xlsx_file_path)
         mail_text = f"""Здравствуйте!
     
@@ -216,7 +210,7 @@ order by last_name"""
                   mail_text, logger)
 
 
-def get_full_list_participants(dbconnect):
+def get_full_list_participants(dbconnect, logger):
     """
     Получение полного списка участников и отправка его менеджерам
     :param dbconnect: Соединение с БД
@@ -239,7 +233,7 @@ order by last_name"""
     print(f"ВСЕГО {count_participants} УЧАСТНИКОВ")
     # now_for_file = datetime.now().strftime("%d%m%Y_%H%M")
     now_for_file = datetime.now().strftime("%Y_%m_%d")
-    xlsx_file_path = os.path.join(log_dir, f'PARTICIPANTS_{now_for_file}.xlsx')
+    xlsx_file_path = os.path.join(os.path.dirname(logger.handlers[0].baseFilename), f'PARTICIPANTS_{now_for_file}.xlsx')
     table_text = get_excel_table(records, xlsx_file_path)
 
     now_for_text = datetime.now().strftime("%d.%m.%Y")
@@ -334,6 +328,12 @@ def main():
     Соединение с БД критично, поэтому при невозможности соединиться с БД осуществляется выход из приложения.
     :return:
     """
+    import logger
+    import os
+
+    program_file = os.path.realpath(__file__)
+    logger = logger.get_logger(program_file=program_file)
+
     logger.info("Try connect to DB")
     try:
         dbconnect = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
@@ -341,7 +341,7 @@ def main():
                                host=PASSWORDS.logins['postgres_host'],
                                port=PASSWORDS.logins['postgres_port'], logger=logger)
     except Exception:
-        send_error("DAILY WORKS ERROR: Can't connect to DB!!!")
+        send_error_to_admin("DAILY WORKS ERROR: Can't connect to DB!!!", logger)
         logger.error("Exit with error")
         sys.exit(1)
     logger.info('\n' + '#' * 120)
@@ -350,7 +350,7 @@ def main():
     try:
         participants_notification(dbconnect)
     except Exception:
-        send_error("DAILY WORKS ERROR: participants_notification()")
+        send_error_to_admin("DAILY WORKS ERROR: participants_notification()", logger)
     logger.info('\n' + '#' * 120)
     # Блокировка участников у которых оплата просрочена на 5 дней. Здесь проверка на ошибку для каждого конкретного
     # участника.
@@ -366,7 +366,7 @@ def main():
     try:
         get_full_list_participants(dbconnect)
     except Exception:
-        send_error("DAILY WORKS ERROR: get_full_list_participants()")
+        send_error_to_admin("DAILY WORKS ERROR: get_full_list_participants()", logger)
     logger.info('\n' + '#' * 120)
 
     # TODO Процедура удаления пользователей у которых последний платёж год назад вместе со всеми их платёжками и письмами
@@ -376,18 +376,18 @@ def main():
     logger.info('END gtp_daily_works')
 
 
-def send_error(subject):
-    """
-    Отсылает сообщение об ошибке администратору, так же логирует его и выводит в консоль.
-    :param subject: Тема письма
-    :return:
-    """
-    subject = subject.upper()
-    error_text = f"{subject}:\n" + traceback.format_exc()
-    print(error_text)
-    logger.error(error_text)
-    logger.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
-    send_mail(PASSWORDS.logins['admin_emails'], subject, error_text, logger)
+# def send_error(subject):
+#     """
+#     Отсылает сообщение об ошибке администратору, так же логирует его и выводит в консоль.
+#     :param subject: Тема письма
+#     :return:
+#     """
+#     subject = subject.upper()
+#     error_text = f"{subject}:\n" + traceback.format_exc()
+#     print(error_text)
+#     logger.error(error_text)
+#     logger.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
+#     send_mail(PASSWORDS.logins['admin_emails'], subject, error_text, logger)
 
 
 if __name__ == "__main__":

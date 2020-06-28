@@ -1,6 +1,5 @@
 import requests
 import re
-import log_config
 import PASSWORDS
 import traceback
 import time
@@ -11,7 +10,6 @@ from utils import is_eng
 from utils import is_rus
 from alert_to_mail import send_mail
 from selenium import webdriver
-from Log import Log
 
 
 def get_clear_payment():
@@ -340,13 +338,14 @@ def get_telegram_from_text(text, logger):
 
 
 if __name__ == "__main__":
-    # parse_getcourse_html("aaaa")
-    import logging
-    from log_config import log_dir, log_level
+    import logger
+    import os
 
-    now = datetime.now().strftime("%Y%m%d%H%M")
-    logger = Log.setup_logger('__main__', log_dir, f'parse_{now}.log',
-                              log_level)
+    program_file = os.path.realpath(__file__)
+    logger = logger.get_logger(program_file=program_file)
+
+    # parse_getcourse_html("aaaa")
+
     # telegram вариант 1
     # payment = get_clear_payment()
     # parse_getcourse_page("https://givin.school/sales/control/deal/update/id/24611232", payment, logger)

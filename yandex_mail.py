@@ -4,12 +4,11 @@ import logging
 # from utils import translit_name
 from utils import get_login
 
-logger = logging.getLogger('DBPostgres')
 
-
-def create_yandex_mail(familia_, name_, login_, password_=None, department_id_=1):
+def create_yandex_mail(logger, familia_, name_, login_, password_=None, department_id_=1):
     """
     Create Yandex mail.
+    :param logger:
     :param login_: Login
     :param familia_: Second Name
     :param name_: First Name

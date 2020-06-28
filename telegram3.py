@@ -6,6 +6,7 @@ from DBPostgres import DBPostgres
 from alert_to_mail import send_mail
 from alert_text import get_participant_notification_text
 
+
 # import logging
 
 
@@ -42,12 +43,12 @@ class TelegramBot:
         self.logger = logger
         self.database = database
 
-    def get_updates_json(self):
+    def get_updates_json(self, offset=0):
         """
         Get updates from Telegram
         :return: Dictionary Updates
         """
-        params = {'timeout': 100, 'offset': None}
+        params = {'timeout': 100, 'offset': offset, 'limit': 1000, 'allowed_updates': ['message', 'edited_message']}
         response = requests.get(self.bot_url + '/getUpdates', data=params)
         self.logger.debug(response)
         self.logger.debug(response.json())
@@ -64,7 +65,7 @@ class TelegramBot:
         self.logger.debug(response)
         if response.ok:
             self.logger.debug("get_updates_json ОК")
-            return True
+            return True, None
         else:
             self.logger.error(f"ERROR:{response.text}")
             return False, response.text
@@ -105,7 +106,11 @@ if __name__ == '__main__':
     logger.info('\n' + '#' * 120)
 
     tb = TelegramBot(PASSWORDS.logins['telegram_bot_url'], logger)
-    updates = tb.get_updates_json()
+    success, updates = tb.get_updates_json()
+    if not success:
+        raise Exception(f"Не могу получить updates\n{updates}")
+    print(updates)
+    exit(0)
     # lu = last_update(updates)
     for lu in updates['result']:
         chat_id = get_chat_id(lu)
@@ -125,10 +130,25 @@ if __name__ == '__main__':
                                                                 person['first_name'],
                                                                 person['login'],
                                                                 person['password'])
-                    tb.send_text_message(chat_id, message)
+                    success, result = tb.send_text_message(chat_id, message)
+                    if not success:
+                        raise Exception(f"Не могу отправить сообщение\n{result}")
+                    # если да - отметить в БД 1) внести telegram_id 2) зафиксировать update_id
+                    sql_text = f"UPDATE participants SET telegram_id=%s where id=%s RETURNING id;"
+                    values_tuple = (person['telegram_id'], person['id'])
+                    id_ = dbconnect.execute_dml_id(sql_text, values_tuple)
+                    if not id_:
+                        raise Exception(
+                            f"Не могу обновить telegram_id={person['telegram_id']} для участника id={person['id']}")
 
+                    # TODO: нужно получить update_id из БД в начале процедуры
+                    sql_text = f"UPDATE settings SET key=%s where key='telegram_id' RETURNING key;"
+                    values_tuple = (person['telegram_id'], person['id'])
+                    id_ = dbconnect.execute_dml_id(sql_text, values_tuple)
+                    # TODO: переписать процедуру получения updates с последнего update_id
 
-    # tb.send_text_message(chat_id, 'Your message goes here')
+# TODO: В каждом alert сделать отсылку письма админу.
+# TODO: Везде вставить log.debug
 
 """
 <Response [200]>

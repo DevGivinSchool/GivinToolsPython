@@ -7,7 +7,6 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 
 import PASSWORDS
-import log_config
 from email.mime.text import MIMEText
 from email.header import Header
 from Log import Log
@@ -71,10 +70,53 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None,
     server.quit()
 
 
+def send_error_to_admin(subject, prog_name, logger):
+    """
+    Отсылает сообщение об ошибке администратору, так же логирует его и выводит в консоль.
+    :param subject: Тема письма
+    :return:
+    """
+    subject = f"[{prog_name}]:{subject}"
+    error_text = f"{subject}:\n" + traceback.format_exc()
+    print(error_text)
+    logger.error(error_text)
+    logger.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
+    send_mail(PASSWORDS.logins['admin_emails'], subject, error_text, logger)
+
+
+def get_participant_notification_text(last_name, first_name, login, password):
+    mail_text2 = f"""Здравствуйте, {last_name.capitalize()} {first_name.capitalize()}!  
+
+Поздравляем, Вы оплатили абонемент на месяц совместных занятий в онлайн-формате "Друзья Школы Гивина". 
+
+Ваш zoom-аккаунт:
+Логин: {login}
+Пароль: {password}
+
+Сохраните себе эти данные, чтобы не потерять их. 
+
+Эти данные вы можете использовать с настоящего момента:
+1) Скачайте приложение Zoom на компьютер, если ещё не cделали это ранее. 
+2) Установите приложение Zoom на ваш компьютер.
+3) Запустите эту программу.
+4) Нажмите кнопку Sign In ("Войти в..").
+5) Введите логин и пароль, предоставленные вам в этом письме .
+6) Поставьте птичку (галку) в поле Keep me logged in ("Не выходить из системы").
+7) Нажмите Sign In ("Войти"). 
+8) Далее из чата Объявлений в телеграмме найдет сообщение с ссылкой на занятия. 
+   Нажмите на неё. Она будет открываться в браузере, появится сверху сообщение с кнопкой, 
+   жмём на кнопку Open ZOOM Meetings (либо Открыть ZOOM)
+9) Появится окно для ввода пароля конференции. Здесь вводим три цифры 355. 
+
+С благодарностью и сердечным теплом,
+команда Школы Гивина."""
+    return mail_text2
+
+
 if __name__ == "__main__":
     from log_config import log_dir, log_level
-    logger = Log.setup_logger('__main__', log_dir, f'gtp_alert_to_mail.log',
-                              log_level)
+
+    logger = Log.setup_logger('__main__', log_dir, f'gtp_alert_to_mail.log', log_level)
     receiver_emails = PASSWORDS.logins['admin_emails']
     subject = "DEBUG: alert_to_mail.py"
     message = "DEBUG: alert_to_mail.py"

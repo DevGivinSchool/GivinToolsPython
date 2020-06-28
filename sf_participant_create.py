@@ -7,10 +7,9 @@ import sys
 # import password_generator
 from ZoomUS import ZoomUS
 from DBPostgres import DBPostgres
-from alert_to_mail import send_mail
+from alert_to_mail import send_mail, get_participant_notification_text
 from utils import get_login
 from sf_password_generator import password_for_sf
-from alert_text import get_participant_notification_text
 
 
 class MailMessage:

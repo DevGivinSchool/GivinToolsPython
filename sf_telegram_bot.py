@@ -1,13 +1,8 @@
 import requests
 import PASSWORDS
-import traceback
 import sys
 from DBPostgres import DBPostgres
-from alert_to_mail import send_mail
-from alert_text import get_participant_notification_text
-
-
-# import logging
+from alert_to_mail import send_error_to_admin, get_participant_notification_text
 
 
 def get_chat_id(data):
@@ -71,27 +66,13 @@ class TelegramBot:
             return False, response.text
 
 
-def send_error(subject):
-    """
-    Отсылает сообщение об ошибке администратору, так же логирует его и выводит в консоль.
-    :param subject: Тема письма
-    :return:
-    """
-    subject = "[gtp_telegram_bot.py]" + subject.upper()
-    error_text = f"{subject}:\n" + traceback.format_exc()
-    print(error_text)
-    logger.error(error_text)
-    logger.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
-    send_mail(PASSWORDS.logins['admin_emails'], subject, error_text, logger)
-
-
 if __name__ == '__main__':
-    import logging
+    import log_config
     from Log import Log
-    from log_config import log_dir
 
-    log_level = logging.DEBUG
-    logger = Log.setup_logger('__main__', log_dir, log_name=f'telegram_bot', level=log_level, dt="%Y%m%d%H%M")
+    logger = Log.setup_logger(log_config.prog_name, log_config.log_dir,
+                              log_name=log_config.prog_name_without_ext,
+                              level=log_config.log_level, dt="%Y%m%d%H%M")
 
     logger.info("Try connect to DB")
     try:
@@ -100,7 +81,7 @@ if __name__ == '__main__':
                                host=PASSWORDS.logins['postgres_host'],
                                port=PASSWORDS.logins['postgres_port'], logger=logger)
     except Exception:
-        send_error("ERROR: Can't connect to DB!!!")
+        send_error_to_admin("Can't connect to DB!!!", )
         logger.error("Exit with error")
         sys.exit(1)
     logger.info('\n' + '#' * 120)
@@ -108,7 +89,9 @@ if __name__ == '__main__':
     tb = TelegramBot(PASSWORDS.logins['telegram_bot_url'], logger)
     success, updates = tb.get_updates_json()
     if not success:
-        raise Exception(f"Не могу получить updates\n{updates}")
+        err_text = f"Не могу получить updates\n{updates}"
+        send_error_to_admin(err_text)
+        raise Exception(err_text)
     print(updates)
     exit(0)
     # lu = last_update(updates)
@@ -132,14 +115,17 @@ if __name__ == '__main__':
                                                                 person['password'])
                     success, result = tb.send_text_message(chat_id, message)
                     if not success:
-                        raise Exception(f"Не могу отправить сообщение\n{result}")
+                        err_text = f"Не могу отправить сообщение\n{result}"
+                        send_error_to_admin(err_text)
+                        raise Exception(err_text)
                     # если да - отметить в БД 1) внести telegram_id 2) зафиксировать update_id
                     sql_text = f"UPDATE participants SET telegram_id=%s where id=%s RETURNING id;"
                     values_tuple = (person['telegram_id'], person['id'])
                     id_ = dbconnect.execute_dml_id(sql_text, values_tuple)
                     if not id_:
-                        raise Exception(
-                            f"Не могу обновить telegram_id={person['telegram_id']} для участника id={person['id']}")
+                        err_text = f"Не могу обновить telegram_id={person['telegram_id']} для участника id={person['id']}"
+                        send_error_to_admin(err_text)
+                        raise Exception(err_text)
 
                     # TODO: нужно получить update_id из БД в начале процедуры
                     sql_text = f"UPDATE settings SET key=%s where key='telegram_id' RETURNING key;"
@@ -147,7 +133,7 @@ if __name__ == '__main__':
                     id_ = dbconnect.execute_dml_id(sql_text, values_tuple)
                     # TODO: переписать процедуру получения updates с последнего update_id
 
-# TODO: В каждом alert сделать отсылку письма админу.
+
 # TODO: Везде вставить log.debug
 
 """

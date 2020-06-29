@@ -53,7 +53,7 @@ def get_logger(program_file=None, log_file=None, dt=True):
     log_file_ = ""
     try:
         if dt:
-            now = "_" + datetime.now().strftime("%Y%m%d%H%M")
+            now = "_" + datetime.now().strftime("%Y%m%d%H%M%S")
         else:
             now = ""
         log_file_ = os.path.join(log_dir, f"{log_name}{now}.{extention}")

@@ -328,11 +328,11 @@ def main():
     Соединение с БД критично, поэтому при невозможности соединиться с БД осуществляется выход из приложения.
     :return:
     """
-    import logger
+    import custom_logger
     import os
 
     program_file = os.path.realpath(__file__)
-    logger = logger.get_logger(program_file=program_file)
+    logger = custom_logger.get_logger(program_file=program_file)
 
     logger.info("Try connect to DB")
     try:

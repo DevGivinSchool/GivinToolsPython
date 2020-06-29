@@ -338,11 +338,11 @@ def get_telegram_from_text(text, logger):
 
 
 if __name__ == "__main__":
-    import logger
+    import custom_logger
     import os
 
     program_file = os.path.realpath(__file__)
-    logger = logger.get_logger(program_file=program_file)
+    logger = custom_logger.get_logger(program_file=program_file)
 
     # parse_getcourse_html("aaaa")
 

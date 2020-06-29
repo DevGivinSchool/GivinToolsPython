@@ -101,12 +101,10 @@ def get_participant_notification_text(last_name, first_name, login, password):
 2) Установите приложение Zoom на ваш компьютер.
 3) Запустите эту программу.
 4) Нажмите кнопку Sign In ("Войти в..").
-5) Введите логин и пароль, предоставленные вам в этом письме .
+5) Введите логин и пароль, предоставленные вам в этом письме.
 6) Поставьте птичку (галку) в поле Keep me logged in ("Не выходить из системы").
 7) Нажмите Sign In ("Войти"). 
-8) Далее из чата Объявлений в телеграмме найдет сообщение с ссылкой на занятия. 
-   Нажмите на неё. Она будет открываться в браузере, появится сверху сообщение с кнопкой, 
-   жмём на кнопку Open ZOOM Meetings (либо Открыть ZOOM)
+8) Далее из чата Объявлений в телеграмме найдет сообщение с ссылкой на занятия. Нажмите на неё. Она будет открываться в браузере, появится сверху сообщение с кнопкой, жмём на кнопку Open ZOOM Meetings (либо Открыть ZOOM).
 9) Появится окно для ввода пароля конференции. Здесь вводим три цифры 355. 
 
 С благодарностью и сердечным теплом,
@@ -115,11 +113,11 @@ def get_participant_notification_text(last_name, first_name, login, password):
 
 
 if __name__ == "__main__":
-    import logger
+    import custom_logger
     import os
 
     program_file = os.path.realpath(__file__)
-    logger = logger.get_logger(program_file=program_file)
+    logger = custom_logger.get_logger(program_file=program_file)
 
     receiver_emails = PASSWORDS.logins['admin_emails']
     subject = "DEBUG: alert_to_mail.py"

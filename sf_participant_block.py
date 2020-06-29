@@ -113,11 +113,11 @@ def block_one_participant(p, postgres, logger):
 
 
 if __name__ == '__main__':
-    import logger
+    import custom_logger
     import os
     from list_ import list_fio
 
     program_file = os.path.realpath(__file__)
-    logger_ = logger.get_logger(program_file=program_file)
+    logger_ = custom_logger.get_logger(program_file=program_file)
 
     participants_block(list_fio, logger_)

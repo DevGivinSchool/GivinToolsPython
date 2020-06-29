@@ -1,7 +1,7 @@
 import yandex_mail
 import password_generator
 import yandex_connect
-import logger
+import custom_logger
 import os
 # На вход подаються строки: Фамилия;Имя (пока из list.py)
 from list_ import list_fio
@@ -9,7 +9,7 @@ from utils import get_login
 from utils import split_str
 
 program_file = os.path.realpath(__file__)
-logger = logger.get_logger(program_file=program_file)
+logger = custom_logger.get_logger(program_file=program_file)
 
 
 # TODO: На вход везде должно подаваться одно и тоже Фамилия + Имя + Login, если чего-то нет, то оно собирается из друго.

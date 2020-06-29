@@ -366,11 +366,11 @@ def create_zoom_user(login, name, surname, password, logger):
 
 # ==========================================================================================
 if __name__ == '__main__':
-    import logger
+    import custom_logger
     import os
 
     program_file = os.path.realpath(__file__)
-    logger = logger.get_logger(program_file=program_file)
+    logger = custom_logger.get_logger(program_file=program_file)
 
     # Получение Bearer
     # print(ZoomUS.generate_jwt(PASSWORDS.logins['zoom03_api_key'], PASSWORDS.logins['zoom03_api_secret']))

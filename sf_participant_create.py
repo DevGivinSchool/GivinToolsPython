@@ -317,12 +317,12 @@ def create_sf_participant_db(database, logger, payment, mm):
 
 
 if __name__ == '__main__':
-    import logger
+    import custom_logger
     import os
     from list_ import list_fio
 
     program_file = os.path.realpath(__file__)
-    log = logger.get_logger(program_file=program_file)
+    log = custom_logger.get_logger(program_file=program_file)
     # noinspection PyBroadException
     try:
         log.info("Try connect to DB")

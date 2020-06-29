@@ -272,11 +272,11 @@ if __name__ == '__main__':
          datetime(2020, 4, 20, 9, 00, 00))
     ]
 
-    import logger
+    import custom_logger
     import os
 
     program_file = os.path.realpath(__file__)
-    main_logger = logger.get_logger(program_file=program_file)
+    main_logger = custom_logger.get_logger(program_file=program_file)
 
     main_logger.info("Try connect to DB")
     db = None
@@ -294,12 +294,12 @@ if __name__ == '__main__':
     buffer = ""
     for event in table_of_events:
         log_file = os.path.join(os.path.dirname(main_logger.handlers[0].baseFilename), f'{event[0]}.log')
-        logger.get_logger(log_file=log_file)
+        custom_logger.get_logger(log_file=log_file)
         main_logger.info(f"Обрабатываю файл отчёта: {event[1]}")
         print(f"Обрабатываю файл отчёта:{event[1]}")
         try:
-            db.logger = logger
-            buffer += mark_attendance(event, db, logger)
+            db.logger = custom_logger
+            buffer += mark_attendance(event, db, custom_logger)
         except:
             error_fixing(f"ERROR: Ошибка при обработке отчёта:\n{traceback.format_exc()}", main_logger)
         list_columns.append(event[0])

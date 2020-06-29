@@ -26,7 +26,7 @@ class DBPostgres:
            :return: List of tuples = List of strings"""
         cursor = self.conn.cursor()
         if PASSWORDS.DEBUG:
-            self.logger.info(cursor.mogrify(sql_text, values_tuple))
+            self.logger.debug(cursor.mogrify(sql_text, values_tuple))
             print(cursor.mogrify(sql_text, values_tuple))
         cursor.execute(sql_text, values_tuple)
         records = cursor.fetchall()
@@ -39,10 +39,10 @@ class DBPostgres:
         """Execute DML operations
                    :param values_tuple: Values
                    :param sql_text: Query text.
-                   :return result: (Rows count, ID)"""
+                   :return: Rows count"""
         cursor = self.conn.cursor()
         if PASSWORDS.DEBUG:
-            self.logger.info(cursor.mogrify(sql_text, values_tuple))
+            self.logger.debug(cursor.mogrify(sql_text, values_tuple))
             print(cursor.mogrify(sql_text, values_tuple))
         cursor.execute(sql_text, values_tuple)
         self.conn.commit()
@@ -54,10 +54,10 @@ class DBPostgres:
         """Execute DML operations
                    :param values_tuple:
                    :param sql_text: Query text.
-                   :return: Count ID"""
+                   :return: ID"""
         cursor = self.conn.cursor()
         if PASSWORDS.DEBUG:
-            self.logger.info(cursor.mogrify(sql_text, values_tuple))
+            self.logger.debug(cursor.mogrify(sql_text, values_tuple))
             print(cursor.mogrify(sql_text, values_tuple))
         cursor.execute(sql_text, values_tuple)
         self.conn.commit()
@@ -356,11 +356,11 @@ class DBPostgres:
 
 
 if __name__ == "__main__":
-    import logger
+    import custom_logger
     import os
 
     program_file = os.path.realpath(__file__)
-    logger = logger.get_logger(program_file=program_file)
+    logger = custom_logger.get_logger(program_file=program_file)
 
     postgres = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
                           logger=logger,

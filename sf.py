@@ -96,7 +96,7 @@ DB: Закрываю сессию работы
 import PASSWORDS
 import traceback
 import sys
-import logger
+import custom_logger
 import os
 from datetime import datetime
 from imapclient import IMAPClient
@@ -106,7 +106,7 @@ from alert_to_mail import send_mail
 
 if __name__ == "__main__":
     program_file = os.path.realpath(__file__)
-    logger = logger.get_logger(program_file=program_file)
+    logger = custom_logger.get_logger(program_file=program_file)
     logger.info('START gtp_school_friends')
     try:
         client = IMAPClient(host="imap.yandex.ru", use_uid=True)

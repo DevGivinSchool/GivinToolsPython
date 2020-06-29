@@ -85,7 +85,7 @@ order by last_name"""
             logger.info(mail_text)
             send_mail([p[3]] + PASSWORDS.logins['manager_emails'], r"[ШКОЛА ГИВИНА]. Оповещение о блокировке в ДШ", mail_text, logger)
         except:
-            send_error_to_admin(f"DAILY WORKS ERROR: Ошибка при попытке заблокировать участника:\n{p}", logger)
+            send_error_to_admin(f"DAILY WORKS ERROR: Ошибка при попытке заблокировать участника:\n{p}", logger, prog_name="sf_daily_works.py")
         logger.info('\n' + '=' * 120)
 
 
@@ -341,7 +341,7 @@ def main():
                                host=PASSWORDS.logins['postgres_host'],
                                port=PASSWORDS.logins['postgres_port'], logger=logger)
     except Exception:
-        send_error_to_admin("DAILY WORKS ERROR: Can't connect to DB!!!", logger)
+        send_error_to_admin("DAILY WORKS ERROR: Can't connect to DB!!!", logger, prog_name="sf_daily_works.py")
         logger.error("Exit with error")
         sys.exit(1)
     logger.info('\n' + '#' * 120)
@@ -350,7 +350,7 @@ def main():
     try:
         participants_notification(dbconnect)
     except Exception:
-        send_error_to_admin("DAILY WORKS ERROR: participants_notification()", logger)
+        send_error_to_admin("DAILY WORKS ERROR: participants_notification()", logger, prog_name="sf_daily_works.py")
     logger.info('\n' + '#' * 120)
     # Блокировка участников у которых оплата просрочена на 5 дней. Здесь проверка на ошибку для каждого конкретного
     # участника.
@@ -366,7 +366,7 @@ def main():
     try:
         get_full_list_participants(dbconnect)
     except Exception:
-        send_error_to_admin("DAILY WORKS ERROR: get_full_list_participants()", logger)
+        send_error_to_admin("DAILY WORKS ERROR: get_full_list_participants()", logger, prog_name="sf_daily_works.py")
     logger.info('\n' + '#' * 120)
 
     # TODO Процедура удаления пользователей у которых последний платёж год назад вместе со всеми их платёжками и письмами

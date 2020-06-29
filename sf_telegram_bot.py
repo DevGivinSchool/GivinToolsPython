@@ -48,7 +48,7 @@ class TelegramBot:
         self.logger.debug(response)
         self.logger.debug(response.json())
         if response.ok:
-            self.logger.debug("get_updates_json ОК")
+            self.logger.debug("get_updates_json OK")
             return True, response.json()
         else:
             self.logger.error(f"ERROR:{response.text}")
@@ -66,6 +66,18 @@ class TelegramBot:
             return False, response.text
 
 
+def mark_telegram_update_id(telegram_update_id):
+    # 2) зафиксировать telegram_update_id + 1
+    sql_text = f"UPDATE settings SET value=%s where key='telegram_update_id' RETURNING key;"
+    values_tuple = (telegram_update_id + 1,)
+    id_ = dbconnect.execute_dml_id(sql_text, values_tuple)
+    logger.debug(f"id_={id_}")
+    if not id_:
+        err_text = f"Не могу обновить telegram_update_id"
+        send_error_to_admin(err_text, logger, prog_name="sf_telegram_bot.py")
+        raise Exception(err_text)
+
+
 if __name__ == '__main__':
     import logger
     import os
@@ -79,25 +91,26 @@ if __name__ == '__main__':
                                host=PASSWORDS.logins['postgres_host'],
                                port=PASSWORDS.logins['postgres_port'], logger=logger)
     except Exception:
-        send_error_to_admin("Can't connect to DB!!!", )
+        send_error_to_admin("Can't connect to DB!!!", logger, prog_name="sf_telegram_bot.py")
         logger.error("Exit with error")
         sys.exit(1)
-    logger.info('\n' + '#' * 120)
+    # logger.info('\n' + '#' * 120)
     # Получить update_id из БД
     sql_text = f"select value from settings where key='telegram_update_id'"
     values_tuple = None
     rows = dbconnect.execute_dml_id(sql_text, values_tuple)
     logger.debug(f"rows={rows}")
     if not rows:
-        err_text = f"Не могу получить rows из БД"
-        send_error_to_admin(err_text)
+        err_text = f"Select для telegram_update_id ничего не возвращает"
+        send_error_to_admin(err_text, logger, prog_name="sf_telegram_bot.py")
         raise Exception(err_text)
     try:
-        telegram_update_id = rows[0][0]
+        telegram_update_id = int(rows[0][0])
     except:
         err_text = f"Не могу получить telegram_update_id"
-        send_error_to_admin(err_text)
+        send_error_to_admin(err_text, logger, prog_name="sf_telegram_bot.py")
         raise Exception(err_text)
+    logger.debug(f"telegram_update_id={telegram_update_id}")
     tb = TelegramBot(PASSWORDS.logins['telegram_bot_url'], logger)
     logger.info("Get updates")
     success, updates = tb.get_text_updates(telegram_update_id)
@@ -105,11 +118,8 @@ if __name__ == '__main__':
     logger.debug(f"updates=\n{updates}")
     if not success:
         err_text = f"Не могу получить updates\n{updates}"
-        send_error_to_admin(err_text)
+        send_error_to_admin(err_text, logger, prog_name="sf_telegram_bot.py")
         raise Exception(err_text)
-    print(updates)
-    exit(0)
-    # lu = last_update(updates)
     for lu in updates['result']:
         chat_id = get_chat_id(lu)
         logger.debug(f"chat_id={chat_id}")
@@ -121,6 +131,7 @@ if __name__ == '__main__':
             if person is None:
                 # Ничего не нашлось
                 logger.debug(f"Нет участника с таким telegram username {username}")
+                mark_telegram_update_id(telegram_update_id)
             else:
                 if person['telegram_id'] is None:
                     # Это новый пользователь, ему нужно отправить логин
@@ -134,38 +145,18 @@ if __name__ == '__main__':
                     logger.debug(f"result=\n{result}")
                     if not success:
                         err_text = f"Не могу отправить сообщение\n{result}"
-                        send_error_to_admin(err_text)
+                        send_error_to_admin(err_text, logger, prog_name="sf_telegram_bot.py")
                         raise Exception(err_text)
-                    # если да - отметить в БД 1) внести telegram_id 2) зафиксировать update_id
+                    # Если да - отметить в БД:
+                    # 1) внести telegram_id в participants
                     sql_text = f"UPDATE participants SET telegram_id=%s where id=%s RETURNING id;"
                     values_tuple = (person['telegram_id'], person['id'])
                     id_ = dbconnect.execute_dml_id(sql_text, values_tuple)
                     logger.debug(f"id_={id_}")
                     if not id_:
                         err_text = f"Не могу обновить telegram_id={person['telegram_id']} для участника id={person['id']}"
-                        send_error_to_admin(err_text)
+                        send_error_to_admin(err_text, logger, prog_name="sf_telegram_bot.py")
                         raise Exception(err_text)
+                    mark_telegram_update_id(telegram_update_id)
 
-                    # TODO: переписать процедуру получения updates с последнего update_id
-                    sql_text = f"UPDATE settings SET key=%s where key='telegram_update_id' RETURNING key;"
-                    values_tuple = (person['telegram_id'], person['id'])
-                    id_ = dbconnect.execute_dml_id(sql_text, values_tuple)
-                    logger.debug(f"id_={id_}")
-                    if not id_:
-                        err_text = f"Не могу обновить telegram_id={person['telegram_id']} для участника id={person['id']}"
-                        send_error_to_admin(err_text)
-                        raise Exception(err_text)
-
-# TODO: Его можно перенести в Log, т.к. debug теперь определяется в PASSWORS. В остальных модулях переделать log_config после проверки в этом модуле.
-# TODO: Сделать в классе Log получение стандартного логгера с параметрами из log_config.
-# TODO: Переделать Log => custom logger | logging system, там не нужен класс, можно просто пару процедур.
-
-"""
-<Response [200]>
-{'ok': True, 'result': [{'update_id': 391387715, 'message': {'message_id': 20, 'from': {'id': 324846110, 'is_bot': False, 'first_name': 'Дмитрий', 'last_name': 'Бобровский', 'username': 'BobrD', 'language_code': 'ru'}, 'chat': {'id': 324846110, 'first_name': 'Дмитрий', 'last_name': 'Бобровский', 'username': 'BobrD', 'type': 'private'}, 'date': 1593108194, 'text': 'Test for link www.mail.ru  dsfhdsjfadsjf 3254', 'entities': [{'offset': 14, 'length': 11, 'type': 'url'}]}}]}
-[{'update_id': 391387715, 'message': {'message_id': 20, 'from': {'id': 324846110, 'is_bot': False, 'first_name': 'Дмитрий', 'last_name': 'Бобровский', 'username': 'BobrD', 'language_code': 'ru'}, 'chat': {'id': 324846110, 'first_name': 'Дмитрий', 'last_name': 'Бобровский', 'username': 'BobrD', 'type': 'private'}, 'date': 1593108194, 'text': 'Test for link www.mail.ru  dsfhdsjfadsjf 3254', 'entities': [{'offset': 14, 'length': 11, 'type': 'url'}]}}]
-0
-{'update_id': 391387715, 'message': {'message_id': 20, 'from': {'id': 324846110, 'is_bot': False, 'first_name': 'Дмитрий', 'last_name': 'Бобровский', 'username': 'BobrD', 'language_code': 'ru'}, 'chat': {'id': 324846110, 'first_name': 'Дмитрий', 'last_name': 'Бобровский', 'username': 'BobrD', 'type': 'private'}, 'date': 1593108194, 'text': 'Test for link www.mail.ru  dsfhdsjfadsjf 3254', 'entities': [{'offset': 14, 'length': 11, 'type': 'url'}]}}
-324846110
-<Response [200]>
-"""
+# TODO: telegram_updete_id нужно получать из каждого updates

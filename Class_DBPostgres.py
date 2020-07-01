@@ -1,7 +1,7 @@
 import datetime
 import utils
 import psycopg2
-import parser
+import payment_creater
 import PASSWORDS
 
 
@@ -176,7 +176,7 @@ class DBPostgres:
             if participant_id is None and task.payment["Платежная система"] == 1:
                 # Если это Getcourse и ничего по ФИО и почте (которой могло и не быть) не нашлось,
                 # тогда парсим страницу GetCourse и пытаемся еще раз поискать по почте и телеграм
-                parser.parse_getcourse_page(task.payment["Кассовый чек 54-ФЗ"], task.payment, self.logger)
+                payment_creater.parse_getcourse_page(task.payment["Кассовый чек 54-ФЗ"], task.payment, self.logger)
                 self.logger.info(f"Ищем участника повторно по email - {task.payment['Электронная почта']}")
                 participant_id, p_type = self.find_participant_by('email', task.payment["Электронная почта"])
                 if participant_id is None:

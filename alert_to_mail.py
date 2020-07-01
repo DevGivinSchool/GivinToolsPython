@@ -95,7 +95,6 @@ def raise_error(err_text_, logger_):
     logger_.error(err_text_)
     send_error_to_admin(err_text_, logger_, prog_name="sf_telegram_bot.py")
     raise Exception(err_text_)
-    exit(1)
 
 
 def get_participant_notification_text(last_name, first_name, login, password):

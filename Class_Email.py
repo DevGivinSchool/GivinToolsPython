@@ -5,10 +5,9 @@ import traceback
 from email.header import decode_header
 import html2text
 import PASSWORDS
-import parser
+import payment_creater
 from Class_DBPostgres import DBPostgres
 from Class_Task import Task
-from alert_to_mail import send_mail
 from alert_to_mail import raise_error
 
 
@@ -81,14 +80,7 @@ class Email:
                                   host=PASSWORDS.settings['postgres_host'],
                                   port=PASSWORDS.settings['postgres_port'], logger=self.logger)
         except Exception:
-            # TODO Вынести процедуру опопвещения MAIN ERROR в отдельную процедуру
-            error_text = \
-                f"MAIN ERROR (Postgres):\n{traceback.format_exc()}"
-            print(error_text)
-            self.logger.error(error_text)
-            self.logger.error(f"Send email to: {PASSWORDS.settings['admin_emails']}")
-            send_mail(PASSWORDS.settings['admin_emails'], "MAIN ERROR (Postgres)", error_text, self.logger)
-            self.logger.error("Exit with error")
+            raise_error("ERROR: Postgres connect", self.logger)
             sys.exit(1)
         session_id = postgres.session_begin()
         self.logger.info(f'Session begin (session_id={session_id})')
@@ -136,7 +128,7 @@ class Email:
                         self.logger.error(f"BODY\n: {body['body_text']}")
                 self.logger.info('-' * 45)
                 postgres.task_error(error_text, uuid)
-                send_mail(PASSWORDS.settings['admin_emails'], "TASK ERROR", error_text, self.logger)
+                raise_error(f"TASK {uuid} ERROR: {error_text}", self.logger)
                 self.move_email_to_trash(uuid)
                 continue
             # Create Task and insert it to DB
@@ -150,7 +142,7 @@ class Email:
                     if ffrom == 'noreply@server.paykeeper.ru' and fsubject == 'Принята оплата':
                         self.logger.info(f'Это письмо от платежной системы - PayKeeper')
                         try:
-                            payment = parser.parse_paykeeper_html(body['body_html'], self.logger)
+                            payment = payment_creater.parse_paykeeper_html(body['body_html'], self.logger)
                         except Exception:
                             raise_error("ERROR: parse_paykeeper_html", self.logger)
                             sys.exit(1)
@@ -162,7 +154,7 @@ class Email:
                         self.logger.info(f'Это письмо от платежной системы - GetCourse')
                         # print(f'Это письмо от платежной системы - GetCourse')
                         try:
-                            payment = parser.parse_getcourse_html(body['body_html'], self.logger)
+                            payment = payment_creater.parse_getcourse_html(body['body_html'], self.logger)
                         except Exception:
                             raise_error("ERROR: parse_getcourse_html", self.logger)
                             sys.exit(1)
@@ -221,7 +213,7 @@ class Email:
                             self.logger.error(f"BODY\n: {body['body_text']}")
                     self.logger.info('-' * 45)
                     postgres.task_error(error_text, uuid)
-                    send_mail(PASSWORDS.settings['admin_emails'], "TASK ERROR", error_text, self.logger)
+                    raise_error(f"TASK {uuid} ERROR: {error_text}", self.logger)
                     continue
             else:
                 self.logger.warning(f"ВНИМАНИЕ: Это письмо уже обрабатывалось!")

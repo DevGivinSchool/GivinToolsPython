@@ -1,6 +1,6 @@
 import yandex_mail
 import yandex_connect
-import parser
+import payment_creater
 import traceback
 import PASSWORDS
 import sys
@@ -113,7 +113,7 @@ def from_list_create_sf_participants(list_, database, logger):
     # TODO Сделать возможность обрабатывать либо строку Ф+И либо словарь
     logger.info("Начинаю обработку списка")
     for line in list_.splitlines():
-        payment = parser.get_clear_payment()
+        payment = payment_creater.get_clear_payment()
         # Когда копирую из Google Sheets разделитель = Tab
         # Иванов	Иван
         # line_ = split_str(line)
@@ -134,8 +134,8 @@ def from_list_create_sf_participants(list_, database, logger):
             pass
         payment["Время проведения"] = datetime.now()
         payment["auto"] = False
-        parser.payment_normalization(payment)
-        parser.payment_computation(payment)
+        payment_creater.payment_normalization(payment)
+        payment_creater.payment_computation(payment)
         # noinspection PyBroadException
         try:
             create_sf_participant(payment, database, logger)

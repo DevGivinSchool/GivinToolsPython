@@ -5,6 +5,7 @@ log/
 chromedriver.exe
 log_config.py
 parser.log
+test.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

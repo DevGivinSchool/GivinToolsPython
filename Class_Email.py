@@ -9,6 +9,7 @@ import parser
 from Class_DBPostgres import DBPostgres
 from Class_Task import Task
 from alert_to_mail import send_mail
+from alert_to_mail import raise_error
 
 
 def get_first_email_from_line(line):
@@ -148,7 +149,11 @@ class Email:
                     # PayKeeper
                     if ffrom == 'noreply@server.paykeeper.ru' and fsubject == 'Принята оплата':
                         self.logger.info(f'Это письмо от платежной системы - PayKeeper')
-                        payment = parser.parse_paykeeper_html(body['body_html'], self.logger)
+                        try:
+                            payment = parser.parse_paykeeper_html(body['body_html'], self.logger)
+                        except Exception:
+                            raise_error("ERROR: parse_paykeeper_html", self.logger)
+                            sys.exit(1)
                         self.payment_verification_for_school_friends(ffrom, fsubject, payment, postgres, task, uuid)
                     # Getcourse
                     elif (
@@ -156,7 +161,11 @@ class Email:
                             and fsubject.startswith("Поступил платеж"):
                         self.logger.info(f'Это письмо от платежной системы - GetCourse')
                         # print(f'Это письмо от платежной системы - GetCourse')
-                        payment = parser.parse_getcourse_html(body['body_html'], self.logger)
+                        try:
+                            payment = parser.parse_getcourse_html(body['body_html'], self.logger)
+                        except Exception:
+                            raise_error("ERROR: parse_getcourse_html", self.logger)
+                            sys.exit(1)
                         self.payment_verification_for_school_friends(ffrom, fsubject, payment, postgres, task, uuid)
                     # Это письмо вообще не платёж
                     else:

@@ -1,6 +1,6 @@
 import PASSWORDS
 import sys
-import Class_TelegramBot
+from Class_TelegramBot import TelegramBot
 from Class_DBPostgres import DBPostgres
 from alert_to_mail import raise_error, get_participant_notification_text
 
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     except:
         raise_error("Не могу получить telegram_update_id из БД", logger)
     logger.debug(f"telegram_update_id={telegram_update_id}")
-    tb = Class_TelegramBot.TelegramBot(PASSWORDS.settings['telegram_bot_url2'], logger)
+    tb = TelegramBot(PASSWORDS.settings['telegram_bot_url2'], logger)
     logger.info("Get updates")
     success, updates = tb.get_text_updates(telegram_update_id)
     logger.debug(f"success={success}")

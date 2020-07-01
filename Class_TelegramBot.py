@@ -28,10 +28,11 @@ class TelegramBot:
 
     def send_text_message(self, chat, text):
         params = {'chat_id': chat, 'text': text}
+        self.logger.debug(self.bot_url + '/sendMessage')
         response = requests.post(self.bot_url + '/sendMessage', data=params)
         self.logger.debug(response)
         if response.ok:
-            self.logger.debug("get_updates_json ОК")
+            self.logger.debug("/sendMessage ОК")
             return True, None
         else:
             self.logger.error(f"ERROR:{response.text}")

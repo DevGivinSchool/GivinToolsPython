@@ -26,14 +26,14 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None,
     """
     logger.info(f"Отправка почтовых оповещений")
     # Все письма отправляются на почту robot для хранения.
-    if PASSWORDS.logins['ymail_login'] not in receiver_emails:
-        receiver_emails.append(PASSWORDS.logins['ymail_login'])
+    if PASSWORDS.settings['ymail_login'] not in receiver_emails:
+        receiver_emails.append(PASSWORDS.settings['ymail_login'])
     # Create a secure SSL context
     context = ssl.create_default_context()
     server = smtplib.SMTP_SSL("smtp.yandex.ru", port, context=context)
     # Try connect to server
     try:
-        server.login(PASSWORDS.logins['ymail_login'], PASSWORDS.logins['ymail_password'])
+        server.login(PASSWORDS.settings['ymail_login'], PASSWORDS.settings['ymail_password'])
     except Exception:
         logger.error("ERROR: Can't connect to SMTP server:\n" + traceback.format_exc())
     # Partial create message (without To)
@@ -81,8 +81,20 @@ def send_error_to_admin(subject, logger, prog_name=None):
     error_text = f"{subject}:\n" + traceback.format_exc()
     print(error_text)
     logger.error(error_text)
-    logger.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
-    send_mail(PASSWORDS.logins['admin_emails'], subject, error_text, logger)
+    logger.error(f"Send email to: {PASSWORDS.settings['admin_emails']}")
+    attached_file = logger.handlers[0].baseFilename
+    send_mail(PASSWORDS.settings['admin_emails'], subject, error_text, logger, attached_file=attached_file)
+
+
+def raise_error(err_text_, logger_):
+    """
+    Записать в лог ошибку - Выслать ошибку админу - Генерировать исключение
+    :param err_text_: Текст ошибки
+    :param logger_: логгер
+    """
+    logger_.error(err_text_)
+    send_error_to_admin(err_text_, logger_, prog_name="sf_telegram_bot.py")
+    raise Exception(err_text_)
 
 
 def get_participant_notification_text(last_name, first_name, login, password):
@@ -119,7 +131,7 @@ if __name__ == "__main__":
     program_file = os.path.realpath(__file__)
     logger = custom_logger.get_logger(program_file=program_file)
 
-    receiver_emails = PASSWORDS.logins['admin_emails']
+    receiver_emails = PASSWORDS.settings['admin_emails']
     subject = "DEBUG: alert_to_mail.py"
     message = "DEBUG: alert_to_mail.py"
     # attached_file = None

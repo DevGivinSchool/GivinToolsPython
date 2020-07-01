@@ -2,11 +2,11 @@ from bitrix24 import Bitrix24
 import requests
 import PASSWORDS
 
-clientId = PASSWORDS.logins['bitrix_clientId']
-clientCode = PASSWORDS.logins['bitrix_clientCode']
-clientSecret = PASSWORDS.logins['bitrix_clientSecret']
+clientId = PASSWORDS.settings['bitrix_clientId']
+clientCode = PASSWORDS.settings['bitrix_clientCode']
+clientSecret = PASSWORDS.settings['bitrix_clientSecret']
 scope = 'user,crm'
-domainName = PASSWORDS.logins['bitrix_domainName']
+domainName = PASSWORDS.settings['bitrix_domainName']
 
 
 def auth(bx24):

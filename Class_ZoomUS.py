@@ -11,8 +11,8 @@ class ZoomUS:
     ZOOM_API_BASE_URL = "https://api.zoom.us/v2"
 
     def __init__(self, logger_,
-                 zoom_ip_key=PASSWORDS.logins['zoom03_api_key'],
-                 zoom_ip_secret=PASSWORDS.logins['zoom03_api_secret']):
+                 zoom_ip_key=PASSWORDS.settings['zoom03_api_key'],
+                 zoom_ip_secret=PASSWORDS.settings['zoom03_api_secret']):
         self.logger = logger_
         self.gwt = self.generate_jwt(zoom_ip_key, zoom_ip_secret)
         self.headers = self.get_headers(self.gwt)

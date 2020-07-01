@@ -5,7 +5,7 @@ import xlsxwriter
 import os
 import PASSWORDS
 import sf_participant_block
-from DBPostgres import DBPostgres
+from Class_DBPostgres import DBPostgres
 from alert_to_mail import send_mail
 from datetime import datetime
 from alert_to_mail import send_error_to_admin
@@ -83,7 +83,7 @@ order by last_name"""
     команда Школы Гивина.
         """
             logger.info(mail_text)
-            send_mail([p[3]] + PASSWORDS.logins['manager_emails'], r"[ШКОЛА ГИВИНА]. Оповещение о блокировке в ДШ", mail_text, logger)
+            send_mail([p[3]] + PASSWORDS.settings['manager_emails'], r"[ШКОЛА ГИВИНА]. Оповещение о блокировке в ДШ", mail_text, logger)
         except:
             send_error_to_admin(f"DAILY WORKS ERROR: Ошибка при попытке заблокировать участника:\n{p}", logger, prog_name="sf_daily_works.py")
         logger.info('\n' + '=' * 120)
@@ -200,12 +200,12 @@ order by last_name"""
     С уважением, ваш робот."""
         print(mail_text)
         logger.info(mail_text)
-        send_mail(PASSWORDS.logins['manager_emails'], f"[ШКОЛА ГИВИНА]. Список должников {now_for_text}",
+        send_mail(PASSWORDS.settings['manager_emails'], f"[ШКОЛА ГИВИНА]. Список должников {now_for_text}",
                   mail_text, logger, xlsx_file_path)
     else:
         mail_text = "Сегодня должников нет."
         logger.info(mail_text)
-        send_mail(PASSWORDS.logins['manager_emails'], f"[ШКОЛА ГИВИНА]. Список должников {now_for_text}. СЕГОДНЯ "
+        send_mail(PASSWORDS.settings['manager_emails'], f"[ШКОЛА ГИВИНА]. Список должников {now_for_text}. СЕГОДНЯ "
                                                       f"ДОЛЖНИКОВ НЕТ.",
                   mail_text, logger)
 
@@ -248,7 +248,7 @@ order by last_name"""
 С уважением, ваш робот."""
     print(mail_text)
     logger.info(mail_text)
-    send_mail(PASSWORDS.logins['full_list_participants_to_emails'],
+    send_mail(PASSWORDS.settings['full_list_participants_to_emails'],
               f"[ШКОЛА ГИВИНА]. Полный список участников ДШ на {now_for_text}. Всего {count_participants}.",
               mail_text, logger, xlsx_file_path)
 
@@ -336,10 +336,10 @@ def main():
 
     logger.info("Try connect to DB")
     try:
-        dbconnect = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
-                               password=PASSWORDS.logins['postgres_password'],
-                               host=PASSWORDS.logins['postgres_host'],
-                               port=PASSWORDS.logins['postgres_port'], logger=logger)
+        dbconnect = DBPostgres(dbname=PASSWORDS.settings['postgres_dbname'], user=PASSWORDS.settings['postgres_user'],
+                               password=PASSWORDS.settings['postgres_password'],
+                               host=PASSWORDS.settings['postgres_host'],
+                               port=PASSWORDS.settings['postgres_port'], logger=logger)
     except Exception:
         send_error_to_admin("DAILY WORKS ERROR: Can't connect to DB!!!", logger, prog_name="sf_daily_works.py")
         logger.error("Exit with error")

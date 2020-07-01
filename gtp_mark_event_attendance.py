@@ -29,7 +29,7 @@ import PASSWORDS
 import sys
 import utils
 from datetime import datetime
-from DBPostgres import DBPostgres
+from Class_DBPostgres import DBPostgres
 
 
 def convert_zoom_datetime(text):
@@ -281,11 +281,11 @@ if __name__ == '__main__':
     main_logger.info("Try connect to DB")
     db = None
     try:
-        db = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'],
-                        user=PASSWORDS.logins['postgres_user'],
-                        password=PASSWORDS.logins['postgres_password'],
-                        host=PASSWORDS.logins['postgres_host'],
-                        port=PASSWORDS.logins['postgres_port'],
+        db = DBPostgres(dbname=PASSWORDS.settings['postgres_dbname'],
+                        user=PASSWORDS.settings['postgres_user'],
+                        password=PASSWORDS.settings['postgres_password'],
+                        host=PASSWORDS.settings['postgres_host'],
+                        port=PASSWORDS.settings['postgres_port'],
                         logger=main_logger)
     except:
         error_fixing(f"ERROR: Connect to Postgres:\n{traceback.format_exc()}", main_logger)

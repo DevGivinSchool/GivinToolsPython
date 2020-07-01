@@ -1,12 +1,12 @@
 import yandex_mail
 import yandex_connect
-import Parser
+import parser
 import traceback
 import PASSWORDS
 import sys
 # import password_generator
-from ZoomUS import ZoomUS
-from DBPostgres import DBPostgres
+from Class_ZoomUS import ZoomUS
+from Class_DBPostgres import DBPostgres
 from alert_to_mail import send_mail, get_participant_notification_text
 from utils import get_login
 from sf_password_generator import password_for_sf
@@ -74,7 +74,7 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
                         f"{zoom_result}" \
                         f"ID={payment['participant_id']}\n{payment['Фамилия Имя']}:" \
                         f"\nLogin: {payment['login']}\nPassword: {payment['password']}"
-            send_mail(PASSWORDS.logins['admin_emails'], "UNBLOCK PARTICIPANT ERROR", mail_text, logger)
+            send_mail(PASSWORDS.settings['admin_emails'], "UNBLOCK PARTICIPANT ERROR", mail_text, logger)
             logger.error(mail_text)
             logger.error("+" * 60)
         else:
@@ -113,7 +113,7 @@ def from_list_create_sf_participants(list_, database, logger):
     # TODO Сделать возможность обрабатывать либо строку Ф+И либо словарь
     logger.info("Начинаю обработку списка")
     for line in list_.splitlines():
-        payment = Parser.get_clear_payment()
+        payment = parser.get_clear_payment()
         # Когда копирую из Google Sheets разделитель = Tab
         # Иванов	Иван
         # line_ = split_str(line)
@@ -134,15 +134,15 @@ def from_list_create_sf_participants(list_, database, logger):
             pass
         payment["Время проведения"] = datetime.now()
         payment["auto"] = False
-        Parser.payment_normalization(payment)
-        Parser.payment_computation(payment)
+        parser.payment_normalization(payment)
+        parser.payment_computation(payment)
         # noinspection PyBroadException
         try:
             create_sf_participant(payment, database, logger)
         except:  # noinspection PyBroadException
             mail_text = f'Ошибка создания участника\n' + traceback.format_exc()
             logger.error(mail_text)
-            send_mail(PASSWORDS.logins['admin_emails'], "ERROR CREATE PARTICIPANT", mail_text, logger)
+            send_mail(PASSWORDS.settings['admin_emails'], "ERROR CREATE PARTICIPANT", mail_text, logger)
     logger.info("Обработка списка закончена")
 
 
@@ -200,8 +200,8 @@ def create_sf_participant(payment, database, logger):
     mm.text += "Текст уведомления:\n\n\n" + notification_text
     # send_mail(PASSWORDS.logins['admin_emails'], subject, mail_text, logger)
     # Вычитаю из списка почт менеджеров список почт админов, чтобы не было повторных писем
-    list_ = PASSWORDS.logins['admin_emails']
-    list_.extend(item for item in PASSWORDS.logins['manager_emails'] if item not in PASSWORDS.logins['admin_emails'])
+    list_ = PASSWORDS.settings['admin_emails']
+    list_.extend(item for item in PASSWORDS.settings['manager_emails'] if item not in PASSWORDS.settings['admin_emails'])
     logger.info(f"list_={list_}")
     send_mail(list_, mm.subject, mm.text, logger)
 
@@ -214,7 +214,7 @@ def create_sf_participant_yandex(logger, payment, mm):
     # добавил эти 4 строчки вместо предыдущей
     payment["login"] = get_login(payment["Фамилия"], payment["Имя"]) + '@givinschool.org'
     message = f'Создать почту для\nЛогин:{payment["login"].lower()}' \
-              f'\nПароль: {PASSWORDS.logins["default_ymail_password"]}' \
+              f'\nПароль: {PASSWORDS.settings["default_ymail_password"]}' \
               f'\n{payment["Фамилия"]}' \
               f'\n{payment["Имя"]}' \
               f'\nemail: {payment["Электронная почта"]}' \
@@ -326,18 +326,18 @@ if __name__ == '__main__':
     # noinspection PyBroadException
     try:
         log.info("Try connect to DB")
-        db = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
-                        password=PASSWORDS.logins['postgres_password'],
-                        host=PASSWORDS.logins['postgres_host'],
-                        port=PASSWORDS.logins['postgres_port'], logger=log)
+        db = DBPostgres(dbname=PASSWORDS.settings['postgres_dbname'], user=PASSWORDS.settings['postgres_user'],
+                        password=PASSWORDS.settings['postgres_password'],
+                        host=PASSWORDS.settings['postgres_host'],
+                        port=PASSWORDS.settings['postgres_port'], logger=log)
     except Exception:
         # TODO Вынести процедуру опопвещения MAIN ERROR в отдельную процедуру
         main_error_text = \
             f"MAIN ERROR (Postgres):\n{traceback.format_exc()}"
         print(main_error_text)
         log.error(main_error_text)
-        log.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
-        send_mail(PASSWORDS.logins['admin_emails'], "MAIN ERROR (Postgres)", main_error_text, log)
+        log.error(f"Send email to: {PASSWORDS.settings['admin_emails']}")
+        send_mail(PASSWORDS.settings['admin_emails'], "MAIN ERROR (Postgres)", main_error_text, log)
         log.error("Exit with error")
         sys.exit(1)
     from_list_create_sf_participants(list_fio, db, logger=log)

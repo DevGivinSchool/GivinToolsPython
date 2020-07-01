@@ -251,11 +251,11 @@ def parse_getcourse_page(link, payment, logger):
             chromeOptions.add_argument("--headless")
             browser = webdriver.Chrome(r'/usr/local/bin/chromedriver', options=chromeOptions)
         # Вход в GetCourse иначе страница заказа будет недоступна
-        browser.get(PASSWORDS.logins['getcourse_login_page'])
+        browser.get(PASSWORDS.settings['getcourse_login_page'])
         input_login = browser.find_element_by_css_selector("input.form-control.form-field-email")
-        input_login.send_keys(PASSWORDS.logins['getcourse_login'])
+        input_login.send_keys(PASSWORDS.settings['getcourse_login'])
         input_password = browser.find_element_by_css_selector("input.form-control.form-field-password")
-        input_password.send_keys(PASSWORDS.logins['getcourse_password'])
+        input_password.send_keys(PASSWORDS.settings['getcourse_password'])
         button = browser.find_element_by_css_selector(".float-row > .btn-success")
         button.click()
         time.sleep(10)
@@ -306,7 +306,7 @@ def parse_getcourse_page(link, payment, logger):
     except:
         mail_text = f'Ошибка парсинга страницы заказа GetCourse\n' + traceback.format_exc()
         logger.error(mail_text)
-        send_mail(PASSWORDS.logins['admin_emails'], "ERROR PARSING", mail_text, logger)
+        send_mail(PASSWORDS.settings['admin_emails'], "ERROR PARSING", mail_text, logger)
     finally:
         # закрываем браузер даже в случае ошибки
         browser.quit()

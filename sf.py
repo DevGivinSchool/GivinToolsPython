@@ -100,7 +100,7 @@ import custom_logger
 import os
 from datetime import datetime
 from imapclient import IMAPClient
-from Email2 import Email
+from Class_Email import Email
 from alert_to_mail import send_mail
 
 
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     logger.info('START gtp_school_friends')
     try:
         client = IMAPClient(host="imap.yandex.ru", use_uid=True)
-        client.login(PASSWORDS.logins['ymail_login'], PASSWORDS.logins['ymail_password'])
+        client.login(PASSWORDS.settings['ymail_login'], PASSWORDS.settings['ymail_password'])
         # Список папко
         # print(client.list_folders())
         """
@@ -130,8 +130,8 @@ if __name__ == "__main__":
         error_text = "MAIN ERROR (Yandex mail):\n" + traceback.format_exc()
         print(error_text)
         logger.error(error_text)
-        logger.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
-        send_mail(PASSWORDS.logins['admin_emails'], "MAIN ERROR (Yandex mail)", error_text, logger,
+        logger.error(f"Send email to: {PASSWORDS.settings['admin_emails']}")
+        send_mail(PASSWORDS.settings['admin_emails'], "MAIN ERROR (Yandex mail)", error_text, logger,
                   attached_file=logger.handlers[0].baseFilename)
         logger.error("Exit with error")
         sys.exit(1)

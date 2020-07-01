@@ -1,27 +1,12 @@
 #!/usr/bin/env python3
 import sys
-import traceback
 import PASSWORDS
-from DBPostgres import DBPostgres
-from alert_to_mail import send_mail
-from datetime import datetime
+import Class_TelegramBot
+from Class_DBPostgres import DBPostgres
+from alert_to_mail import raise_error
 
 
-def send_error(subject):
-    """
-    Отсылает сообщение об ошибке администратору, так же логирует его и выводит в консоль.
-    :param subject: Тема письма
-    :return:
-    """
-    subject = subject.upper()
-    error_text = f"{subject}:\n" + traceback.format_exc()
-    print(error_text)
-    logger.error(error_text)
-    logger.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
-    send_mail(PASSWORDS.logins['admin_emails'], subject, error_text, logger)
-
-
-def birthday_alert(dbconnect):
+def birthday_alert(dbconnect, logger):
     sql_text = """select last_name, first_name from team_members WHERE
     DATE_PART('day', birthday) = date_part('day', CURRENT_DATE)
 AND
@@ -29,12 +14,22 @@ AND
     values_tuple = (None,)
     records = dbconnect.execute_select(sql_text, values_tuple)
     # ('ИВАНОВ', 'ИВАН')
-    congratulation = """** Поздравляем сегодня с днём рождения ❤️🤗🎈:\n"""
-    for rec in records:
-        print(rec)
-        congratulation += f"{rec[0].capitalize()} {rec[1].capitalize()}\n"
-    congratulation += " **"
-    print(congratulation)
+    logger.debug(f"records={records}")
+    if records:
+        congratulation = """\nПоздравляем сегодня с днём рождения ❤️🤗🎈:\n"""
+        for rec in records:
+            logger.debug(f"rec={rec}")
+            congratulation += f"{rec[0].capitalize()} {rec[1].capitalize()}\n"
+        congratulation += "\n"
+        logger.debug(f"congratulation={congratulation}")
+        tb = Class_TelegramBot(PASSWORDS.settings['telegram_bot_url1'], logger)
+        for chat_id in PASSWORDS.settings['telegram_chats_1']:
+            logger.info(f"Отправляю сообщение в чат {chat_id}")
+            success, result = tb.send_text_message(chat_id, congratulation)
+            logger.debug(f"success={success}")
+            logger.debug(f"result=\n{result}")
+            if not success:
+                raise_error(f"Не могу отправить сообщение\n{result}", logger)
 
 
 if __name__ == "__main__":
@@ -49,20 +44,20 @@ if __name__ == "__main__":
     logger.info('START gtp_birthday_alert')
     logger.info("Try connect to DB")
     try:
-        dbconnect = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
-                               password=PASSWORDS.logins['postgres_password'],
-                               host=PASSWORDS.logins['postgres_host'],
-                               port=PASSWORDS.logins['postgres_port'], logger=logger)
+        dbconnect = DBPostgres(dbname=PASSWORDS.settings['postgres_dbname'], user=PASSWORDS.settings['postgres_user'],
+                               password=PASSWORDS.settings['postgres_password'],
+                               host=PASSWORDS.settings['postgres_host'],
+                               port=PASSWORDS.settings['postgres_port'], logger=logger)
     except Exception:
-        send_error("ERROR: Can't connect to DB!!!")
+        raise_error("ERROR: Can't connect to DB!!!")
         logger.error("Exit with error")
         sys.exit(1)
     logger.info('\n' + '#' * 120)
     # Основная процедура
     try:
-        birthday_alert(dbconnect)
+        birthday_alert(dbconnect, logger)
     except Exception:
-        send_error("ERROR: gtp_birthday_alert()")
+        raise_error("ERROR: gtp_birthday_alert()")
     logger.info('\n' + '#' * 120)
 
     logger.info('#' * 120)

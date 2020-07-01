@@ -1,8 +1,7 @@
 import datetime
 import utils
 import psycopg2
-import logging
-import Parser
+import parser
 import PASSWORDS
 
 
@@ -177,7 +176,7 @@ class DBPostgres:
             if participant_id is None and task.payment["Платежная система"] == 1:
                 # Если это Getcourse и ничего по ФИО и почте (которой могло и не быть) не нашлось,
                 # тогда парсим страницу GetCourse и пытаемся еще раз поискать по почте и телеграм
-                Parser.parse_getcourse_page(task.payment["Кассовый чек 54-ФЗ"], task.payment, self.logger)
+                parser.parse_getcourse_page(task.payment["Кассовый чек 54-ФЗ"], task.payment, self.logger)
                 self.logger.info(f"Ищем участника повторно по email - {task.payment['Электронная почта']}")
                 participant_id, p_type = self.find_participant_by('email', task.payment["Электронная почта"])
                 if participant_id is None:
@@ -362,10 +361,10 @@ if __name__ == "__main__":
     program_file = os.path.realpath(__file__)
     logger = custom_logger.get_logger(program_file=program_file)
 
-    postgres = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
+    postgres = DBPostgres(dbname=PASSWORDS.settings['postgres_dbname'], user=PASSWORDS.settings['postgres_user'],
                           logger=logger,
-                          password=PASSWORDS.logins['postgres_password'], host=PASSWORDS.logins['postgres_host'],
-                          port=PASSWORDS.logins['postgres_port'])
+                          password=PASSWORDS.settings['postgres_password'], host=PASSWORDS.settings['postgres_host'],
+                          port=PASSWORDS.settings['postgres_port'])
 
     # id2 = postgres.find_participant_by('email', 'xxxx@gmail.com')
     # id3 = postgres.find_participant_by('telegram', '@xxxx')

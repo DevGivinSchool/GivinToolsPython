@@ -7,8 +7,8 @@ def token_get_by_code():
     import base64
     import PASSWORDS
     import requests
-    client_id = PASSWORDS.logins['gtp_mail_robot_ID']
-    client_secret = PASSWORDS.logins['gtp_mail_robot_password']
+    client_id = PASSWORDS.settings['gtp_mail_robot_ID']
+    client_secret = PASSWORDS.settings['gtp_mail_robot_password']
     print('Open link in browser:')
     print('https://oauth.yandex.ru/authorize?response_type=code&client_id=%s' % client_id)
     code = input('Enter code: ')
@@ -33,7 +33,7 @@ def yandex_tocken_test():
     import PASSWORDS
     from yandex_connect import YandexConnectDirectory
     # api = YandexConnectDirectory(PASSWORDS.logins['token_yandex'], org_id=None)
-    api = YandexConnectDirectory(PASSWORDS.logins['token_yandex'], org_id=2520809)
+    api = YandexConnectDirectory(PASSWORDS.settings['token_yandex'], org_id=2520809)
     department_list = api.department_list_full()
     print(department_list)
 

@@ -1,6 +1,6 @@
 import email
 from email.header import decode_header
-from Task import Task
+from Class_Task import Task
 from test.Executor import Executor
 from Log import Log
 import logging

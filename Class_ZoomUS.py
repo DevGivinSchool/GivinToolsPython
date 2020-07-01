@@ -11,8 +11,8 @@ class ZoomUS:
     ZOOM_API_BASE_URL = "https://api.zoom.us/v2"
 
     def __init__(self, logger_,
-                 zoom_ip_key=PASSWORDS.logins['zoom03_api_key'],
-                 zoom_ip_secret=PASSWORDS.logins['zoom03_api_secret']):
+                 zoom_ip_key=PASSWORDS.settings['zoom03_api_key'],
+                 zoom_ip_secret=PASSWORDS.settings['zoom03_api_secret']):
         self.logger = logger_
         self.gwt = self.generate_jwt(zoom_ip_key, zoom_ip_secret)
         self.headers = self.get_headers(self.gwt)
@@ -366,15 +366,14 @@ def create_zoom_user(login, name, surname, password, logger):
 
 # ==========================================================================================
 if __name__ == '__main__':
+    import custom_logger
+    import os
+
+    program_file = os.path.realpath(__file__)
+    logger = custom_logger.get_logger(program_file=program_file)
+
     # Получение Bearer
     # print(ZoomUS.generate_jwt(PASSWORDS.logins['zoom03_api_key'], PASSWORDS.logins['zoom03_api_secret']))
-
-    import logging
-    from Log import Log
-    from log_config import log_dir
-
-    log_level = logging.DEBUG
-    logger = Log.setup_logger('__main__', log_dir, log_name=f'zoom_us', level=log_level, dt="%Y%m%d%H%M")
 
     # Создание пользователя Zoom
     print(

@@ -1,16 +1,16 @@
 import PASSWORDS
-from zoom_us import ZoomUS
+from Class_ZoomUS import ZoomUS
 from alert_to_mail import send_mail
-from DBPostgres import DBPostgres
+from Class_DBPostgres import DBPostgres
 from utils import is_eng
 from utils import is_rus
 
 
 def participants_block(list_participants, logger2):
     # Подключение к БД
-    postgres = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
-                          password=PASSWORDS.logins['postgres_password'], host=PASSWORDS.logins['postgres_host'],
-                          port=PASSWORDS.logins['postgres_port'])
+    postgres = DBPostgres(dbname=PASSWORDS.settings['postgres_dbname'], user=PASSWORDS.settings['postgres_user'],
+                          password=PASSWORDS.settings['postgres_password'], host=PASSWORDS.settings['postgres_host'],
+                          port=PASSWORDS.settings['postgres_port'])
     for p in list_participants.splitlines():
         block_one_participant(p, postgres, logger2)
     postgres.disconnect()
@@ -95,7 +95,7 @@ def block_one_participant(p, postgres, logger):
                                 f"{zoom_result}" \
                                 f"ID={participant[0]}\n{participant[1]}:" \
                                 f"\nLogin: {participant[2]}\nPassword: {participant[3]}"
-                    send_mail(PASSWORDS.logins['admin_emails'], "BLOCK PARTICIPANT ERROR", mail_text, logger)
+                    send_mail(PASSWORDS.settings['admin_emails'], "BLOCK PARTICIPANT ERROR", mail_text, logger)
                     print(mail_text)
                     logger.error(mail_text)
                     logger.error("+" * 60)
@@ -113,12 +113,11 @@ def block_one_participant(p, postgres, logger):
 
 
 if __name__ == '__main__':
-    from Log import Log
-    from log_config import log_dir, log_level
-    from datetime import datetime
+    import custom_logger
+    import os
     from list_ import list_fio
 
-    now = datetime.now().strftime("%Y%m%d%H%M")
-    logger_ = Log.setup_logger('__main__', log_dir, f'gtp_block_participant_{now}.log', log_level)
+    program_file = os.path.realpath(__file__)
+    logger_ = custom_logger.get_logger(program_file=program_file)
 
     participants_block(list_fio, logger_)

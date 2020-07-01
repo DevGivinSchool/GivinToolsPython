@@ -5,7 +5,7 @@
 
 # Здесь есть полезные фишки для БД - https://github.com/alexey-goloburdin/telegram-finance-bot/blob/master/expenses.py
 
-# TODO процедуру блокировки пользователя Zoom вставить в gtp_daily_works.py.
+# TODO процедуру блокировки пользователя Zoom вставить в sf_daily_works.py.
 
 # TODO В этом заказе ник Телеграм в поле - Ник телеграмм, нужно в парсинге это учесть. 
 
@@ -96,24 +96,21 @@ DB: Закрываю сессию работы
 import PASSWORDS
 import traceback
 import sys
-from Log import Log
-from log_config import log_dir, log_level
+import custom_logger
+import os
 from datetime import datetime
 from imapclient import IMAPClient
-from Email2 import Email
+from Class_Email import Email
 from alert_to_mail import send_mail
 
 
-# Текущая дата для имени лог файла (без %S)
-now = datetime.now().strftime("%Y%m%d%H%M")
-logger = Log.setup_logger('__main__', log_dir, f'gtp_school_friends_{now}.log', log_level)
-logger.info('START gtp_school_friends')
-
-
-def main():
+if __name__ == "__main__":
+    program_file = os.path.realpath(__file__)
+    logger = custom_logger.get_logger(program_file=program_file)
+    logger.info('START gtp_school_friends')
     try:
         client = IMAPClient(host="imap.yandex.ru", use_uid=True)
-        client.login(PASSWORDS.logins['ymail_login'], PASSWORDS.logins['ymail_password'])
+        client.login(PASSWORDS.settings['ymail_login'], PASSWORDS.settings['ymail_password'])
         # Список папко
         # print(client.list_folders())
         """
@@ -133,19 +130,14 @@ def main():
         error_text = "MAIN ERROR (Yandex mail):\n" + traceback.format_exc()
         print(error_text)
         logger.error(error_text)
-        logger.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
-        send_mail(PASSWORDS.logins['admin_emails'], "MAIN ERROR (Yandex mail)", error_text, logger,
+        logger.error(f"Send email to: {PASSWORDS.settings['admin_emails']}")
+        send_mail(PASSWORDS.settings['admin_emails'], "MAIN ERROR (Yandex mail)", error_text, logger,
                   attached_file=logger.handlers[0].baseFilename)
         logger.error("Exit with error")
         sys.exit(1)
     # First sort_mail() execution then go to idle mode
     email = Email(client, logger)
     email.sort_mail()
-    # TODO Процедура выявления и оповещения должников.  За 7 и 3 дня отправлять оповещения о необходимости оплаты.
     # TODO Процедура чистки: 1) Удалять всех заблокированных пользователей больше года
     client.logout()
     logger.info('END gtp_school_friends')
-
-
-if __name__ == "__main__":
-    main()

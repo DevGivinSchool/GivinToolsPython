@@ -4,12 +4,11 @@ import logging
 # from utils import translit_name
 from utils import get_login
 
-logger = logging.getLogger('DBPostgres')
 
-
-def create_yandex_mail(familia_, name_, login_, password_=None, department_id_=1):
+def create_yandex_mail(logger, familia_, name_, login_, password_=None, department_id_=1):
     """
     Create Yandex mail.
+    :param logger:
     :param login_: Login
     :param familia_: Second Name
     :param name_: First Name
@@ -20,7 +19,7 @@ def create_yandex_mail(familia_, name_, login_, password_=None, department_id_=1
     # Если пароль пустой то пароль будет стандартный для ДЩ
     if password_ is None:
         # Единый пароль для всех создаваемых почт для ДШ
-        password_ = PASSWORDS.logins['default_ymail_password']
+        password_ = PASSWORDS.settings['default_ymail_password']
     # print(password_)
     logger.debug(f"password_={password_}")
     if login_ is None:
@@ -90,7 +89,7 @@ def create_yandex_mail(familia_, name_, login_, password_=None, department_id_=1
 
 def get_api():
     # Токен Яндекса, действует год
-    token = PASSWORDS.logins['token_yandex']
+    token = PASSWORDS.settings['token_yandex']
     # 'org_id': 2520809, 'name': 'givinschool.org'
     api = yandex_connect.YandexConnectDirectory(token, org_id=2520809)
     return api

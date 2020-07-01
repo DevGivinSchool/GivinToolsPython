@@ -1,14 +1,15 @@
 import yandex_mail
 import yandex_connect
-import Parser
+import payment_creater
 import traceback
 import PASSWORDS
 import sys
-import password_generator
-from zoom_us import ZoomUS
-from DBPostgres import DBPostgres
-from alert_to_mail import send_mail
+# import password_generator
+from Class_ZoomUS import ZoomUS
+from Class_DBPostgres import DBPostgres
+from alert_to_mail import send_mail, get_participant_notification_text
 from utils import get_login
+from password_generator_for_sf import password_for_sf
 
 
 class MailMessage:
@@ -73,7 +74,7 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
                         f"{zoom_result}" \
                         f"ID={payment['participant_id']}\n{payment['Фамилия Имя']}:" \
                         f"\nLogin: {payment['login']}\nPassword: {payment['password']}"
-            send_mail(PASSWORDS.logins['admin_emails'], "UNBLOCK PARTICIPANT ERROR", mail_text, logger)
+            send_mail(PASSWORDS.settings['admin_emails'], "UNBLOCK PARTICIPANT ERROR", mail_text, logger)
             logger.error(mail_text)
             logger.error("+" * 60)
         else:
@@ -93,38 +94,9 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
     logger.info("Оплата в БД отмечена")
 
 
-def get_participant_notification_text(payment):
-    mail_text2 = f"""Здравствуйте, {payment['Фамилия Имя'].title()}!  
-
-Поздравляем, Вы оплатили абонемент на месяц совместных занятий в онлайн-формате "Друзья Школы Гивина". 
-
-Ваш zoom-аккаунт:
-Логин: {payment['login']}
-Пароль: {payment['password']}
-
-Сохраните себе эти данные, чтобы не потерять их. 
-
-Эти данные вы можете использовать с настоящего момента:
-1) Скачайте приложение Zoom на компьютер, если ещё не cделали это ранее. 
-2) Установите приложение Zoom на ваш компьютер.
-3) Запустите эту программу.
-4) Нажмите кнопку Sign In ("Войти в..").
-5) Введите логин и пароль, предоставленные вам в этом письме .
-6) Поставьте птичку (галку) в поле Keep me logged in ("Не выходить из системы").
-7) Нажмите Sign In ("Войти"). 
-8) Далее из чата Объявлений в телеграмме найдет сообщение с ссылкой на занятия. 
-   Нажмите на неё. Она будет открываться в браузере, появится сверху сообщение с кнопкой, 
-   жмём на кнопку Open ZOOM Meetings (либо Открыть ZOOM)
-9) Появится окно для ввода пароля конференции. Здесь вводим три цифры 355. 
-
-С благодарностью и сердечным теплом,
-команда Школы Гивина."""
-    return mail_text2
-
-
 def participant_notification(payment, logger):
     logger.info("Уведомление участника")
-    mail_text2 = get_participant_notification_text(payment)
+    mail_text2 = get_participant_notification_text(payment['Фамилия'], payment['Имя'], payment['login'], payment['password'])
     logger.info(mail_text2)
     send_mail([payment["Электронная почта"]],
               r"[ШКОЛА ГИВИНА]. Поздравляем, Вы приняты в Друзья Школы", mail_text2, logger)
@@ -141,7 +113,7 @@ def from_list_create_sf_participants(list_, database, logger):
     # TODO Сделать возможность обрабатывать либо строку Ф+И либо словарь
     logger.info("Начинаю обработку списка")
     for line in list_.splitlines():
-        payment = Parser.get_clear_payment()
+        payment = payment_creater.get_clear_payment()
         # Когда копирую из Google Sheets разделитель = Tab
         # Иванов	Иван
         # line_ = split_str(line)
@@ -162,15 +134,15 @@ def from_list_create_sf_participants(list_, database, logger):
             pass
         payment["Время проведения"] = datetime.now()
         payment["auto"] = False
-        Parser.payment_normalization(payment)
-        Parser.payment_computation(payment)
+        payment_creater.payment_normalization(payment)
+        payment_creater.payment_computation(payment)
         # noinspection PyBroadException
         try:
             create_sf_participant(payment, database, logger)
         except:  # noinspection PyBroadException
             mail_text = f'Ошибка создания участника\n' + traceback.format_exc()
             logger.error(mail_text)
-            send_mail(PASSWORDS.logins['admin_emails'], "ERROR CREATE PARTICIPANT", mail_text, logger)
+            send_mail(PASSWORDS.settings['admin_emails'], "ERROR CREATE PARTICIPANT", mail_text, logger)
     logger.info("Обработка списка закончена")
 
 
@@ -203,7 +175,7 @@ def create_sf_participant(payment, database, logger):
     # Создать участнику ДШ учётку (email) Yandex
     mm = create_sf_participant_yandex(logger, payment, mm)
     # Генерация пароля для Zoom (для всех почт пароль одинаковый)
-    payment["password"] = password_generator.random_password(strong=True, zoom=True)
+    payment["password"] = password_for_sf()
     mm.text += f'\nPassword: {payment["password"]}'
     logger.info(f'Password: {payment["password"]}')
     # Создать участнику ДШ учётку Zoom
@@ -224,12 +196,12 @@ def create_sf_participant(payment, database, logger):
         logger.warning("+" * 60)
         logger.warning(f"ВНИМАНИЕ: Отправить почтовое уведомление (email) участнику")
         logger.warning("+" * 60)
-    notification_text = get_participant_notification_text(payment)
+    notification_text = get_participant_notification_text(payment['Фамилия'], payment['Имя'], payment['login'], payment['password'])
     mm.text += "Текст уведомления:\n\n\n" + notification_text
     # send_mail(PASSWORDS.logins['admin_emails'], subject, mail_text, logger)
     # Вычитаю из списка почт менеджеров список почт админов, чтобы не было повторных писем
-    list_ = PASSWORDS.logins['admin_emails']
-    list_.extend(item for item in PASSWORDS.logins['manager_emails'] if item not in PASSWORDS.logins['admin_emails'])
+    list_ = PASSWORDS.settings['admin_emails']
+    list_.extend(item for item in PASSWORDS.settings['manager_emails'] if item not in PASSWORDS.settings['admin_emails'])
     logger.info(f"list_={list_}")
     send_mail(list_, mm.subject, mm.text, logger)
 
@@ -242,7 +214,7 @@ def create_sf_participant_yandex(logger, payment, mm):
     # добавил эти 4 строчки вместо предыдущей
     payment["login"] = get_login(payment["Фамилия"], payment["Имя"]) + '@givinschool.org'
     message = f'Создать почту для\nЛогин:{payment["login"].lower()}' \
-              f'\nПароль: {PASSWORDS.logins["default_ymail_password"]}' \
+              f'\nПароль: {PASSWORDS.settings["default_ymail_password"]}' \
               f'\n{payment["Фамилия"]}' \
               f'\n{payment["Имя"]}' \
               f'\nemail: {payment["Электронная почта"]}' \
@@ -345,29 +317,27 @@ def create_sf_participant_db(database, logger, payment, mm):
 
 
 if __name__ == '__main__':
-    import logging
+    import custom_logger
+    import os
     from list_ import list_fio
-    from datetime import datetime
-    from Log import Log
-    from log_config import log_dir
 
-    now = datetime.now().strftime("%Y%m%d%H%M")
-    log = Log.setup_logger('__main__', log_dir, f'gtp_create_login_{now}.log', logging.DEBUG)
+    program_file = os.path.realpath(__file__)
+    log = custom_logger.get_logger(program_file=program_file)
     # noinspection PyBroadException
     try:
         log.info("Try connect to DB")
-        db = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
-                        password=PASSWORDS.logins['postgres_password'],
-                        host=PASSWORDS.logins['postgres_host'],
-                        port=PASSWORDS.logins['postgres_port'], logger=log)
+        db = DBPostgres(dbname=PASSWORDS.settings['postgres_dbname'], user=PASSWORDS.settings['postgres_user'],
+                        password=PASSWORDS.settings['postgres_password'],
+                        host=PASSWORDS.settings['postgres_host'],
+                        port=PASSWORDS.settings['postgres_port'], logger=log)
     except Exception:
         # TODO Вынести процедуру опопвещения MAIN ERROR в отдельную процедуру
         main_error_text = \
             f"MAIN ERROR (Postgres):\n{traceback.format_exc()}"
         print(main_error_text)
         log.error(main_error_text)
-        log.error(f"Send email to: {PASSWORDS.logins['admin_emails']}")
-        send_mail(PASSWORDS.logins['admin_emails'], "MAIN ERROR (Postgres)", main_error_text, log)
+        log.error(f"Send email to: {PASSWORDS.settings['admin_emails']}")
+        send_mail(PASSWORDS.settings['admin_emails'], "MAIN ERROR (Postgres)", main_error_text, log)
         log.error("Exit with error")
         sys.exit(1)
     from_list_create_sf_participants(list_fio, db, logger=log)

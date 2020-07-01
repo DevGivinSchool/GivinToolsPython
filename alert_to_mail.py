@@ -7,10 +7,8 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 
 import PASSWORDS
-import log_config
 from email.mime.text import MIMEText
 from email.header import Header
-from Log import Log
 
 
 def send_mail(receiver_emails, subject, message, logger, attached_file=None,
@@ -28,14 +26,14 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None,
     """
     logger.info(f"Отправка почтовых оповещений")
     # Все письма отправляются на почту robot для хранения.
-    if PASSWORDS.logins['ymail_login'] not in receiver_emails:
-        receiver_emails.append(PASSWORDS.logins['ymail_login'])
+    if PASSWORDS.settings['ymail_login'] not in receiver_emails:
+        receiver_emails.append(PASSWORDS.settings['ymail_login'])
     # Create a secure SSL context
     context = ssl.create_default_context()
     server = smtplib.SMTP_SSL("smtp.yandex.ru", port, context=context)
     # Try connect to server
     try:
-        server.login(PASSWORDS.logins['ymail_login'], PASSWORDS.logins['ymail_password'])
+        server.login(PASSWORDS.settings['ymail_login'], PASSWORDS.settings['ymail_password'])
     except Exception:
         logger.error("ERROR: Can't connect to SMTP server:\n" + traceback.format_exc())
     # Partial create message (without To)
@@ -71,11 +69,69 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None,
     server.quit()
 
 
+def send_error_to_admin(subject, logger, prog_name=None):
+    """
+    Отсылает сообщение об ошибке администратору, так же логирует его и выводит в консоль.
+    :param subject: Тема письма
+    :return:
+    """
+    if not prog_name:
+        prog_name = os.path.basename(logger.handlers[0].baseFilename.split(".")[0])
+    subject = f"[{prog_name}]:{subject}"
+    error_text = f"{subject}:\n" + traceback.format_exc()
+    print(error_text)
+    logger.error(error_text)
+    logger.error(f"Send email to: {PASSWORDS.settings['admin_emails']}")
+    attached_file = logger.handlers[0].baseFilename
+    send_mail(PASSWORDS.settings['admin_emails'], subject, error_text, logger, attached_file=attached_file)
+
+
+def raise_error(err_text_, logger_):
+    """
+    Записать в лог ошибку - Выслать ошибку админу - Генерировать исключение
+    :param err_text_: Текст ошибки
+    :param logger_: логгер
+    """
+    logger_.error(err_text_)
+    send_error_to_admin(err_text_, logger_, prog_name="sf_telegram_bot.py")
+    raise Exception(err_text_)
+
+
+def get_participant_notification_text(last_name, first_name, login, password):
+    mail_text2 = f"""Здравствуйте, {last_name.capitalize()} {first_name.capitalize()}!  
+
+Поздравляем, Вы оплатили абонемент на месяц совместных занятий в онлайн-формате "Друзья Школы Гивина". 
+
+Ваш zoom-аккаунт:
+Логин: {login}
+Пароль: {password}
+
+Сохраните себе эти данные, чтобы не потерять их. 
+
+Эти данные вы можете использовать с настоящего момента:
+1) Скачайте приложение Zoom на компьютер, если ещё не cделали это ранее. 
+2) Установите приложение Zoom на ваш компьютер.
+3) Запустите эту программу.
+4) Нажмите кнопку Sign In ("Войти в..").
+5) Введите логин и пароль, предоставленные вам в этом письме.
+6) Поставьте птичку (галку) в поле Keep me logged in ("Не выходить из системы").
+7) Нажмите Sign In ("Войти"). 
+8) Далее из чата Объявлений в телеграмме найдет сообщение с ссылкой на занятия. Нажмите на неё. Она будет открываться в браузере, появится сверху сообщение с кнопкой, жмём на кнопку Open ZOOM Meetings (либо Открыть ZOOM).
+9) Появится окно для ввода пароля конференции. Здесь вводим три цифры 355. 
+
+С благодарностью и сердечным теплом,
+команда Школы Гивина."""
+    return mail_text2
+
+
 if __name__ == "__main__":
-    from log_config import log_dir, log_level
-    logger = Log.setup_logger('__main__', log_dir, f'gtp_alert_to_mail.log',
-                              log_level)
-    receiver_emails = PASSWORDS.logins['admin_emails']
+    import custom_logger
+    import os
+
+    program_file = os.path.realpath(__file__)
+    logger = custom_logger.get_logger(program_file=program_file)
+
+    receiver_emails = PASSWORDS.settings['admin_emails']
     subject = "DEBUG: alert_to_mail.py"
     message = "DEBUG: alert_to_mail.py"
     # attached_file = None

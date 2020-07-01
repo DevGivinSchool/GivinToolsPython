@@ -28,10 +28,8 @@ import traceback
 import PASSWORDS
 import sys
 import utils
-from Log import Log
-from log_config import log_dir, log_level
 from datetime import datetime
-from DBPostgres import DBPostgres
+from Class_DBPostgres import DBPostgres
 
 
 def convert_zoom_datetime(text):
@@ -274,17 +272,20 @@ if __name__ == '__main__':
          datetime(2020, 4, 20, 9, 00, 00))
     ]
 
-    now = datetime.now().strftime("%Y%m%d%H%M")
-    main_logger = Log.setup_logger('__main__', log_dir, f'gtp_attend_class_{now}.log', log_level)
+    import custom_logger
+    import os
+
+    program_file = os.path.realpath(__file__)
+    main_logger = custom_logger.get_logger(program_file=program_file)
 
     main_logger.info("Try connect to DB")
     db = None
     try:
-        db = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'],
-                        user=PASSWORDS.logins['postgres_user'],
-                        password=PASSWORDS.logins['postgres_password'],
-                        host=PASSWORDS.logins['postgres_host'],
-                        port=PASSWORDS.logins['postgres_port'],
+        db = DBPostgres(dbname=PASSWORDS.settings['postgres_dbname'],
+                        user=PASSWORDS.settings['postgres_user'],
+                        password=PASSWORDS.settings['postgres_password'],
+                        host=PASSWORDS.settings['postgres_host'],
+                        port=PASSWORDS.settings['postgres_port'],
                         logger=main_logger)
     except:
         error_fixing(f"ERROR: Connect to Postgres:\n{traceback.format_exc()}", main_logger)
@@ -292,12 +293,13 @@ if __name__ == '__main__':
     list_columns = []
     buffer = ""
     for event in table_of_events:
-        logger = Log.setup_logger(event[0], log_dir, f'{event[0]}_{now}.log', log_level)
+        log_file = os.path.join(os.path.dirname(main_logger.handlers[0].baseFilename), f'{event[0]}.log')
+        custom_logger.get_logger(log_file=log_file)
         main_logger.info(f"Обрабатываю файл отчёта: {event[1]}")
         print(f"Обрабатываю файл отчёта:{event[1]}")
         try:
-            db.logger = logger
-            buffer += mark_attendance(event, db, logger)
+            db.logger = custom_logger
+            buffer += mark_attendance(event, db, custom_logger)
         except:
             error_fixing(f"ERROR: Ошибка при обработке отчёта:\n{traceback.format_exc()}", main_logger)
         list_columns.append(event[0])

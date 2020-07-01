@@ -1,13 +1,13 @@
 import datetime
 import utils
 import psycopg2
-import logging
-import Parser
+import payment_creater
+import PASSWORDS
 
 
 class DBPostgres:
 
-    def __init__(self, dbname, host, logger=logging.getLogger('DBPostgres'), port='5432', user='postgres',
+    def __init__(self, dbname, host, logger, port='5432', user='postgres',
                  password='postgres'):
         self.dbname = dbname
         self.host = host
@@ -24,7 +24,9 @@ class DBPostgres:
            :param sql_text: Query text.
            :return: List of tuples = List of strings"""
         cursor = self.conn.cursor()
-        # print(cursor.mogrify(sql_text, values_tuple))
+        if PASSWORDS.DEBUG:
+            self.logger.debug(cursor.mogrify(sql_text, values_tuple))
+            print(cursor.mogrify(sql_text, values_tuple))
         cursor.execute(sql_text, values_tuple)
         records = cursor.fetchall()
         # print(cursor.rowcount)
@@ -36,9 +38,11 @@ class DBPostgres:
         """Execute DML operations
                    :param values_tuple: Values
                    :param sql_text: Query text.
-                   :return result: (Rows count, ID)"""
+                   :return: Rows count"""
         cursor = self.conn.cursor()
-        # print(cursor.mogrify(sql_text, values_tuple))
+        if PASSWORDS.DEBUG:
+            self.logger.debug(cursor.mogrify(sql_text, values_tuple))
+            print(cursor.mogrify(sql_text, values_tuple))
         cursor.execute(sql_text, values_tuple)
         self.conn.commit()
         # print(cursor.rowcount)
@@ -49,9 +53,11 @@ class DBPostgres:
         """Execute DML operations
                    :param values_tuple:
                    :param sql_text: Query text.
-                   :return: Count ID"""
+                   :return: ID"""
         cursor = self.conn.cursor()
-        # print(cursor.mogrify(sql_text, values_tuple))
+        if PASSWORDS.DEBUG:
+            self.logger.debug(cursor.mogrify(sql_text, values_tuple))
+            print(cursor.mogrify(sql_text, values_tuple))
         cursor.execute(sql_text, values_tuple)
         self.conn.commit()
         # print(cursor.rowcount)
@@ -170,7 +176,7 @@ class DBPostgres:
             if participant_id is None and task.payment["Платежная система"] == 1:
                 # Если это Getcourse и ничего по ФИО и почте (которой могло и не быть) не нашлось,
                 # тогда парсим страницу GetCourse и пытаемся еще раз поискать по почте и телеграм
-                Parser.parse_getcourse_page(task.payment["Кассовый чек 54-ФЗ"], task.payment, self.logger)
+                payment_creater.parse_getcourse_page(task.payment["Кассовый чек 54-ФЗ"], task.payment, self.logger)
                 self.logger.info(f"Ищем участника повторно по email - {task.payment['Электронная почта']}")
                 participant_id, p_type = self.find_participant_by('email', task.payment["Электронная почта"])
                 if participant_id is None:
@@ -313,17 +319,52 @@ class DBPostgres:
                 type_ = records[0][1]
             return id_, type_
 
+    def find_participant_by_telegram_username(self, value):
+        """
+        Find participant by email or telegram or fio or fio_eng
+        :param criterion: Search criteria
+        :param value: Search value
+        :return: None - if search nothing or ID participant and his type
+        """
+        # Нормализация value под БД
+        value = value.lower()
+        self.logger.info(f"Осуществляем поиск участника по telegram username={value}")
+        # Искать нужно с любым type т.к. заблокированный участник тоже может вновь оплатить
+        sql_text = f"select id, telegram_id, last_name, first_name, login, password from participants where telegram=%s;"
+        values_tuple = (value,)
+        records = self.execute_select(sql_text, values_tuple)
+        # print(records)
+        if len(records) > 1:
+            raise Exception(
+                f"Поиск участника по telegram username={value} возвращает больше одной строки. Возможно дублирование!")
+        elif len(records) == 0:
+            person = None
+        else:
+            person = {
+                'id': records[0][0],
+                'telegram_id': records[0][1],
+                'last_name': records[0][2],
+                'first_name': records[0][3],
+                'login': records[0][4],
+                'password': records[0][5]
+            }
+        return person
+
     def disconnect(self):
         self.conn.close()
 
 
 if __name__ == "__main__":
-    import log_config
-    import PASSWORDS
+    import custom_logger
+    import os
 
-    postgres = DBPostgres(dbname=PASSWORDS.logins['postgres_dbname'], user=PASSWORDS.logins['postgres_user'],
-                          password=PASSWORDS.logins['postgres_password'], host=PASSWORDS.logins['postgres_host'],
-                          port=PASSWORDS.logins['postgres_port'])
+    program_file = os.path.realpath(__file__)
+    logger = custom_logger.get_logger(program_file=program_file)
+
+    postgres = DBPostgres(dbname=PASSWORDS.settings['postgres_dbname'], user=PASSWORDS.settings['postgres_user'],
+                          logger=logger,
+                          password=PASSWORDS.settings['postgres_password'], host=PASSWORDS.settings['postgres_host'],
+                          port=PASSWORDS.settings['postgres_port'])
 
     # id2 = postgres.find_participant_by('email', 'xxxx@gmail.com')
     # id3 = postgres.find_participant_by('telegram', '@xxxx')

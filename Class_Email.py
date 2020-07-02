@@ -80,7 +80,7 @@ class Email:
                                   host=PASSWORDS.settings['postgres_host'],
                                   port=PASSWORDS.settings['postgres_port'], logger=self.logger)
         except Exception:
-            raise_error("ERROR: Postgres connect", self.logger)
+            raise_error("ERROR: Postgres connect", self.logger, prog_name="Class_Email.py")
             sys.exit(1)
         session_id = postgres.session_begin()
         self.logger.info(f'Session begin (session_id={session_id})')
@@ -128,7 +128,7 @@ class Email:
                         self.logger.error(f"BODY\n: {body['body_text']}")
                 self.logger.info('-' * 45)
                 postgres.task_error(error_text, uuid)
-                raise_error(f"TASK {uuid} ERROR: {error_text}", self.logger)
+                raise_error(f"TASK {uuid} ERROR: {error_text}", self.logger, prog_name="Class_Email.py")
                 self.move_email_to_trash(uuid)
                 continue
             # Create Task and insert it to DB
@@ -144,7 +144,7 @@ class Email:
                         try:
                             payment = payment_creater.parse_paykeeper_html(body['body_html'], self.logger)
                         except Exception:
-                            raise_error("ERROR: parse_paykeeper_html", self.logger)
+                            raise_error("ERROR: parse_paykeeper_html", self.logger, prog_name="Class_Email.py")
                             sys.exit(1)
                         self.payment_verification_for_school_friends(ffrom, fsubject, payment, postgres, task, uuid)
                     # Getcourse
@@ -156,7 +156,7 @@ class Email:
                         try:
                             payment = payment_creater.parse_getcourse_html(body['body_html'], self.logger)
                         except Exception:
-                            raise_error("ERROR: parse_getcourse_html", self.logger)
+                            raise_error("ERROR: parse_getcourse_html", self.logger, prog_name="Class_Email.py")
                             sys.exit(1)
                         self.payment_verification_for_school_friends(ffrom, fsubject, payment, postgres, task, uuid)
                     # Это письмо вообще не платёж
@@ -213,7 +213,7 @@ class Email:
                             self.logger.error(f"BODY\n: {body['body_text']}")
                     self.logger.info('-' * 45)
                     postgres.task_error(error_text, uuid)
-                    raise_error(f"TASK {uuid} ERROR: {error_text}", self.logger)
+                    raise_error(f"TASK {uuid} ERROR: {error_text}", self.logger, prog_name="Class_Email.py")
                     continue
             else:
                 self.logger.warning(f"ВНИМАНИЕ: Это письмо уже обрабатывалось!")

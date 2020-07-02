@@ -69,9 +69,9 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None,
     server.quit()
 
 
-def send_error_to_admin(subject, logger, prog_name=None):
+def send_error_to_admin(subject, logger, prog_name="NONE"):
     """
-    Отсылает сообщение об ошибке администратору, так же логирует его и выводит в консоль.
+    Логировать сообщение об ошибке, вывод его на консоль, отослать его на email администратору.
     :param subject: Тема письма
     :return:
     """
@@ -81,19 +81,19 @@ def send_error_to_admin(subject, logger, prog_name=None):
     error_text = f"{subject}:\n" + traceback.format_exc()
     print(error_text)
     logger.error(error_text)
-    logger.error(f"Send email to: {PASSWORDS.settings['admin_emails']}")
+    logger.info(f"Send email to: {PASSWORDS.settings['admin_emails']}")
     attached_file = logger.handlers[0].baseFilename
     send_mail(PASSWORDS.settings['admin_emails'], subject, error_text, logger, attached_file=attached_file)
 
 
-def raise_error(err_text_, logger_):
+def raise_error(err_text_, logger_, prog_name="NONE"):
     """
-    Записать в лог ошибку - Выслать ошибку админу - Генерировать исключение
+    Делает всё тоже что и send_error_to_admin + генерация исключения.
+    Делать ли выход из приложения (exit(1)) после генерации исключения, определяется в коде
     :param err_text_: Текст ошибки
     :param logger_: логгер
     """
-    logger_.error(err_text_)
-    send_error_to_admin(err_text_, logger_, prog_name="sf_telegram_bot.py")
+    send_error_to_admin(err_text_, logger_, prog_name=prog_name)
     raise Exception(err_text_)
 
 

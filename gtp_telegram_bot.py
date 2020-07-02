@@ -49,7 +49,7 @@ if __name__ == "__main__":
                                host=PASSWORDS.settings['postgres_host'],
                                port=PASSWORDS.settings['postgres_port'], logger=logger)
     except Exception:
-        raise_error("ERROR: Can't connect to DB!!!")
+        raise_error("ERROR: Can't connect to DB!!!", logger, prog_name="gtp_telegram_bot.py")
         logger.error("Exit with error")
         sys.exit(1)
     logger.info('\n' + '#' * 120)
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     try:
         birthday_alert(dbconnect, logger)
     except Exception:
-        raise_error("ERROR: gtp_birthday_alert()", logger)
+        raise_error("ERROR: gtp_birthday_alert()", logger, prog_name="gtp_telegram_bot.py")
     logger.info('\n' + '#' * 120)
 
     logger.info('#' * 120)

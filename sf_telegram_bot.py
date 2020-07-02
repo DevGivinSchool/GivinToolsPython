@@ -38,18 +38,18 @@ if __name__ == '__main__':
                                host=PASSWORDS.settings['postgres_host'],
                                port=PASSWORDS.settings['postgres_port'], logger=logger)
     except Exception:
-        raise_error("Can't connect to DB!!!", logger)
+        raise_error("Can't connect to DB!!!", logger, prog_name="sf_telegram_bot.py")
         sys.exit(1)
     # logger.info('\n' + '#' * 120)
     # Получить update_id из БД
     rows = dbconnect.execute_select(f"select value from settings where key='telegram_update_id';", None)
     logger.debug(f"rows={rows}")
     if not rows:
-        raise_error("Select для telegram_update_id ничего не возвращает", logger)
+        raise_error("Select для telegram_update_id ничего не возвращает", logger, prog_name="sf_telegram_bot.py")
     try:
         telegram_update_id = int(rows[0][0])
     except:
-        raise_error("Не могу получить telegram_update_id из БД", logger)
+        raise_error("Не могу получить telegram_update_id из БД", logger, prog_name="sf_telegram_bot.py")
     logger.debug(f"telegram_update_id={telegram_update_id}")
     tb = TelegramBot(PASSWORDS.settings['telegram_bot_url2'], logger)
     logger.info("Get updates")
@@ -57,23 +57,23 @@ if __name__ == '__main__':
     logger.debug(f"success={success}")
     logger.debug(f"updates=\n{updates}")
     if not success:
-        raise_error(f"Не могу получить updates\n{updates}", logger)
+        raise_error(f"Не могу получить updates\n{updates}", logger, prog_name="sf_telegram_bot.py")
     for update in updates['result']:
         try:
             telegram_update_id = int(update['update_id'])
         except:
-            raise_error("Не могу получить telegram_update_id из update", logger)
+            raise_error("Не могу получить telegram_update_id из update", logger, prog_name="sf_telegram_bot.py")
         logger.info(f"Processing telegram_update_id={telegram_update_id}")
         try:
             chat_id = update['message']['chat']['id']
         except:
-            raise_error("Не могу получить chat_id", logger)
+            raise_error("Не могу получить chat_id", logger, prog_name="sf_telegram_bot.py")
         logger.debug(f"chat_id={chat_id}")
         if chat_id > 0:
             try:
                 username = f"@{update['message']['chat']['username'].lower()}"
             except:
-                raise_error("Не могу получить username", logger)
+                raise_error("Не могу получить username", logger, prog_name="sf_telegram_bot.py")
             logger.debug(f"username={username}")
             person = dbconnect.find_participant_by_telegram_username(username)
             logger.debug(person)
@@ -94,7 +94,7 @@ if __name__ == '__main__':
                     logger.debug(f"success={success}")
                     logger.debug(f"result=\n{result}")
                     if not success:
-                        raise_error(f"Не могу отправить сообщение\n{result}", logger)
+                        raise_error(f"Не могу отправить сообщение\n{result}", logger, prog_name="sf_telegram_bot.py")
                     # Если да - отметить в БД:
                     # 1) внести telegram_id в participants
                     sql_text = f"UPDATE participants SET telegram_id=%s where id=%s RETURNING id;"
@@ -102,7 +102,7 @@ if __name__ == '__main__':
                     id_ = dbconnect.execute_dml_id(sql_text, values_tuple)
                     logger.debug(f"id_={id_}")
                     if not id_:
-                        raise_error(f"Не могу обновить telegram_id={person['telegram_id']} для участника id={person['id']}", logger)
+                        raise_error(f"Не могу обновить telegram_id={person['telegram_id']} для участника id={person['id']}", logger, prog_name="sf_telegram_bot.py")
                     mark_telegram_update_id(telegram_update_id, logger)
                     logger.info('\n' + '#' * 120)
                 else:

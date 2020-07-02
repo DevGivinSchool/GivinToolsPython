@@ -348,23 +348,23 @@ def main():
     # Уведомление участников о необходимости оплаты. Здесь падаем при первой же ошибке, т.к. тут скорее всего может
     # быть только проблема с почтой, а это будет для всех.
     try:
-        participants_notification(dbconnect)
+        participants_notification(dbconnect, logger)
     except Exception:
         send_error_to_admin("DAILY WORKS ERROR: participants_notification()", logger, prog_name="sf_daily_works.py")
     logger.info('\n' + '#' * 120)
     # Блокировка участников у которых оплата просрочена на 5 дней. Здесь проверка на ошибку для каждого конкретного
     # участника.
-    block_participants(dbconnect)
+    block_participants(dbconnect, logger)
     logger.info('\n' + '#' * 120)
     # Получение списка должников и отправка его менеджерам
     # try:
-    #     get_list_debtors(dbconnect)
+    #     get_list_debtors(dbconnect, logger)
     # except Exception:
     #     send_error("DAILY WORKS ERROR: get_list_debtors()")
     # logger.info('\n' + '#' * 120)
     # Получение полного списка участников и отправка его менеджерам
     try:
-        get_full_list_participants(dbconnect)
+        get_full_list_participants(dbconnect, logger)
     except Exception:
         send_error_to_admin("DAILY WORKS ERROR: get_full_list_participants()", logger, prog_name="sf_daily_works.py")
     logger.info('\n' + '#' * 120)

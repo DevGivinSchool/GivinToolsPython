@@ -12,8 +12,6 @@ program_file = os.path.realpath(__file__)
 logger = custom_logger.get_logger(program_file=program_file)
 
 
-# TODO: На вход везде должно подаваться одно и тоже Фамилия + Имя + Login, если чего-то нет, то оно собирается из друго.
-
 def create_team_mail():
     """ Русские только Фамилия (для почт тех кто в команде)
         В list_.py нужно внести список Фамилия + Имя

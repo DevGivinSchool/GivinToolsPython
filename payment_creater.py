@@ -162,7 +162,9 @@ def parse_getcourse_html(body_html, logger):
     # print(f'4:{payment["Имя"]}')
     # print(f'5:{payment["Фамилия Имя"]}')
     # У GetCourse в письме дата не указана, поэтому ставлю текущую
-    # TODO Получать дату оплаты для GetCourse по дате и времени самого письма
+    # Получать дату оплаты для GetCourse по дате и времени самого письма
+    # https://github.com/DevGivinSchool/GivinToolsPython/projects/1#card-41172417
+
     payment["Время проведения"] = datetime.now()
     payment["Платежная система"] = 1
     payment_normalization(payment)

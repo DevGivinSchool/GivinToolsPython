@@ -110,7 +110,6 @@ def from_list_create_sf_participants(list_, database, logger):
     :param list_:
     :return: 
     """
-    # TODO Сделать возможность обрабатывать либо строку Ф+И либо словарь
     logger.info("Начинаю обработку списка")
     for line in list_.splitlines():
         payment = payment_creater.get_clear_payment()
@@ -185,6 +184,7 @@ def create_sf_participant(payment, database, logger):
 
     # Почтовые оповещения
     # TODO Отправить Telegram участнику
+    #  https://github.com/DevGivinSchool/GivinToolsPython/issues/13#issue-650152143
     logger.warning("+" * 60)
     logger.warning("TODO: Отправить уведомление участнику в Telegram.")
     logger.warning("+" * 60)
@@ -331,7 +331,6 @@ if __name__ == '__main__':
                         host=PASSWORDS.settings['postgres_host'],
                         port=PASSWORDS.settings['postgres_port'], logger=log)
     except Exception:
-        # TODO Вынести процедуру опопвещения MAIN ERROR в отдельную процедуру
         main_error_text = \
             f"MAIN ERROR (Postgres):\n{traceback.format_exc()}"
         print(main_error_text)

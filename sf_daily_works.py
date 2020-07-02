@@ -368,10 +368,7 @@ def main():
     except Exception:
         send_error_to_admin("DAILY WORKS ERROR: get_full_list_participants()", logger, prog_name="sf_daily_works.py")
     logger.info('\n' + '#' * 120)
-
-    # TODO Процедура удаления пользователей у которых последний платёж год назад вместе со всеми их платёжками и письмами
-
-    # TODO Процедура удаления писем из почты старше 1 года
+    # Здесь дополнительные процедуры
     logger.info('#' * 120)
     logger.info('END gtp_daily_works')
 

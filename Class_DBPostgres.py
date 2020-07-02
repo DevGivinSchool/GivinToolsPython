@@ -33,7 +33,6 @@ class DBPostgres:
         cursor.close()
         return records
 
-    # TODO Переписать все функции в этом файле через execute_dml
     def execute_dml(self, sql_text, values_tuple):
         """Execute DML operations
                    :param values_tuple: Values

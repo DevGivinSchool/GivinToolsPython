@@ -1,5 +1,7 @@
 import transliterate
 import re
+import os
+import time
 
 
 def translit_name(text):
@@ -91,3 +93,38 @@ def str_normalization2(text):
     :return:
     """
     return ''.join(c for c in text if c.isalpha())
+
+
+def delete_obsolete_files(path, days, logger):
+    """
+    Процедура удаления устаревших файлов (старше Х дней).
+    :param path: Папка из которой удаляются файлы.
+    :param days: Количество дней больше которого файлы считаются устаревшими.
+    :param logger: логгер
+    """
+    logger.info("Процедура удаления устареших файлов")
+    deadline = time.time() - (days * 86400)
+    logger.debug(f"time.time()={time.time()}")
+    logger.debug(f"interval={days * 86400}")
+    logger.debug(f"deadline={deadline}")
+    files = os.listdir(path)
+    # file_path = os.path.join(get_file_directory(__file__), "logs/")
+    for file in files:
+        # logger.debug(f"обработка файла {file}")
+        file = os.path.join(path, file)
+        logger.debug(f"обработка файла {file}")
+        if os.path.isfile(os.path.join(path, file)):
+            change_time = os.stat(file).st_mtime
+            # У старых файлов diff отрицательный
+            logger.debug(f"time_creation={change_time}; diff={change_time - deadline}")
+            if change_time < deadline:
+                logger.info(f"delete {file}")
+                os.remove(file)
+
+
+if __name__ == '__main__':
+    import custom_logger
+    program_file = os.path.realpath(__file__)
+    logger = custom_logger.get_logger(program_file=program_file)
+    log_path = r"c:\\MyGit\\GivinToolsPython\\log\\"
+    delete_obsolete_files(log_path, 31, logger)

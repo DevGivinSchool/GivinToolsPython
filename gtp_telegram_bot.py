@@ -7,10 +7,13 @@ from alert_to_mail import raise_error
 
 
 def birthday_alert(dbconnect, logger):
-    sql_text = """select last_name, first_name, telegram from team_members WHERE
-    DATE_PART('day', birthday) = date_part('day', CURRENT_DATE)
-AND
-    DATE_PART('month', birthday) = date_part('month', CURRENT_DATE)"""
+    sql_text = """SELECT last_name,
+       first_name,
+       telegram
+FROM team_members
+WHERE time_end IS NULL
+  AND DATE_PART('day', birthday) = date_part('day', CURRENT_DATE)
+  AND DATE_PART('month', birthday) = date_part('month', CURRENT_DATE)"""
     values_tuple = (None,)
     records = dbconnect.execute_select(sql_text, values_tuple)
     # ('ИВАНОВ', 'ИВАН')

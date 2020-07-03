@@ -6,9 +6,9 @@ import os
 import PASSWORDS
 import sf_participant_block
 from Class_DBPostgres import DBPostgres
-from alert_to_mail import send_mail
+from alert_to_mail import send_mail, send_error_to_admin
 from datetime import datetime
-from alert_to_mail import send_error_to_admin
+from utils import delete_obsolete_files
 
 
 def block_participants(dbconnect, logger):
@@ -333,7 +333,6 @@ def main():
 
     program_file = os.path.realpath(__file__)
     logger = custom_logger.get_logger(program_file=program_file)
-
     logger.info("Try connect to DB")
     try:
         dbconnect = DBPostgres(dbname=PASSWORDS.settings['postgres_dbname'], user=PASSWORDS.settings['postgres_user'],
@@ -367,6 +366,12 @@ def main():
         get_full_list_participants(dbconnect, logger)
     except Exception:
         send_error_to_admin("DAILY WORKS ERROR: get_full_list_participants()", logger, prog_name="sf_daily_works.py")
+    logger.info('\n' + '#' * 120)
+    # Удаление лог файлов старше 31 дня
+    try:
+        delete_obsolete_files(os.path.dirname(logger.handlers[0].baseFilename), 31, logger)
+    except Exception:
+        send_error_to_admin("DAILY WORKS ERROR: delete_obsolete_files()", logger, prog_name="sf_daily_works.py")
     logger.info('\n' + '#' * 120)
     # Здесь дополнительные процедуры
     logger.info('#' * 120)

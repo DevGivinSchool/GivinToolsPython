@@ -24,7 +24,7 @@ WHERE time_end IS NULL
             logger.debug(f"rec={rec}")
             congratulation += f"{rec[0].capitalize()} {rec[1].capitalize()} {rec[2]}\n"
         congratulation += "\n"
-        logger.debug(f"congratulation={congratulation}")
+        logger.info(f"Текст сообщения=\n{congratulation}")
         tb = TelegramBot(PASSWORDS.settings['telegram_bot_url1'], logger)
         for chat_id in PASSWORDS.settings['telegram_chats_1']:
             logger.info(f"Отправляю сообщение в чат {chat_id}")

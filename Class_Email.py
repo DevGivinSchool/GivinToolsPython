@@ -188,7 +188,8 @@ class Email:
                                     self.logger.info(f"    BODY\n: {body['body_text']}")
                             self.move_email_to_trash(uuid)
                         else:
-                            # TODO Процедура обработки писем с командами (fsubject.startswith("#"))
+                            # Процедура обработки писем с командами (fsubject.startswith("#"))
+                            # https://github.com/DevGivinSchool/GivinToolsPython/projects/1#card-41171908
                             pass
                     # if payment:
                     #    self.logger.info(f"payment for {ffrom}:\n{payment}")
@@ -229,8 +230,6 @@ class Email:
         self.logger.info('#' * 45)
         self.logger.info(f'Session end')
         self.logger.info("sort_mail end")
-        # TODO: Сводка не нужна. Если всё хорошо то мне об этом и знать не нужно,
-        #  нужны только ошибки и оповещения о работа которые мне нужно выполнить
 
     def payment_verification_for_school_friends(self, ffrom, fsubject, payment, postgres, task, uuid):
         """

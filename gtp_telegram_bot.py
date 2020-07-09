@@ -62,6 +62,4 @@ if __name__ == "__main__":
     except Exception:
         raise_error("ERROR: gtp_birthday_alert()", logger, prog_name="gtp_telegram_bot.py")
     logger.info('\n' + '#' * 120)
-
-    logger.info('#' * 120)
     logger.info('END gtp_birthday_alert')

@@ -7,6 +7,7 @@ import os
 from list_ import list_fio
 from utils import get_login
 from utils import split_str
+from password_generator_for_sf import password_for_sf
 
 program_file = os.path.realpath(__file__)
 logger = custom_logger.get_logger(program_file=program_file)
@@ -110,6 +111,10 @@ def generate_password():
     print(f"Пароль: {password_generator.random_password(strong=s, zoom=z, long=ln)}")
 
 
+def generate_sf_password():
+    print(f"Пароль: {password_for_sf()}")
+
+
 def create_info_str(result, password=True, welcome=True):
     text = ""
     text = text + f"Для: {result['name']['last']} {result['name']['first']}\n"
@@ -174,8 +179,9 @@ if __name__ == "__main__":
             "3": ("Логин для FTP", create_ftp_login),
             "4": ("Посмотреть список групп", show_groups),
             "5": ("Генерировать пароль", generate_password),
-            "6": ("DEBUG: Создание учётки для ДШ", create_participant),
-            "7": ("Выход", exit_fn)
+            "6": ("Генерировать пароль для ДШ", generate_sf_password),
+            "7": ("DEBUG: Создание учётки для ДШ", create_participant),
+            "8": ("Выход", exit_fn)
             }
     for key in sorted(menu.keys()):
         print(key + ":" + menu[key][0])

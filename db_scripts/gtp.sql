@@ -196,3 +196,5 @@ begin
 end $$;
 
 -- ===============================================================
+-- Список команды
+SELECT id, last_name, first_name, telegram, birthday FROM public.team_members where id<>1 order by last_name;

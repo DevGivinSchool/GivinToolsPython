@@ -10,6 +10,7 @@ from Class_DBPostgres import DBPostgres
 from alert_to_mail import send_mail, get_participant_notification_text
 from utils import get_login
 from password_generator_for_sf import password_for_sf
+from datetime import datetime
 
 
 class MailMessage:

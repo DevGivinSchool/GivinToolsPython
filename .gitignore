@@ -1,6 +1,7 @@
 #
 list_.py
 PASSWORDS.py
+parents_PASSWORDS.py
 log/
 chromedriver.exe
 log_config.py
@@ -139,4 +140,4 @@ dmypy.json
 
 # PyCharm files
 .idea/
-parents_PASSWORDS.py
+

@@ -19,10 +19,10 @@ def mark_telegram_update_id(telegram_update_id_, logger_):
         raise_error("Не могу обновить telegram_update_id", logger_)
 
 
-def send_message(tb_, logger_):
+def send_message(tb_, chat_id_, message_, logger_):
     global success
     logger_.info("Отправляю сообщение в Telegram новому участнику")
-    success, result = tb_.send_text_message(chat_id, message)
+    success, result = tb_.send_text_message(chat_id_, message_)
     logger_.debug(f"success={success}")
     logger_.debug(f"result=\n{result}")
     if not success:
@@ -112,7 +112,7 @@ if __name__ == '__main__':
                                                                 person['login'],
                                                                 person['password'])
                     logger.debug(f"message=\n{message}")
-                    send_message(tb, logger)
+                    send_message(tb, chat_id, message, logger)
                     # Если да - отметить в БД:
                     # 1) внести telegram_id в participants
                     sql_text = f"UPDATE participants SET telegram_id=%s where id=%s RETURNING id;"
@@ -137,7 +137,11 @@ if __name__ == '__main__':
             person = dbconnect.find_participant_by_telegram_username(row[1])
             logger.debug(person)
             if person:
-                send_message(tb, logger)
+                message = get_participant_notification_text(person['last_name'],
+                                                            person['first_name'],
+                                                            person['login'],
+                                                            person['password'])
+                send_message(tb, person['telegram_id'], message, logger)
         # Сбросить все строки (new) в telegram_bot_added в FALSE
         sql_text = f"UPDATE telegram_bot_added set new=FALSE where new=TRUE"
         rowcount = dbconnect.execute_dml(sql_text, None)

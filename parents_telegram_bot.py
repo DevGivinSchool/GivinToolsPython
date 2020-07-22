@@ -33,9 +33,9 @@ if __name__ == "__main__":
     
     Вручную можно отправить сообщение так (аргумент в командной строке это message_id):
     Windows: 
-        cd c:\Users\MinistrBob\.virtualenvs\GivinToolsPython\Scripts
+        cd c:\\Users\\MinistrBob\\.virtualenvs\\GivinToolsPython\\Scripts
         activate
-        cd c:\MyGit\GivinToolsPython\
+        cd c:\\yGit\\GivinToolsPython\\
         python parents_telegram_bot.py 1
     """
     import custom_logger

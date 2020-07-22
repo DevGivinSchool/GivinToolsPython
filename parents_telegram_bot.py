@@ -7,17 +7,12 @@ from alert_to_mail import raise_error
 
 
 def parents_telegram_bot(dbconnect, logger):
-    sql_text = """SELECT message_text FROM telegram_messages;"""
-    values_tuple = (None,)
+    sql_text = """SELECT message_text FROM telegram_messages where message_id=%s;"""
+    values_tuple = (int(sys.argv[1]),)
     records = dbconnect.execute_select(sql_text, values_tuple)
-    # ('ИВАНОВ', 'ИВАН')
     logger.info(f"records={records}")
     if records:
         tb = TelegramBot(parents_PASSWORDS.settings['telegram_bot_parents_url'], logger)
-        # logger.info("Get updates")
-        # success, updates = tb.get_text_updates()
-        # logger.info(f"success={success}")
-        # logger.debug(f"updates=\n{updates}")
         for chat_id in parents_PASSWORDS.settings['telegram_chats']:
             logger.info(f"Отправляю в чат {chat_id}")
             logger.info(f"Сообщение:\n{records[0][0]}")
@@ -32,7 +27,16 @@ def parents_telegram_bot(dbconnect, logger):
 
 if __name__ == "__main__":
     """
-    Бот для проекта Мы Родители. Рассылка заданий по расписанию
+    Бот для проекта Мы Родители. Рассылка заданий по расписанию.
+    
+    HTTP запрос на получение updates для бота чтобы посмотреть chat_id группы можно посмотерть в parents_PASSWORDS.py
+    
+    Вручную можно отправить сообщение так (аргумент в командной строке это message_id):
+    Windows: 
+        cd c:\Users\MinistrBob\.virtualenvs\GivinToolsPython\Scripts
+        activate
+        cd c:\MyGit\GivinToolsPython\
+        python parents_telegram_bot.py 1
     """
     import custom_logger
     import os

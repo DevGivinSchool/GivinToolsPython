@@ -10,19 +10,19 @@ def parents_telegram_bot(dbconnect, logger):
     sql_text = """SELECT message_text FROM telegram_messages where message_id=%s;"""
     values_tuple = (int(sys.argv[1]),)
     records = dbconnect.execute_select(sql_text, values_tuple)
-    logger.info(f"records={records}")
+    logger.info(f"records=\n{records}")
+    logger.info(f"Сообщение:\n{records[0][0]}")
     if records:
         tb = TelegramBot(parents_PASSWORDS.settings['telegram_bot_parents_url'], logger)
         for chat_id in parents_PASSWORDS.settings['telegram_chats']:
             logger.info(f"Отправляю в чат {chat_id}")
-            logger.info(f"Сообщение:\n{records[0][0]}")
             success, result = tb.send_text_message(chat_id, records[0][0])
             logger.info(f"success={success}")
-            logger.info(f"result=\n{result}")
+            logger.info(f"result={result}")
             if not success:
-                raise_error(f"Не могу отправить сообщение в чат chat_id={chat_id}\n{result}", logger)
+                raise_error(f"Не могу отправить сообщение в чат chat_id={chat_id};result={result}", logger)
     else:
-        raise_error(f"Не такого сообщения", logger)
+        raise_error(f"Не такого сообщения {sys.argv[1]}", logger)
 
 
 if __name__ == "__main__":

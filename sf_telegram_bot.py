@@ -68,9 +68,9 @@ if __name__ == '__main__':
     logger.info("Get updates")
     success, updates = tb.get_text_updates(telegram_update_id)
     logger.info(f"success={success}")
-    logger.info(f"updates=\n{updates}")
+    logger.info(f"updates={updates}")
     if not success:
-        raise_error(f"Не могу получить updates\n{updates}", logger, prog_name="sf_telegram_bot.py")
+        raise_error(f"Не могу получить updates={updates}", logger, prog_name="sf_telegram_bot.py")
     # Цикл по сообщениям telegram полученных ботом
     for update in updates['result']:
         try:

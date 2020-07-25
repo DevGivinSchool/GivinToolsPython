@@ -242,16 +242,12 @@ def parse_getcourse_page(link, payment, logger):
     print(response.text)
     """
     try:
-        if PASSWORDS.DEBUG:
-            # ноутбук (драйвер устанавливать через install_chromedriver.py (заметка @ Chromedrive)"")
-            ######### browser = webdriver.Chrome(r'chromedriver.exe')
-            ######### browser = webdriver.Chrome(r'c:\Windows\System32\chromedriver.exe')
-            browser = webdriver.Chrome(r'c:\Users\MinistrBob\.wdm\drivers\chromedriver\83.0.4103.39\win32\chromedriver.exe')
-        else:
-            # prod
+        if PASSWORDS.settings['headless']:
             chromeOptions = webdriver.ChromeOptions()
             chromeOptions.add_argument("--headless")
-            browser = webdriver.Chrome(r'/usr/local/bin/chromedriver', options=chromeOptions)
+            browser = webdriver.Chrome(PASSWORDS.settings['chromedriver_path'], options=chromeOptions)
+        else:
+            browser = webdriver.Chrome(PASSWORDS.settings['chromedriver_path'])
         # Вход в GetCourse иначе страница заказа будет недоступна
         browser.get(PASSWORDS.settings['getcourse_login_page'])
         input_login = browser.find_element_by_css_selector("input.form-control.form-field-email")

@@ -15,7 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from gtp_index.views import index
 
 urlpatterns = [
+    path('index/', index),
     path('admin/', admin.site.urls),
 ]

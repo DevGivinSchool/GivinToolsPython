@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
+import PASSWORDS
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'e71dd_r4p(zdt=44r^$=nmfb!fdt=br(tc=3=+8ga0o6#4lv^v'
+SECRET_KEY = PASSWORDS.settings['django_secret_key']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

@@ -15,11 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from gtp_index.views import index, my_view, detail_page
+from gtp_index import views
 
 urlpatterns = [
-    path('my_view/', my_view),
-    path('', index),
-    path('detail/<int:id>', detail_page),
+    path('my_view/', views.my_view),
+    # path('', views.index),
+    path('', views.HomeListView.as_view(), name='home'),
+    # path('detail/<int:id>', views.detail_page),
+    path('detail/<int:pk>', views.HomeDetailView.as_view(), name='detail_page'),
     path('admin/', admin.site.urls),
 ]

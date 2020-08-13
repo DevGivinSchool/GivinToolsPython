@@ -23,3 +23,6 @@ webdriver-manager==2.3.0
 XlsxWriter==1.2.7
 yandex-connect==0.28b0
 zoomus==1.1.1
+
+Django~=3.1
+pytz~=2020.1

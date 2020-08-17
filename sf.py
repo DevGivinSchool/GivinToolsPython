@@ -57,7 +57,10 @@ if __name__ == "__main__":
         logger.error("Exit with error")
         sys.exit(1)
     # First sort_mail() execution then go to idle mode
-    email = Email(client, logger)
+    email = Email(client, postgres, session_id, logger)
     email.sort_mail()
     client.logout()
+    postgres.session_end(session_id)
+    logger.info('#' * 45)
+    logger.info(f'Session end')
     logger.info('END gtp_school_friends')

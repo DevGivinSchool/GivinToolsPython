@@ -8,12 +8,28 @@ from datetime import datetime
 from imapclient import IMAPClient
 from Class_Email import Email
 from alert_to_mail import send_mail
+from Class_DBPostgres import DBPostgres
+from alert_to_mail import raise_error
 
 
 if __name__ == "__main__":
     program_file = os.path.realpath(__file__)
     logger = custom_logger.get_logger(program_file=program_file)
     logger.info('START gtp_school_friends')
+    try:
+        logger.info("Try connect to DB")
+        postgres = DBPostgres(dbname=PASSWORDS.settings['postgres_dbname'], user=PASSWORDS.settings['postgres_user'],
+                              password=PASSWORDS.settings['postgres_password'],
+                              host=PASSWORDS.settings['postgres_host'],
+                              port=PASSWORDS.settings['postgres_port'], logger=logger)
+    except Exception:
+        raise_error("ERROR: Postgres connect", logger, prog_name="Class_Email.py")
+        sys.exit(1)
+    sql_text = """INSERT INTO sessions(time_begin, log) VALUES (NOW(), %s) RETURNING id;"""
+    values_tuple = (logger.handlers[0].baseFilename,)
+    session_id = postgres.execute_dml_id(sql_text, values_tuple)
+    logger.info(f'Session begin (session_id={session_id})')
+    logger.info('#' * 45)
     try:
         client = IMAPClient(host="imap.yandex.ru", use_uid=True)
         client.login(PASSWORDS.settings['ymail_login'], PASSWORDS.settings['ymail_password'])

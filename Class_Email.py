@@ -73,18 +73,6 @@ class Email:
     def sort_mail(self):
         """Sort mail and start work """
         self.logger.info("sort_mail begin")
-        try:
-            self.logger.info("Try connect to DB")
-            postgres = DBPostgres(dbname=PASSWORDS.settings['postgres_dbname'], user=PASSWORDS.settings['postgres_user'],
-                                  password=PASSWORDS.settings['postgres_password'],
-                                  host=PASSWORDS.settings['postgres_host'],
-                                  port=PASSWORDS.settings['postgres_port'], logger=self.logger)
-        except Exception:
-            raise_error("ERROR: Postgres connect", self.logger, prog_name="Class_Email.py")
-            sys.exit(1)
-        session_id = postgres.session_begin()
-        self.logger.info(f'Session begin (session_id={session_id})')
-        self.logger.info('#' * 45)
         messages = self.client.search('ALL')
         """We go through the cycle in all letters"""
         for uid, message_data in self.client.fetch(messages, 'RFC822').items():

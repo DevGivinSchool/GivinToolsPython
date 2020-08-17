@@ -124,6 +124,7 @@ def get_participant_notification_text(last_name, first_name, login, password):
 
 
 if __name__ == "__main__":
+    # print(get_participant_notification_text("fam", "mane", "xxx@givinschool.org", "passwd"))
     import custom_logger
     import os
 

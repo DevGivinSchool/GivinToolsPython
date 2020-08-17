@@ -122,15 +122,6 @@ class DBPostgres:
         cursor.close()
         return True
 
-    def session_begin(self):
-        cursor = self.conn.cursor()
-        sql_text = """INSERT INTO sessions(time_begin) VALUES (NOW()) RETURNING id;"""
-        cursor.execute(sql_text)
-        self.conn.commit()
-        id_ = cursor.fetchone()[0]
-        cursor.close()
-        return id_
-
     def task_error(self, error_text, task_uuid):
         """
         Log Task error

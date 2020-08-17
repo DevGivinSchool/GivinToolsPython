@@ -153,9 +153,12 @@ order by last_name"""
 С благодарностью и сердечным теплом,
 команда Школы Гивина.
     """
-        print(mail_text)
+        # print(mail_text)
         logger.info(mail_text)
-        send_mail([p[3]], r"[ШКОЛА ГИВИНА]. Напоминание об оплате ДШ", mail_text, logger)
+        try:
+            send_mail([p[3]], r"[ШКОЛА ГИВИНА]. Напоминание об оплате ДШ", mail_text, logger)
+        except:
+            send_error_to_admin(f"DAILY WORKS ERROR: Ошибка при попытке выслать оповещение должнику:\n{p}", logger, prog_name="sf_daily_works.py")
         logger.info('\n' + '=' * 120)
 
 

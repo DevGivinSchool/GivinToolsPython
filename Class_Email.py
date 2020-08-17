@@ -61,10 +61,12 @@ def verification_for_school_friends(text):
 class Email:
     """Kласс для работы с почтой"""
 
-    def __init__(self, client, logger):
+    def __init__(self, client, postgres, session_id, logger):
         self.client = client
         self.logger = logger  # Общий logger для всей программы
         # self.work_logger = logger  # Частный логгер для каждого письма а затем и Task
+        self.postgres = postgres  # Соединение с БД
+        self.session_id = session_id
 
     def move_email_to_trash(self, uuid):
         self.logger.info(f"Удаляю сообщение: {uuid}")
@@ -115,13 +117,13 @@ class Email:
                     else:
                         self.logger.error(f"BODY\n: {body['body_text']}")
                 self.logger.info('-' * 45)
-                postgres.task_error(error_text, uuid)
+                self.postgres.task_error(error_text, uuid)
                 raise_error(f"TASK {uuid} ERROR: {error_text}", self.logger, prog_name="Class_Email.py")
                 self.move_email_to_trash(uuid)
                 continue
             # Create Task and insert it to DB
-            task = Task(uuid, ffrom, fsubject, self.logger, postgres)
-            task_is_new = postgres.create_task(session_id, task)
+            task = Task(uuid, ffrom, fsubject, self.logger, self.postgres)
+            task_is_new = self.postgres.create_task(self.session_id, task)
             self.logger.info(f"Task begin: ID={uuid}|NEW={task_is_new}")
             if task_is_new:
                 try:
@@ -134,7 +136,7 @@ class Email:
                         except Exception:
                             raise_error("ERROR: parse_paykeeper_html", self.logger, prog_name="Class_Email.py")
                             sys.exit(1)
-                        self.payment_verification_for_school_friends(ffrom, fsubject, payment, postgres, task, uuid)
+                        self.payment_verification_for_school_friends(ffrom, fsubject, payment, self.postgres, task, uuid)
                     # Getcourse
                     elif (
                             ffrom == 'no-reply@getcourse.ru' or ffrom == 'info@study.givinschool.org' or ffrom == 'info@givin.school') \
@@ -146,7 +148,7 @@ class Email:
                         except Exception:
                             raise_error("ERROR: parse_getcourse_html", self.logger, prog_name="Class_Email.py")
                             sys.exit(1)
-                        self.payment_verification_for_school_friends(ffrom, fsubject, payment, postgres, task, uuid)
+                        self.payment_verification_for_school_friends(ffrom, fsubject, payment, self.postgres, task, uuid)
                     # Это письмо вообще не платёж
                     else:
                         self.logger.info(f'ЭТО ПИСЬМО НЕ ОТ ПЛАТЁЖНЫХ СИСТЕМ (ничего с ним не делаю, пока...)')
@@ -201,7 +203,7 @@ class Email:
                         else:
                             self.logger.error(f"BODY\n: {body['body_text']}")
                     self.logger.info('-' * 45)
-                    postgres.task_error(error_text, uuid)
+                    self.postgres.task_error(error_text, uuid)
                     raise_error(f"TASK {uuid} ERROR: {error_text}", self.logger, prog_name="Class_Email.py")
                     continue
             else:
@@ -214,9 +216,6 @@ class Email:
             self.logger.info('=' * 45)
             # -----------------------------------------------------------------
         self.client.expunge()
-        postgres.session_end(session_id)
-        self.logger.info('#' * 45)
-        self.logger.info(f'Session end')
         self.logger.info("sort_mail end")
 
     def payment_verification_for_school_friends(self, ffrom, fsubject, payment, postgres, task, uuid):

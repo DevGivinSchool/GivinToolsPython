@@ -1,4 +1,4 @@
-import sf_participant_create
+from . import sf_participant_create
 
 
 class Task:

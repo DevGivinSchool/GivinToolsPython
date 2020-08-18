@@ -86,7 +86,7 @@ words = {
 }
 
 if __name__ == '__main__':
-    for _ in range(10000):
+    for _ in range(1):
         print(password_for_sf())
 
 

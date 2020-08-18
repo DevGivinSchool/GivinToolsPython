@@ -1,16 +1,14 @@
 #!/home/robot/MyGit/GivinToolsPython/venv/bin/python3.8
-import PASSWORDS
+import core.PASSWORDS as PASSWORDS
 import traceback
 import sys
-import custom_logger
+import core.custom_logger as custom_logger
 import os
 from datetime import datetime
 from imapclient import IMAPClient
-from Class_Email import Email
-from alert_to_mail import send_mail
-from Class_DBPostgres import DBPostgres
-from alert_to_mail import raise_error
-
+from sf.Class_Email import Email
+from core.alert_to_mail import send_mail, raise_error
+from core.Class_DBPostgres import DBPostgres
 
 if __name__ == "__main__":
     program_file = os.path.realpath(__file__)

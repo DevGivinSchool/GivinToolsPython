@@ -4,11 +4,11 @@ import sys
 import traceback
 from email.header import decode_header
 import html2text
-import PASSWORDS
-import payment_creater
-from Class_DBPostgres import DBPostgres
-from Class_Task import Task
-from alert_to_mail import raise_error
+# import core.PASSWORDS as PASSWORDS
+from . import payment_creater
+# from core.Class_DBPostgres import DBPostgres
+from .Class_Task import Task
+from core.alert_to_mail import raise_error
 
 
 def get_first_email_from_line(line):

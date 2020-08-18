@@ -1,14 +1,13 @@
-import requests
+# import requests
 import re
-import PASSWORDS
+import core.PASSWORDS as PASSWORDS
 import traceback
 import time
 from datetime import datetime
 from datetime import timedelta
 from lxml import html
-from utils import is_eng
-from utils import is_rus
-from alert_to_mail import send_mail
+from core.utils import is_eng, is_rus
+from core.alert_to_mail import send_mail
 from selenium import webdriver
 
 

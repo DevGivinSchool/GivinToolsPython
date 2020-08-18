@@ -261,7 +261,7 @@ class Email:
         self.move_email_to_trash(uuid)
 
     def create_payment(self, payment, postgres, task):
-        self.logger.info("create_payment begin")
+        self.logger.info(">>>>Class_Email.create_payment begin")
         # This payment after parsing mail
         self.logger.info(f'payment after parsing = {payment}')
         # Put in Payment to Task and insert Payment to DB
@@ -272,7 +272,7 @@ class Email:
         task.payment["participant_id"] = participant_id
         task.payment["participant_type"] = participant_type
         self.logger.info(f"Payment {payment_id} for participant {participant_id}|{participant_type} created")
-        self.logger.info("create_payment end")
+        self.logger.info(">>>>Class_Email.create_payment end")
 
     def get_decoded_email_body(self, msg):
         """Decode email body.

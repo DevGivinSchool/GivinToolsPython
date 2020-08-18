@@ -152,7 +152,7 @@ class DBPostgres:
         :param task:
         :return:
         """
-        self.logger.info(f"----------- Процедура DBPostgres.create_payment begin")
+        self.logger.info(f">>>>Class_DBPostgres.create_payment begin")
         # Ищем участника сначала по email
         self.logger.info(f"Ищем участника сначала по email - {task.payment['Электронная почта']}")
         participant_id, p_type = self.find_participant_by('email', task.payment["Электронная почта"])
@@ -187,7 +187,7 @@ class DBPostgres:
         self.conn.commit()
         id_ = cursor.fetchone()[0]
         cursor.close()
-        self.logger.info(f"----------- Процедура DBPostgres.create_payment end")
+        self.logger.info(f">>>>Class_DBPostgres.create_payment end")
         return id_, participant_id, p_type
 
     def create_column(self, col_name, logger):

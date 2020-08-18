@@ -147,6 +147,7 @@ def from_list_create_sf_participants(list_, database, logger):
 
 
 def create_sf_participant(payment, database, logger):
+    logger.info(f">>>>sf_participant_create.create_sf_participant begin")
     # This is new participant
     # Participant must have Name, Surname, Email
     # mail_text = ""
@@ -171,7 +172,6 @@ def create_sf_participant(payment, database, logger):
         logger.warning("+" * 60)
         # raise Exception("The participant must have a Email")
         mm.text += "\nВНИМАНИЕ: У участника нет Telegram!!!"
-
     # Создать участнику ДШ учётку (email) Yandex
     mm = create_sf_participant_yandex(logger, payment, mm)
     # Генерация пароля для Zoom (для всех почт пароль одинаковый)
@@ -182,7 +182,6 @@ def create_sf_participant(payment, database, logger):
     mm = create_sf_participant_zoom(logger, payment, mm)
     # Создать участника ДШ в БД и отметить ему оплату
     mm = create_sf_participant_db(database, logger, payment, mm)
-
     # Почтовые оповещения
     # TODO Отправить Telegram участнику
     #  https://github.com/DevGivinSchool/GivinToolsPython/issues/13#issue-650152143
@@ -191,6 +190,7 @@ def create_sf_participant(payment, database, logger):
     logger.warning("+" * 60)
     mm.text += f"\nВНИМАНИЕ: Необходимо отправить оповещение участнику {payment['telegram']} в Telegram вручную."
     if payment["Электронная почта"]:
+        # Оповещение участника
         participant_notification(payment, logger)
     else:
         mm.text += f"\nВНИМАНИЕ: Отправить почтовое уведомление (email) участнику"
@@ -205,6 +205,7 @@ def create_sf_participant(payment, database, logger):
     list_.extend(item for item in PASSWORDS.settings['manager_emails'] if item not in PASSWORDS.settings['admin_emails'])
     logger.info(f"list_={list_}")
     send_mail(list_, mm.subject, mm.text, logger)
+    logger.info(f">>>>sf_participant_create.create_sf_participant end")
 
 
 def create_sf_participant_yandex(logger, payment, mm):
@@ -222,7 +223,7 @@ def create_sf_participant_yandex(logger, payment, mm):
               f'\ntelegram: {payment["telegram"]} '
     print(message)
     logger.info(message)
-    # region ПОКА НЕ РАБОТАЕТ ЯНДЕКС
+    # region Сейчас учётка zoom создаётся из кода приложения, без получения подтверждения на email, поэтому реально почта не нужна.
     """
     try:
         result = yandex_mail.create_yandex_mail(payment["Фамилия"], payment["Имя"], payment["login"], department_id_=4)

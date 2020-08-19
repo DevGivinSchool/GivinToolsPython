@@ -1,8 +1,8 @@
-import PASSWORDS
+import core.PASSWORDS as PASSWORDS
 import sys
-from Class_TelegramBot import TelegramBot
-from Class_DBPostgres import DBPostgres
-from alert_to_mail import raise_error, get_participant_notification_text
+from core.Class_TelegramBot import TelegramBot
+from core.Class_DBPostgres import DBPostgres
+from core.alert_to_mail import raise_error, get_participant_notification_text
 
 
 def mark_telegram_update_id(telegram_update_id_, logger_):

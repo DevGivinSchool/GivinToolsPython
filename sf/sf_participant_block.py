@@ -1,9 +1,8 @@
-import PASSWORDS
-from Class_ZoomUS import ZoomUS
-from alert_to_mail import send_mail
-from Class_DBPostgres import DBPostgres
-from utils import is_eng
-from utils import is_rus
+import core.PASSWORDS as PASSWORDS
+from core.Class_ZoomUS import ZoomUS
+from core.alert_to_mail import send_mail
+from core.Class_DBPostgres import DBPostgres
+from core.utils import is_eng, is_rus
 
 
 def participants_block(list_participants, logger2):

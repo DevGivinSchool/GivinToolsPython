@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import sys
-import parents_PASSWORDS
-from Class_TelegramBot import TelegramBot
-from Class_DBPostgres import DBPostgres
-from alert_to_mail import raise_error
+import parent.parents_PASSWORDS as parents_PASSWORDS
+from core.Class_TelegramBot import TelegramBot
+from core.Class_DBPostgres import DBPostgres
+from core.alert_to_mail import raise_error
 
 
 def parents_telegram_bot(dbconnect, logger):

@@ -1,13 +1,12 @@
-import yandex_mail
-import password_generator
+import core.yandex_mail as yandex_mail
+import core.password_generator as password_generator
 import yandex_connect
-import custom_logger
+import core.custom_logger as custom_logger
 import os
 # На вход подаються строки: Фамилия;Имя (пока из list.py)
 from list_ import list_fio
-from utils import get_login
-from utils import split_str
-from password_generator_for_sf import password_for_sf
+from core.utils import get_login, split_str
+from core.password_generator_for_sf import password_for_sf
 
 program_file = os.path.realpath(__file__)
 logger = custom_logger.get_logger(program_file=program_file)

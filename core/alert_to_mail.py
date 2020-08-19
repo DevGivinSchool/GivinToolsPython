@@ -6,7 +6,7 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 
-import PASSWORDS
+import core.PASSWORDS as PASSWORDS
 from email.mime.text import MIMEText
 from email.header import Header
 

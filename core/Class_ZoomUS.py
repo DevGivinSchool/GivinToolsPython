@@ -1,16 +1,13 @@
 import json
-import PASSWORDS
+import core.PASSWORDS as PASSWORDS
 import requests
 import time
 import jwt
-import traceback
-import math
-import logging
+# import logging
 import traceback
 import math
 import datetime
-import custom_logger
-import os
+# import core.custom_logger as custom_logger
 
 
 class ZoomUS:
@@ -394,7 +391,7 @@ def get_list_meetings(logger):
 
 # ==========================================================================================
 if __name__ == '__main__':
-    import custom_logger
+    import core.custom_logger as custom_logger
     import os
 
     program_file = os.path.realpath(__file__)

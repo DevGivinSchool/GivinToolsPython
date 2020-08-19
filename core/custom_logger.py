@@ -1,6 +1,6 @@
 import logging
 import os
-import PASSWORDS
+import core.PASSWORDS as PASSWORDS
 from datetime import datetime
 
 
@@ -18,10 +18,11 @@ def get_prog_name(file_path):
 
 def get_logger(program_file=None, log_file=None, dt=True):
     """
-    Процедура создаёт logger на основе либо program_file либо log_file
+    Процедура создаёт logger на основе либо program_file либо log_file.
+    Логирование по умолчанию производится в папку где лежит скрипт/log
     :param program_file: Полный путь к исполняемому файлу
     :param log_file: Полный путь к лог файлу
-    :param dt: Включать ли в имя лог файлв дату и время
+    :param dt: Включать ли в имя лог файла дату и время
     :return: logger
     """
     # Лог файл можно задать явно
@@ -33,7 +34,8 @@ def get_logger(program_file=None, log_file=None, dt=True):
         # Если лог файл явно не задан, собираем его по частям
         if program_file:
             # Логирование по умолчанию производится в папку где лежит скрипт/log
-            log_dir = os.path.join(os.path.dirname(program_file), 'log')
+            # т.к. теперь все скрипты переместились на уровень ниже, то логирование нужно выполнять на 1 уровень выше
+            log_dir = os.path.join(os.path.dirname(os.path.dirname(program_file)), 'log')
             prog_name, prog_name_without_ext, extention = get_prog_name(program_file)
             extention = 'log'
             log_name = prog_name_without_ext

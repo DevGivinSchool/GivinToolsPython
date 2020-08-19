@@ -1,8 +1,8 @@
 import datetime
-import utils
+import core.utils as utils
 import psycopg2
-import payment_creater
-import PASSWORDS
+import sf.payment_creater as payment_creater
+import core.PASSWORDS as PASSWORDS
 
 
 class DBPostgres:

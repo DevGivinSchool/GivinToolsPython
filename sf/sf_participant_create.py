@@ -1,15 +1,15 @@
-import yandex_mail
-import yandex_connect
-import payment_creater
+# import core.yandex_mail
+# import yandex_connect
+import sf.payment_creater as payment_creater
 import traceback
-import PASSWORDS
+import core.PASSWORDS as PASSWORDS
 import sys
 # import password_generator
-from Class_ZoomUS import ZoomUS
-from Class_DBPostgres import DBPostgres
-from alert_to_mail import send_mail, get_participant_notification_text
-from utils import get_login
-from password_generator_for_sf import password_for_sf
+from core.Class_ZoomUS import ZoomUS
+from core.Class_DBPostgres import DBPostgres
+from core.alert_to_mail import send_mail, get_participant_notification_text
+from core.utils import get_login
+from core.password_generator_for_sf import password_for_sf
 from datetime import datetime
 
 
@@ -105,28 +105,35 @@ def participant_notification(payment, logger):
 
 def from_list_create_sf_participants(list_, database, logger):
     """
-    Создание нескольких участников ДШ по списку 
+    Создание нескольких участников ДШ по списку.
+    Список в формате:
+    Фамлия; Имя; email; telegram
     :param logger:
     :param database:
     :param list_:
     :return: 
     """
     logger.info("Начинаю обработку списка")
+    line_number = 1
     for line in list_.splitlines():
         payment = payment_creater.get_clear_payment()
-        # Когда копирую из Google Sheets разделитель = Tab
-        # Иванов	Иван
-        # line_ = split_str(line)
         line_ = line.split(';')
-        # При транслитерации некоторые буквы переводятся в - ' - это нужно заменить
-        # ['Иванов', 'Иван']
-        payment["Фамилия"] = line_[0]
-        payment["Имя"] = line_[1]
+        try:
+            payment["Фамилия"] = line_[0]
+        except IndexError:
+            print("Нет фамилии. Скорее всего файл list_.py пустой.")
+            exit(1)
+        try:
+            payment["Имя"] = line_[1]
+        except:
+            print(f"Строка №{line_number}. Нет имени, участник не создан")
+            exit(1)
         try:
             if line_[2]:
                 payment["Электронная почта"] = line_[2]
         except IndexError:
-            pass
+            print(f"Строка №{line_number}. Нет email, участник не создан")
+            exit(1)
         try:
             if line_[3]:
                 payment["telegram"] = line_[3]
@@ -143,6 +150,7 @@ def from_list_create_sf_participants(list_, database, logger):
             mail_text = f'Ошибка создания участника\n' + traceback.format_exc()
             logger.error(mail_text)
             send_mail(PASSWORDS.settings['admin_emails'], "ERROR CREATE PARTICIPANT", mail_text, logger)
+        line_number += 1
     logger.info("Обработка списка закончена")
 
 
@@ -319,7 +327,10 @@ def create_sf_participant_db(database, logger, payment, mm):
 
 
 if __name__ == '__main__':
-    import custom_logger
+    """ Создание участников по списку. Список в формате:
+    Фамлия; Имя; email; telegram
+    """
+    import core.custom_logger as custom_logger
     import os
     from list_ import list_fio
 

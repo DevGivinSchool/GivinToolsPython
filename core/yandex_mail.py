@@ -1,8 +1,8 @@
 import yandex_connect
-import PASSWORDS
+import core.PASSWORDS as PASSWORDS
 import logging
 # from utils import translit_name
-from utils import get_login
+from core.utils import get_login
 
 
 def create_yandex_mail(logger, familia_, name_, login_, password_=None, department_id_=1):

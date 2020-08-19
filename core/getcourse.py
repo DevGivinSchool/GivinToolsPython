@@ -1,6 +1,6 @@
 import requests
 import json
-import PASSWORDS
+import core.PASSWORDS as PASSWORDS
 
 
 def getcourse_create_user():

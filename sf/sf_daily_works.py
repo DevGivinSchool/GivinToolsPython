@@ -3,12 +3,12 @@ import sys
 import traceback
 import xlsxwriter
 import os
-import PASSWORDS
-import sf_participant_block
-from Class_DBPostgres import DBPostgres
-from alert_to_mail import send_mail, send_error_to_admin
+import core.PASSWORDS as PASSWORDS
+from . import sf_participant_block
+from core.Class_DBPostgres import DBPostgres
+from core.alert_to_mail import send_mail, send_error_to_admin
 from datetime import datetime
-from utils import delete_obsolete_files
+from core.utils import delete_obsolete_files
 
 
 def block_participants(dbconnect, logger):

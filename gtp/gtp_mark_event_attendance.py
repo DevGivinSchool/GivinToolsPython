@@ -25,11 +25,11 @@ order by tm.last_name
 """
 import csv
 import traceback
-import PASSWORDS
+import core.PASSWORDS as PASSWORDS
 import sys
-import utils
+import core.utils as utils
 from datetime import datetime
-from Class_DBPostgres import DBPostgres
+from core.Class_DBPostgres import DBPostgres
 
 
 def convert_zoom_datetime(text):

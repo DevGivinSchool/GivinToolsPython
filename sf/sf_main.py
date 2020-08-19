@@ -4,7 +4,7 @@ import traceback
 import sys
 import core.custom_logger as custom_logger
 import os
-from datetime import datetime
+# from datetime import datetime
 from imapclient import IMAPClient
 from sf.Class_Email import Email
 from core.alert_to_mail import send_mail, raise_error

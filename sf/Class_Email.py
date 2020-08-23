@@ -246,7 +246,7 @@ class Email:
             task.task_run()
         # Это платёж но НЕ за ДШ
         else:
-            self.logger.info('ЭТО ИНОЙ ПЛАТЁЖ')
+            self.logger.info(f"ЭТО ИНОЙ ПЛАТЁЖ: {payment['Наименование услуги']}")
             if uuid is not None:
                 self.logger.info(f"    UUID   : {uuid}")
             if ffrom is not None:

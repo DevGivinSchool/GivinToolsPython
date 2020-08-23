@@ -100,7 +100,7 @@ def raise_error(err_text_, logger_, prog_name="NONE"):
 def get_participant_notification_text(last_name, first_name, login, password):
     mail_text2 = f"""Здравствуйте, {last_name.capitalize()} {first_name.capitalize()}!  
 
-Поздравляем, Вы оплатили абонемент на месяц совместных занятий в онлайн-формате "Друзья Школы Гивина". 
+Поздравляем, Вы оплатили абонемент для совместных занятий в онлайн-формате "Друзья Школы Гивина". 
 
 Ваш zoom-аккаунт:
 Логин: {login}

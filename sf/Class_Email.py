@@ -126,17 +126,21 @@ class Email:
             task_is_new = self.postgres.create_task(self.session_id, task)
             self.logger.info(f"Task begin: ID={uuid}|NEW={task_is_new}")
             if task_is_new:
+                payment = None
                 try:
                     """Определяем типа письма (платёж / не платёж) и вытаскиваем данные платежа в payment."""
                     # PayKeeper
                     if ffrom == 'noreply@server.paykeeper.ru' and fsubject == 'Принята оплата':
                         self.logger.info(f'Это письмо от платежной системы - PayKeeper')
                         try:
+                            self.logger.info(
+                                f"Текст полученного оповещения (письма), используется для первоначального парсинга\n{body['body_html']}")
                             payment = payment_creater.parse_paykeeper_html(body['body_html'], self.logger)
                         except Exception:
-                            raise_error("ERROR: parse_paykeeper_html", self.logger, prog_name="Class_Email.py")
+                            raise_error("ERROR: parse_paykeeper_html", self.logger, prog_name="payment_creater.py")
                             sys.exit(1)
-                        self.payment_verification_for_school_friends(ffrom, fsubject, payment, self.postgres, task, uuid)
+                        self.payment_verification_for_school_friends(ffrom, fsubject, payment, self.postgres, task,
+                                                                     uuid)
                     # Getcourse
                     elif (
                             ffrom == 'no-reply@getcourse.ru' or ffrom == 'info@study.givinschool.org' or ffrom == 'info@givin.school') \
@@ -144,11 +148,14 @@ class Email:
                         self.logger.info(f'Это письмо от платежной системы - GetCourse')
                         # print(f'Это письмо от платежной системы - GetCourse')
                         try:
+                            self.logger.info(
+                                f"Текст полученного оповещения (письма), используется для первоначального парсинга\n{body['body_html']}")
                             payment = payment_creater.parse_getcourse_html(body['body_html'], self.logger)
                         except Exception:
-                            raise_error("ERROR: parse_getcourse_html", self.logger, prog_name="Class_Email.py")
+                            raise_error("ERROR: parse_getcourse_html", self.logger, prog_name="payment_creater.py")
                             sys.exit(1)
-                        self.payment_verification_for_school_friends(ffrom, fsubject, payment, self.postgres, task, uuid)
+                        self.payment_verification_for_school_friends(ffrom, fsubject, payment, self.postgres, task,
+                                                                     uuid)
                     # Это письмо вообще не платёж
                     else:
                         self.logger.info(f'ЭТО ПИСЬМО НЕ ОТ ПЛАТЁЖНЫХ СИСТЕМ (ничего с ним не делаю, пока...)')
@@ -235,7 +242,7 @@ class Email:
         if verification_for_school_friends(payment["Наименование услуги"]):
             # print('Это платёж Друзья Школы')
             self.logger.info('Это платёж Друзья Школы')
-            self.create_payment(payment, postgres, task)
+            self.addition_of_payment_information_from_db(payment, postgres, task)
             task.task_run()
         # Это платёж но НЕ за ДШ
         else:
@@ -260,19 +267,24 @@ class Email:
             """
         self.move_email_to_trash(uuid)
 
-    def create_payment(self, payment, postgres, task):
-        self.logger.info(">>>>Class_Email.create_payment begin")
-        # This payment after parsing mail
-        self.logger.info(f'payment after parsing = {payment}')
-        # Put in Payment to Task and insert Payment to DB
-        # and join payment after parsing with participant if it is
+    def addition_of_payment_information_from_db(self, payment, postgres, task):
+        """
+        Дополняем платёж полученный после парсинга страницы заказа информацией из БД, если она там найдётся.
+        :param payment:
+        :param postgres:
+        :param task:
+        :return:
+        """
+        self.logger.info("Дополняем платёж полученный после парсинга страницы заказа информацией из БД, если она там найдётся.")
+        self.logger.info(">>>>Class_Email.addition_of_payment_information_from_db begin")
         task.payment = payment
-        payment_id, participant_id, participant_type = postgres.create_payment(task)
+        payment_id, participant_id, participant_type = postgres.create_payment_in_db(task)
         task.payment["task_uuid"] = payment_id
         task.payment["participant_id"] = participant_id
         task.payment["participant_type"] = participant_type
         self.logger.info(f"Payment {payment_id} for participant {participant_id}|{participant_type} created")
-        self.logger.info(">>>>Class_Email.create_payment end")
+        self.logger.info(f'Платёж после дополнения:\n{task.payment}')
+        self.logger.info(">>>>Class_Email.addition_of_payment_information_from_db end")
 
     def get_decoded_email_body(self, msg):
         """Decode email body.

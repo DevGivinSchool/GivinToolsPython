@@ -88,7 +88,8 @@ def payment_computation(payment):
 
 
 def parse_getcourse_html(body_html, logger):
-    logger.info("Парсинг parse_getcourse_html")
+    logger.info(">>>> parse_getcourse_html begin")
+    # logger.info("Парсинг parse_getcourse_html")
     logger.debug(f"body_html=\n{body_html}\n")
     payment = get_clear_payment()
     tree = html.fromstring(body_html)
@@ -168,12 +169,13 @@ def parse_getcourse_html(body_html, logger):
     payment["Платежная система"] = 1
     payment_normalization(payment)
     payment_computation(payment)
-    # print(payment)
+    logger.info(f'payment after parsing\n{payment}')
+    logger.info(">>>> parse_getcourse_html end")
     return payment
 
 
 def parse_paykeeper_html(body_html, logger):
-    logger.info("Парсинг parse_paykeeper_html")
+    logger.info(">>>> parse_paykeeper_html begin")
     logger.debug(f"body_html=\n{body_html}\n")
     payment = get_clear_payment()
     tree = html.fromstring(body_html)
@@ -208,7 +210,8 @@ def parse_paykeeper_html(body_html, logger):
     payment["Платежная система"] = 2
     payment_normalization(payment)
     payment_computation(payment)
-    # print(payment)
+    logger.info(f'payment after parsing\n{payment}')
+    logger.info(">>>> parse_paykeeper_html end")
     return payment
 
 
@@ -356,6 +359,9 @@ if __name__ == "__main__":
     # print(payment)
     # result = get_telegram_from_text(telegram_elements[0].text, logger)
     # IndexError: list index out of range
+    # payment = get_clear_payment()
+    # parse_getcourse_page("https://givinschoolru.getcourse.ru/sales/control/deal/update/id/43670994", payment, logger)
+    # print(payment)
     payment = get_clear_payment()
-    parse_getcourse_page("https://givinschoolru.getcourse.ru/sales/control/deal/update/id/43670994", payment, logger)
+    parse_getcourse_page("https://givin.school/sales/control/deal/update/id/52700202", payment, logger)
     print(payment)

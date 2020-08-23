@@ -146,13 +146,13 @@ class DBPostgres:
         cursor.close()
         return count
 
-    def create_payment(self, task):
+    def create_payment_in_db(self, task):
         """
         Создание платежа. К платежу сразу привязывается плательщик, если находится соответсвие по почте или ФИО
         :param task:
         :return:
         """
-        self.logger.info(f">>>>Class_DBPostgres.create_payment begin")
+        self.logger.info(f">>>>Class_DBPostgres.create_payment_in_db begin")
         # Ищем участника сначала по email
         self.logger.info(f"Ищем участника сначала по email - {task.payment['Электронная почта']}")
         participant_id, p_type = self.find_participant_by('email', task.payment["Электронная почта"])
@@ -160,10 +160,13 @@ class DBPostgres:
             # Ищем по fio в зависимости от языка RUS\ENG
             self.logger.info(f"Ищем участника по fio - {task.payment['Фамилия Имя']}")
             if task.payment["fio_lang"] == "RUS":
+                self.logger.info(f"fio_lang = RUS")
                 participant_id, p_type = self.find_participant_by('fio', task.payment["Фамилия Имя"])
             else:  # Иначе ищем по ENG потому что после парсера никаких других языков быть не может
+                self.logger.info(f"fio_lang = ENG")
                 participant_id, p_type = self.find_participant_by('fio_eng', task.payment["Фамилия Имя"])
             if participant_id is None and task.payment["Платежная система"] == 1:
+                self.logger.info(f"Ничего не найдено, поэтому пробуем парсить страницу заказа")
                 # Если это Getcourse и ничего по ФИО и почте (которой могло и не быть) не нашлось,
                 # тогда парсим страницу GetCourse и пытаемся еще раз поискать по почте и телеграм
                 payment_creater.parse_getcourse_page(task.payment["Кассовый чек 54-ФЗ"], task.payment, self.logger)
@@ -187,7 +190,7 @@ class DBPostgres:
         self.conn.commit()
         id_ = cursor.fetchone()[0]
         cursor.close()
-        self.logger.info(f">>>>Class_DBPostgres.create_payment end")
+        self.logger.info(f">>>>Class_DBPostgres.create_payment_in_db end")
         return id_, participant_id, p_type
 
     def create_column(self, col_name, logger):

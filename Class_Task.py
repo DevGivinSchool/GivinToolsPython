@@ -31,12 +31,14 @@ class Task:
         Обработка платежа, пока без обработки шагов
         :return:
         """
-        self.logger.info('Task_run begin')
+        self.logger.info('>>>>task_run begin')
         self.logger.info(f'task_run payment = {self.payment}')
         if self.payment["participant_id"] is None:
             # This is new participant
+            self.logger.info('СОЗДАЁМ НОВОГО ПОЛЬЗОВАТЕЛЯ')
             sf_participant_create.create_sf_participant(self.payment, self.database, self.logger)
         else:
             # Отмечаем оплату в БД
+            self.logger.info('ОТМЕЧАЕМ ОПЛАТУ В БД')
             sf_participant_create.mark_payment_into_db(self.payment, self.database, self.logger)
-        self.logger.info('Task_run end')
+        self.logger.info('>>>>task_run end')

@@ -41,7 +41,8 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
     Отмечаем оплату в БД. Поля until_date (отсрочка до) и comment - обнуляются.
     :return:
     """
-    logger.info("Отмечаем оплату в БД")
+    logger.info(">>>> mark_payment_into_db begin")
+    mm = MailMessage("", "")
     # Состояние участника до отметки
     # logger.info(select_participant(payment["participant_id"], database))
     # Коментарий и поле отсрочки обнуляются
@@ -60,13 +61,16 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         # Исправление пароля (вырезать 55 в конце)
         if payment["password"][-2:] == "55":
             payment["password"] = payment["password"][:-2]
-        logger.info("Разблокировка пользователя")
+        logger.info("Изменение статуса учатника в БД")
         sql_text = """UPDATE participants 
         SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s, password=%s
         WHERE id=%s;"""
         values_tuple = (payment["Время проведения"], payment["number_of_days"],
                         payment["deadline"], participant_type, payment["password"], payment["participant_id"])
+        database.execute_dml(sql_text, values_tuple)
+        logger.info("Статус учатника в БД изменён")
         # Измение статуса в zoom
+        logger.info("Активация участника в Zoom")
         zoom_user = ZoomUS(logger)
         zoom_result = zoom_user.zoom_users_userstatus(payment["login"], "activate")
         if zoom_result is not None:
@@ -79,28 +83,46 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
             logger.error(mail_text)
             logger.error("+" * 60)
         else:
-            logger.info("Учётка Zoom успешно активирована")
-
-        participant_notification(payment, logger)
+            logger.info("Участник активирован в Zoom")
+        # Уведомление участника
+        logger.info("Уведомление участника")
+        notification_text = participant_notification(payment, r"[ШКОЛА ГИВИНА]. Ваша учтёная запись в Друзьях Школы разблокирована.", logger)
+        mm.subject = "[ДШ] РАЗБЛОКИРОВКА УЧАСТНИКА"
+        mm.text += "Текст уведомления:\n\n\n" + notification_text
     else:
+        logger.info("Отмечаем оплату в БД")
         sql_text = """UPDATE participants 
         SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s 
         WHERE id=%s;"""
         values_tuple = (payment["Время проведения"], payment["number_of_days"],
                         payment["deadline"], participant_type, payment["participant_id"])
-    # logger.info(sql_text % values_tuple)
-    database.execute_dml(sql_text, values_tuple)
-    # Состояние участника после отметки
-    # logger.info(select_participant(payment["participant_id"], database))
-    logger.info("Оплата в БД отмечена")
+        # logger.info(sql_text % values_tuple)
+        database.execute_dml(sql_text, values_tuple)
+        logger.info("Оплата в БД отмечена")
+        # Уведомление участника
+        logger.info("Уведомление участника")
+        notification_text = participant_notification(payment, r"[ШКОЛА ГИВИНА]. Ваша оплата принята и продлено участие в Друзьях Школы.", logger)
+        mm.subject = "[ДШ] принята оплата за ДШ"
+        mm.text += "Текст уведомления:\n\n\n" + notification_text
+    # Окончательное состояние участника
+    logger.info(f"Окончательное состояние участника\n{select_participant(payment['participant_id'], database)}")
+    # Оповещение админов
+    logger.info("Уведомление админов и менеджеров")
+    list_ = PASSWORDS.settings['admin_emails']
+    list_.extend(item for item in PASSWORDS.settings['manager_emails'] if item not in PASSWORDS.settings['admin_emails'])
+    logger.info(f"list_={list_}")
+    send_mail(list_, mm.subject, mm.text, logger)
+    logger.info(">>>> mark_payment_into_db end")
 
 
-def participant_notification(payment, logger):
+def participant_notification(payment, subject, logger):
+    logger.info(">>>> participant_notification begin")
     logger.info("Уведомление участника")
     mail_text2 = get_participant_notification_text(payment['Фамилия'], payment['Имя'], payment['login'], payment['password'])
-    logger.info(mail_text2)
-    send_mail([payment["Электронная почта"]],
-              r"[ШКОЛА ГИВИНА]. Поздравляем, Вы приняты в Друзья Школы", mail_text2, logger)
+    logger.info(f"Текст оповещения\n{mail_text2}")
+    send_mail([payment["Электронная почта"]], subject, mail_text2, logger)
+    logger.info(">>>> participant_notification end")
+    return mail_text2
 
 
 def from_list_create_sf_participants(list_, database, logger):
@@ -152,7 +174,7 @@ def create_sf_participant(payment, database, logger):
     # Participant must have Name, Surname, Email
     # mail_text = ""
     # subject = "НОВЫЙ УЧАСТНИК"
-    mm = MailMessage("НОВЫЙ УЧАСТНИК", "")
+    mm = MailMessage("[ДШ] НОВЫЙ УЧАСТНИК", "")
     logger.info(f"Создание участника:{payment}")
     if not payment["Фамилия"]:
         logger.error("The participant must have a Surname")
@@ -191,16 +213,17 @@ def create_sf_participant(payment, database, logger):
     mm.text += f"\nВНИМАНИЕ: Необходимо отправить оповещение участнику {payment['telegram']} в Telegram вручную."
     if payment["Электронная почта"]:
         # Оповещение участника
-        participant_notification(payment, logger)
+        notification_text = participant_notification(payment, r"[ШКОЛА ГИВИНА]. Поздравляем, Вы приняты в Друзья Школы", logger)
     else:
         mm.text += f"\nВНИМАНИЕ: Отправить почтовое уведомление (email) участнику"
         logger.warning("+" * 60)
         logger.warning(f"ВНИМАНИЕ: Отправить почтовое уведомление (email) участнику")
         logger.warning("+" * 60)
-    notification_text = get_participant_notification_text(payment['Фамилия'], payment['Имя'], payment['login'], payment['password'])
+        notification_text = "НЕТ ТЕКСТА ОПОВЕЩЕНИЯ УЧАСТНИКА. Т.к. у участника не email"
     mm.text += "Текст уведомления:\n\n\n" + notification_text
     # send_mail(PASSWORDS.logins['admin_emails'], subject, mail_text, logger)
     # Вычитаю из списка почт менеджеров список почт админов, чтобы не было повторных писем
+    logger.info("Уведомление админов и менеджеров")
     list_ = PASSWORDS.settings['admin_emails']
     list_.extend(item for item in PASSWORDS.settings['manager_emails'] if item not in PASSWORDS.settings['admin_emails'])
     logger.info(f"list_={list_}")

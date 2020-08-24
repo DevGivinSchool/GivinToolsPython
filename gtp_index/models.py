@@ -15,11 +15,14 @@ class Article(models.Model):
         verbose_name = "Статью"
         verbose_name_plural = "Статьи"
 
-
+##########################################################
 # time_begin default=datetime.date.today
 # create_date = models.DateTimeField(default=timezone.now)
 class Participant(models.Model):
-    PARTICIPANT_TYPE_CHOICES = [
+    """
+    Участник
+    """
+    PARTICIPANT_TYPE_VOC = [
         ('N', 'новый участник (первый месяц)'),
         ('P', 'регулярный участник'),
         ('B', 'заблокированный'),
@@ -43,7 +46,7 @@ class Participant(models.Model):
     until_date = models.DateField(null=True, verbose_name="Дата до которой отсрочен платёж")
     type = models.CharField(
         max_length=1,
-        choices=PARTICIPANT_TYPE_CHOICES,
+        choices=PARTICIPANT_TYPE_VOC,
         default='N',
         verbose_name="Тип участника: P - регулярный участник; B - заблокированный; E - наш сотрудник; V - VIP (особые условия, например, участие без оплаты)",
     )
@@ -59,3 +62,49 @@ class Participant(models.Model):
     class Meta:
         verbose_name = "Участника"
         verbose_name_plural = "Участников"
+
+
+class Payment(models.Model):
+    """
+    Платёж
+    """
+    PAYMENT_PURPOSE_VOC = [
+        ('ДШ', 'Друзья Школы'),
+    ]
+    PAYMENT_SYSTEM_VOC = [
+        ('GC', 'GetCourse'),
+        ('PK', 'PayKeeper'),
+    ]
+    name_of_service = models.CharField(null=True, max_length=255, verbose_name="Наименование услуги (как в письме)")
+    payment_id = models.CharField(null=True, max_length=10, verbose_name="ID платежа (как в письме)")
+    amount = models.PositiveSmallIntegerField(null=True, verbose_name="Сумма платежа")
+    sales_slip = models.CharField(null=True, max_length=500, verbose_name="Кассовый чек 54-ФЗ (ссылка на него)")
+    card_number = models.CharField(null=True, max_length=20, verbose_name="Номер кредитной карты плательщика")
+    card_type = models.CharField(null=True, max_length=10, verbose_name="Тип кредитной карты плательщика")
+    payment_purpose = models.CharField(
+        max_length=2,
+        choices=PAYMENT_PURPOSE_VOC,
+        default='ДШ',
+        verbose_name='Назначение платежа',
+    )
+    last_name = models.CharField(null=True, max_length=255, verbose_name="Фамилия по русски")
+    first_name = models.CharField(null=True, max_length=255, verbose_name="Имя по русски")
+    fio = models.CharField(db_index=True, null=True, max_length=500, verbose_name="Фамилия и Имя по русски")
+    email = models.CharField(db_index=True, null=True, max_length=254, verbose_name="Email")
+    telegram = models.CharField(db_index=True, null=True, max_length=32, verbose_name="Telegram name")
+    time_create = models.DateTimeField(null=False, editable=False, auto_now_add=True, verbose_name="Дата создания")
+    payment_system = models.CharField(
+        max_length=2,
+        choices=PAYMENT_SYSTEM_VOC,
+        default='GC',
+        verbose_name='Платёжная система',
+    )
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.fio} {self.payment_system} {self.payment_id}"
+
+    class Meta:
+        verbose_name = "Платежа"
+        verbose_name_plural = "Платежей"
+

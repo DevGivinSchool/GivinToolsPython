@@ -65,6 +65,46 @@ class Participant(models.Model):
         verbose_name_plural = "Участники"
 
 
+class Session(models.Model):
+    """
+    Сеанс работы. За один сеанс может быть обработано множество писем.
+    """
+    time_begin = models.DateTimeField(null=False, editable=False, auto_now_add=True, verbose_name="Дата и время начала сессии")
+    time_end = models.DateTimeField(null=True, verbose_name="Дата и время окончания сессии")
+    log_file = models.CharField(null=True, max_length=4000, verbose_name="Путь к лог-файлу")
+
+    def __str__(self):
+        return f"{self.id}"
+
+    class Meta:
+        verbose_name = "Сеанс"
+        verbose_name_plural = "Сеансы"
+
+
+class Task(models.Model):
+    """
+    Задание (по сути это отдельно письмо которое обрабатывается)
+    """
+    time_begin = models.DateTimeField(null=False, editable=False, auto_now_add=True, verbose_name="Дата и время начала задания")
+    time_end = models.DateTimeField(null=True, verbose_name="Дата и время окончания задания")
+    task_from = models.CharField(null=True, max_length=254, verbose_name="От кого (email)")
+    task_subject = models.CharField(null=True, max_length=2000, verbose_name="Тема (email)")
+    task_body_type = models.CharField(null=True, max_length=4, verbose_name="Типа тела письма (TEXT;HTML;MIX)")
+    task_body_html = models.TextField(null=True, verbose_name="Тело письма HTML")
+    task_body_text = models.TextField(null=True, verbose_name="Тело письма TEXT")
+    task_error = models.CharField(null=True, max_length=4000, verbose_name="Сообщение об ошибке")
+    number_of_attempts = models.PositiveSmallIntegerField(null=True, verbose_name="Количество попыток")
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
+    session = models.ForeignKey(Session, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.task_from}-{self.task_subject}"
+
+    class Meta:
+        verbose_name = "Задание"
+        verbose_name_plural = "Задания"
+
+
 class Payment(models.Model):
     """
     Платёж
@@ -101,6 +141,7 @@ class Payment(models.Model):
         verbose_name='Платёжная система',
     )
     participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.fio} {self.payment_system} {self.payment_id}"
@@ -126,41 +167,3 @@ class Settings(models.Model):
     class Meta:
         verbose_name = "Настройки"
         verbose_name_plural = "Настройки"
-
-
-class Task(models.Model):
-    """
-    Задание (по сути это отдельно письмо которое обрабатывается)
-    """
-    time_begin = models.DateTimeField(null=False, editable=False, auto_now_add=True, verbose_name="Дата и время начала задания")
-    time_end = models.DateTimeField(null=True, verbose_name="Дата и время окончания задания")
-    task_from = models.CharField(null=True, max_length=254, verbose_name="От кого (email)")
-    task_subject = models.CharField(null=True, max_length=2000, verbose_name="Тема (email)")
-    task_body_type = models.CharField(null=True, max_length=4, verbose_name="Типа тела письма (TEXT;HTML;MIX)")
-    task_body_html = models.TextField(null=True, verbose_name="Тело письма HTML")
-    task_body_text = models.TextField(null=True, verbose_name="Тело письма TEXT")
-    task_error = models.CharField(null=True, max_length=4000, verbose_name="Сообщение об ошибке")
-    number_of_attempts = models.PositiveSmallIntegerField(null=True, verbose_name="Количество попыток")
-
-    def __str__(self):
-        return f"{self.task_from}-{self.task_subject}"
-
-    class Meta:
-        verbose_name = "Задание"
-        verbose_name_plural = "Задания"
-
-
-class Session(models.Model):
-    """
-    Сеанс работы. За один сеанс может быть обработано множество писем.
-    """
-    time_begin = models.DateTimeField(null=False, editable=False, auto_now_add=True, verbose_name="Дата и время начала сессии")
-    time_end = models.DateTimeField(null=True, verbose_name="Дата и время окончания сессии")
-    log_file = models.CharField(null=True, max_length=4000, verbose_name="Путь к лог-файлу")
-
-    def __str__(self):
-        return f"{self.id}"
-
-    class Meta:
-        verbose_name = "Сеанс"
-        verbose_name_plural = "Сеансы"

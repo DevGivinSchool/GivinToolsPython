@@ -120,3 +120,24 @@ class Settings(models.Model):
     inserted_date = models.DateTimeField(null=False, editable=False, auto_now_add=True, verbose_name="Дата создания")
     updated_date = models.DateTimeField(null=True, editable=False, auto_now=True, verbose_name="Дата изменения")
 
+    def __str__(self):
+        return f"{self.key}={self.value}"
+
+    class Meta:
+        verbose_name = "Настройки"
+        verbose_name_plural = "Настроек"
+
+
+class Task(models.Model):
+    """
+    Задание (по сути это отдельно письмо которое обрабатывается)
+    """
+    time_begin = models.DateTimeField(null=False, editable=False, auto_now_add=True, verbose_name="Дата и время начала задания")
+    time_end = models.DateTimeField(null=True, verbose_name="Дата и время окончания задания")
+    task_from = models.CharField(null=True, max_length=254, verbose_name="От кого (email)")
+    task_subject = models.CharField(null=True, max_length=2000, verbose_name="Тема (email)")
+    task_body_type = models.CharField(null=True, max_length=4, verbose_name="Типа тела письма (TEXT;HTML;MIX)")
+    task_body_html = models.TextField(null=True, verbose_name="Тело письма HTML")
+    task_body_text = models.TextField(null=True, verbose_name="Тело письма TEXT")
+    task_error = models.CharField(null=True, max_length=4000, verbose_name="Сообщение об ошибке")
+    number_of_attempts = models.PositiveSmallIntegerField(null=True, verbose_name="Количество попыток")

@@ -12,7 +12,7 @@ class Article(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = "Статью"
+        verbose_name = "Статья"
         verbose_name_plural = "Статьи"
 
 
@@ -61,8 +61,8 @@ class Participant(models.Model):
         return self.fio
 
     class Meta:
-        verbose_name = "Участника"
-        verbose_name_plural = "Участников"
+        verbose_name = "Участник"
+        verbose_name_plural = "Участники"
 
 
 class Payment(models.Model):
@@ -106,8 +106,8 @@ class Payment(models.Model):
         return f"{self.fio} {self.payment_system} {self.payment_id}"
 
     class Meta:
-        verbose_name = "Платежа"
-        verbose_name_plural = "Платежей"
+        verbose_name = "Платеж"
+        verbose_name_plural = "Платежи"
 
 
 class Settings(models.Model):
@@ -125,7 +125,7 @@ class Settings(models.Model):
 
     class Meta:
         verbose_name = "Настройки"
-        verbose_name_plural = "Настроек"
+        verbose_name_plural = "Настройки"
 
 
 class Task(models.Model):
@@ -141,3 +141,26 @@ class Task(models.Model):
     task_body_text = models.TextField(null=True, verbose_name="Тело письма TEXT")
     task_error = models.CharField(null=True, max_length=4000, verbose_name="Сообщение об ошибке")
     number_of_attempts = models.PositiveSmallIntegerField(null=True, verbose_name="Количество попыток")
+
+    def __str__(self):
+        return f"{self.task_from}-{self.task_subject}"
+
+    class Meta:
+        verbose_name = "Задание"
+        verbose_name_plural = "Задания"
+
+
+class Session(models.Model):
+    """
+    Сеанс работы. За один сеанс может быть обработано множество писем.
+    """
+    time_begin = models.DateTimeField(null=False, editable=False, auto_now_add=True, verbose_name="Дата и время начала сессии")
+    time_end = models.DateTimeField(null=True, verbose_name="Дата и время окончания сессии")
+    log_file = models.CharField(null=True, max_length=4000, verbose_name="Путь к лог-файлу")
+
+    def __str__(self):
+        return f"{self.id}"
+
+    class Meta:
+        verbose_name = "Сеанс"
+        verbose_name_plural = "Сеансы"

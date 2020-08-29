@@ -15,6 +15,7 @@ class Article(models.Model):
         verbose_name = "Статью"
         verbose_name_plural = "Статьи"
 
+
 ##########################################################
 # time_begin default=datetime.date.today
 # create_date = models.DateTimeField(default=timezone.now)
@@ -107,4 +108,15 @@ class Payment(models.Model):
     class Meta:
         verbose_name = "Платежа"
         verbose_name_plural = "Платежей"
+
+
+class Settings(models.Model):
+    """
+    Настройки приложения
+    """
+    key = models.CharField(null=False, max_length=255, verbose_name="Ключ")
+    value = models.CharField(null=True, max_length=2000, verbose_name="Значение")
+    type = models.CharField(null=True, max_length=255, verbose_name="Тип")
+    inserted_date = models.DateTimeField(null=False, editable=False, auto_now_add=True, verbose_name="Дата создания")
+    updated_date = models.DateTimeField(null=True, editable=False, auto_now=True, verbose_name="Дата изменения")
 

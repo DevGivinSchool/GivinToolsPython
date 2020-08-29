@@ -31,6 +31,9 @@
 
 # Полезные материалы
 
+## Команды
+
+
 ## Установка зависимостей  
 pip freeze > c:\MyGit\GivinToolsPython\requirements.txt  
 pip install -r c:\MyGit\GivinToolsPython\requirements.txt  

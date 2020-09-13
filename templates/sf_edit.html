@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{{ the_participant.last_name }} {{ the_participant.first_name }}{% endblock %}
+
+{% block menu %}
+<div class="container mt-4">
+    <ul class="nav nav-pills">
+        <li class="nav-item">
+            {% url 'home' as url_home %}
+            <a class="nav-link {% if url_home == request.path%}active{% endif %}" href="{{url_home}}">Главная</a>
+        </li>
+        <li class="nav-item">
+            {% url 'sf' as url_sf %}
+            <a class="nav-link {% if url_sf == request.path%}active{% endif %}" href="{{url_sf}}">Список ДШ</a>
+        </li>
+        <li class="nav-item">
+            {% url 'sf_edit' as url_sf_edit %}
+            <a class="nav-link {% if url_sf_edit == request.path%}active{% endif %}" href="{{url_sf_edit}}">Редактирование
+                ДШ</a>
+        </li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mt-4">{{ the_participant.last_name }} {{ the_participant.first_name }}</h1>
+    <p><a href="/sf">Вернуться назад</a></p>
+    <p>Имя: {{ the_participant.first_name }}</p>
+    <p>Фамилия: {{ the_participant.last_name }}</p>
+    <p>Email: {{ the_participant.email }}</p>
+    <p>Telegram: {{ the_participant.telegram }}</p>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">id</th>
+            <th scope="col">Last Name</th>
+            <th scope="col">First Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Telegram</th>
+            <th scope="col">Редактирование</th>
+            <th scope="col">Удаление</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for i in sf_list %}
+        <tr>
+            <th>{{i.id}}</th>
+            <td>{{ i.last_name }}</td>
+            <td>{{ i.first_name }}</td>
+            <td>{{ i.email|default_if_none:"" }}</td>
+            <td>{{ i.telegram|default_if_none:"" }}</td>
+            <td><a href="">редактировать</a></td>
+            <td><a href="">удалить</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

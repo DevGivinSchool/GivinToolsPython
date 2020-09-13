@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}ШГ.Личный кабинет{% endblock %}
+
+{% block menu %}
+<div class="container mt-4">
+    <ul class="nav nav-pills">
+        <li class="nav-item">
+            {% url 'home' as url_home %}
+            <a class="nav-link {% if url_home == request.path%}active{% endif %}" href="{{url_home}}">Главная</a>
+        </li>
+        <li class="nav-item">
+            {% url 'sf' as url_sf %}
+            <a class="nav-link {% if url_sf == request.path%}active{% endif %}" href="{{url_sf}}">ДШ</a>
+        </li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}{% endblock %}

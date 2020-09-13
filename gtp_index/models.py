@@ -37,7 +37,7 @@ class Participant(models.Model):
     telegram = models.CharField(db_index=True, null=True, max_length=32, verbose_name="Telegram name")
     time_begin = models.DateTimeField(null=False, editable=False, auto_now_add=True, verbose_name="Дата создания")
     time_end = models.DateTimeField(null=True, verbose_name="Дата блокировки")
-    login = models.CharField(null=True, max_length=32,
+    login = models.CharField(null=True, max_length=100,
                              verbose_name="Логин пользователя в домене @givinschool.org, соответствует почте")
     password = models.CharField(null=True, max_length=32, verbose_name="Пароль участника")
     payment_date = models.DateField(null=True, default=datetime.date.today, verbose_name="Дата оплаты")

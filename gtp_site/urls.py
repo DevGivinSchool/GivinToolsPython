@@ -20,8 +20,11 @@ from gtp_index import views
 urlpatterns = [
     path('my_view/', views.my_view),
     # path('', views.index),
-    path('', views.HomeListView.as_view(), name='home'),
+    # path('', views.HomeListView.as_view(), name='home'),
     # path('detail/<int:id>', views.detail_page),
-    path('detail/<int:pk>', views.HomeDetailView.as_view(), name='detail_page'),
+    path('', views.index, name='home'),
     path('admin/', admin.site.urls),
+    path('sf/', views.ParticipantListView.as_view(), name='sf'),
+    path('sf-edit/', views.sf_edit, name='sf_edit'),
+    path('sf-detail/<int:pk>', views.ParticipantDetailView.as_view(), name='detail_page'),
 ]

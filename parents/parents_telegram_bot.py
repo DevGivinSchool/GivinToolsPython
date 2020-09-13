@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import sys
-import parent.parents_PASSWORDS as parents_PASSWORDS
+import parents.parents_PASSWORDS as parents_PASSWORDS
 from core.Class_TelegramBot import TelegramBot
 from core.Class_DBPostgres import DBPostgres
 from core.alert_to_mail import raise_error

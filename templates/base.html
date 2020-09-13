@@ -9,21 +9,14 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
           integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
 
-    <title>Hello, world!</title>
+    <title>{% block title %}Школы Гивина. Личный кабинет{% endblock %}</title>
 </head>
 <body>
-<div class="container mt-4">
-    <h1>Проект Друзья Школы</h1>
-    {% for i in list_articles %}
-    <ul class="list-groupe mt-4">
-        <li class="list-groupe-item">
-            <b>{{i.create_date}}</b>
-            <span class="m-2">{{i.name}}</span>
-            <span>{{i.text}}</span>
-            <span class="float-right mr-3"><a href="/detail/{{i.id}}">перейти к статье</a></span>
-        </li>
-    </ul>
-    {% endfor %}
+<div id="menu">
+    {% block menu %}NULL{% endblock %}
+</div>
+<div id="content">
+    {% block content %}NULL{% endblock %}
 </div>
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->

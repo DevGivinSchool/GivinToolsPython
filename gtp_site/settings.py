@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
+import os
 import core.PASSWORDS as PASSWORDS
 from pathlib import Path
 
@@ -40,7 +41,7 @@ INSTALLED_APPS = [
     'core',
     'gtp_index',
     'gtp',
-    'parent',
+    'parents',
     'sf',
 ]
 
@@ -59,8 +60,8 @@ ROOT_URLCONF = 'gtp_site.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': False,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',

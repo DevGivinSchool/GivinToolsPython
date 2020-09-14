@@ -31,32 +31,25 @@
 
 # Полезные материалы
 
-## Команды
-```
-python manage.py makemigrations  
-python manage.py migrate
-```
-
-
 ## Установка зависимостей  
-`pip freeze > c:\MyGit\GivinToolsPython\requirements.txt`  
-`pip install -r c:\MyGit\GivinToolsPython\requirements.txt`  
+pip freeze > c:\MyGit\GivinToolsPython\requirements.txt  
+pip install -r c:\MyGit\GivinToolsPython\requirements.txt  
 В случае ошибок лучше сначала попробовать установить все через PyCharm.  
 
 ## ENV + PIP. Создание виртуального окружения.
 -- Глобальная установка virtualenv  
-`c:\> pip install virtualenv`  
+c:\> pip install virtualenv  
 -- Далее установка в проекте  
 -- Создание виртуального окружения  
-`c:\> cd c:\mygit\GivinToolsPython`  
-`c:\MyGit\GivinToolsPython> python -m venv venv`  
+c:\> cd c:\mygit\GivinToolsPython  
+c:\MyGit\GivinToolsPython> python -m venv venv  
 -- Активация виртуального окружения  
-`c:\MyGit\GivinToolsPython> cd c:\MyGit\GivinToolsPython\venv\Scripts\`  
-`c:\MyGit\GivinToolsPython\venv\Scripts> activate`  
+c:\MyGit\GivinToolsPython> cd c:\MyGit\GivinToolsPython\venv\Scripts\  
+c:\MyGit\GivinToolsPython\venv\Scripts> activate  
 -- Обновление самого pip в этом виртуальном окружении  
-`c:\MyGit\GivinToolsPython\venv\Scripts> python -m pip install --upgrade pip`  
+c:\MyGit\GivinToolsPython\venv\Scripts> python -m pip install --upgrade pip  
 -- Установка в виртуальное окружение всех необходимых зависимостей  
-`c:\MyGit\GivinToolsPython\venv\Scripts> pip install -r c:\MyGit\GivinToolsPython\requirements.txt`  
+c:\MyGit\GivinToolsPython\venv\Scripts> pip install -r c:\MyGit\GivinToolsPython\requirements.txt  
 Далее настройка в PyCharm Project Interpreter 
 
 ## Кодировки в email
@@ -89,22 +82,21 @@ psycopgmodule.obj : error LNK2001: unresolved external symbol
 Бинарники lxml можно скачать с - https://www.lfd.uci.edu/~gohlke/pythonlibs/#psycopg  
 
 Если pip не обновляется с ошибкой:  
-`pip install -U pip==19.3.1`  
+pip install -U pip==19.3.1  
 
 Если потом при запуске скрипта начинаются какие-то ошибки:  
-`pip uninstall <package>`  
-`pip install <package>`  
+pip uninstall <package>  
+pip install <package>  
 
 ## Проблемы с Chromedriver
 Не смотря на то что драйвер в system32, python его в упор не видит  
 Ошибка: selenium.common.exceptions.WebDriverException: Message: 'chromedriver.exe' executable needs to be in PATH. Please see https://sites.google.com/a/chromium.org/chromedriver/home  
-
+** ./stuff/install_chromedriver.py **  
 Вот так можно установить последнюю версию драйвера  
-```
 from selenium import webdriver  
 from webdriver_manager.chrome import ChromeDriverManager  
 driver = webdriver.Chrome(ChromeDriverManager().install())  
-```
+
 ## Модули используемые в проекте
 **IMAPClient**  
 

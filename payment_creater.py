@@ -77,12 +77,20 @@ def payment_normalization2(payment):
 
 def payment_computation(payment):
     # По сумме оплаты вычислить за сколько месяцев оплачено
-    if payment["Оплаченная сумма"] == 0:
+    if payment["Оплаченная сумма"] < 3980:  # <=1990 >1990 <3980 весь этот промежуток это 30 дней
         payment["number_of_days"] = 30
-    elif payment["Оплаченная сумма"] > 10000:
-        payment["number_of_days"] = 180
-    elif payment["Оплаченная сумма"] > 5000:  # от 5000 до 10000
+    elif 3980 <= payment["Оплаченная сумма"] < 5580:
+        payment["number_of_days"] = 60
+    elif 5580 <= payment["Оплаченная сумма"] < 7440:
         payment["number_of_days"] = 90
+    elif 7440 <= payment["Оплаченная сумма"] < 9300:
+        payment["number_of_days"] = 120
+    elif 9300 <= payment["Оплаченная сумма"] < 10440:
+        payment["number_of_days"] = 150
+    elif 10440 <= payment["Оплаченная сумма"] < 20280:
+        payment["number_of_days"] = 180
+    elif payment["Оплаченная сумма"] >= 20280:
+        payment["number_of_days"] = 365
     # Вычисляем до какой даты произведена оплата
     if isinstance(payment["Время проведения"], datetime):
         payment["deadline"] = payment["Время проведения"] + timedelta(days=payment["number_of_days"])
@@ -217,6 +225,7 @@ def parse_paykeeper_html(body_html, logger):
 
 
 def parse_getcourse_page(link, payment, logger):
+    logger.info(">>>> parse_getcourse_page start")
     """
     Парсинг страницы заказа GetCourse и получение email и telegram.
     Пытаемся получить email и Telegram, если ошибка просто пишем в лог и идём дальше.
@@ -245,13 +254,17 @@ def parse_getcourse_page(link, payment, logger):
     print(response.text)
     """
     try:
+        logger.debug(f"headless={PASSWORDS.settings['headless']}")
+        logger.debug(f"chromedriver_path={PASSWORDS.settings['chromedriver_path']}")
         if PASSWORDS.settings['headless']:
             chromeOptions = webdriver.ChromeOptions()
             chromeOptions.add_argument("--headless")
             browser = webdriver.Chrome(PASSWORDS.settings['chromedriver_path'], options=chromeOptions)
         else:
             browser = webdriver.Chrome(PASSWORDS.settings['chromedriver_path'])
+        logger.debug(f"browser={browser}")
         # Вход в GetCourse иначе страница заказа будет недоступна
+        logger.debug(f"Try login to GetCourse")
         browser.get(PASSWORDS.settings['getcourse_login_page'])
         input_login = browser.find_element_by_css_selector("input.form-control.form-field-email")
         input_login.send_keys(PASSWORDS.settings['getcourse_login'])
@@ -261,12 +274,14 @@ def parse_getcourse_page(link, payment, logger):
         button.click()
         time.sleep(10)
         # Выделить из ссылки заказа ID и открыть страницу заказа (ссылка которая в письме не открывается)
+        logger.debug(f"Выделить из ссылки заказа ID и открыть страницу заказа")
         link_id = link.rsplit("/", 1)
         link = "https://givinschoolru.getcourse.ru/sales/control/deal/update/id/" + link_id[1]
         logger.debug(f"link={link}")
         browser.get(link)
         time.sleep(10)
         # Поиск email на странице заказа
+        logger.debug(f"Поиск email на странице заказа")
         email_element = browser.find_element_by_css_selector("div.user-email")
         logger.debug(f"email_element.text={email_element.text}")
         email = email_element.text
@@ -278,6 +293,7 @@ def parse_getcourse_page(link, payment, logger):
             logger.info(f"PARSING: email={email}")
         # Поиск telegram на странице заказа
         # telegram вариант 2 (только первый div может содержать telegram)
+        logger.debug(f"Поиск telegram на странице заказа. Вариант 2")
         telegram_elements = browser.find_elements_by_xpath(
             "//*[contains(text(), 'Ник телеграмм')]/following-sibling::div")
         result = None
@@ -289,6 +305,7 @@ def parse_getcourse_page(link, payment, logger):
         if not result:
             # telegram вариант 1 (здесь несколько равнозначных блоков из них выделяется телеграм, можно по идее брать
             # только второй блок)
+            logger.debug(f"Поиск telegram на странице заказа. Вариант 1")
             telegram_elements = browser.find_elements_by_css_selector(".text-block>div[style]")
             if len(telegram_elements) > 0:
                 text = ""
@@ -302,7 +319,9 @@ def parse_getcourse_page(link, payment, logger):
         else:
             logger.warning(f"PARSING: Не нашел telegram на странице заказа - {link}")
         # закрываем браузер после всех манипуляций
+        logger.debug(f"закрываем браузер после всех манипуляций")
         browser.quit()
+        logger.debug(f"payment_normalization(payment)")
         payment_normalization(payment)
     except:
         mail_text = f'Ошибка парсинга страницы заказа GetCourse\n' + traceback.format_exc()
@@ -311,6 +330,7 @@ def parse_getcourse_page(link, payment, logger):
     finally:
         # закрываем браузер даже в случае ошибки
         browser.quit()
+    logger.info(">>>> parse_getcourse_page end")
 
 
 def get_telegram_from_text(text, logger):
@@ -364,5 +384,5 @@ if __name__ == "__main__":
     # parse_getcourse_page("https://givinschoolru.getcourse.ru/sales/control/deal/update/id/43670994", payment, logger)
     # print(payment)
     payment = get_clear_payment()
-    parse_getcourse_page("https://givin.school/sales/control/deal/update/id/52700202", payment, logger)
+    parse_getcourse_page("https://givin.school/sales/control/deal/update/id/55563843", payment, logger)
     print(payment)

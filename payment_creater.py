@@ -77,12 +77,20 @@ def payment_normalization2(payment):
 
 def payment_computation(payment):
     # По сумме оплаты вычислить за сколько месяцев оплачено
-    if payment["Оплаченная сумма"] == 0:
+    if payment["Оплаченная сумма"] < 3980:  # <=1990 >1990 <3980 весь этот промежуток это 30 дней
         payment["number_of_days"] = 30
-    elif payment["Оплаченная сумма"] > 10000:
-        payment["number_of_days"] = 180
-    elif payment["Оплаченная сумма"] > 5000:  # от 5000 до 10000
+    elif 3980 <= payment["Оплаченная сумма"] < 5580:
+        payment["number_of_days"] = 60
+    elif 5580 <= payment["Оплаченная сумма"] < 7440:
         payment["number_of_days"] = 90
+    elif 7440 <= payment["Оплаченная сумма"] < 9300:
+        payment["number_of_days"] = 120
+    elif 9300 <= payment["Оплаченная сумма"] < 10440:
+        payment["number_of_days"] = 150
+    elif 10440 <= payment["Оплаченная сумма"] < 20280:
+        payment["number_of_days"] = 180
+    elif payment["Оплаченная сумма"] >= 20280:
+        payment["number_of_days"] = 365
     # Вычисляем до какой даты произведена оплата
     if isinstance(payment["Время проведения"], datetime):
         payment["deadline"] = payment["Время проведения"] + timedelta(days=payment["number_of_days"])

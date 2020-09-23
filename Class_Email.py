@@ -98,6 +98,8 @@ class Email:
             fsubject = get_decoded_str(email_message.get('Subject'))
             self.logger.debug(f"ffrom={ffrom}")
             self.logger.debug(f"fsubject={fsubject}")
+            fdate = email.utils.parsedate_to_datetime(email_message.get('Date'))
+            self.logger.debug(f"fdate=|{type(fdate)}|{fdate}|")
             body = self.get_decoded_email_body(email_message)
             if body is None:
                 error_text = 'ERROR: Неизвестный формат письма'
@@ -278,11 +280,7 @@ class Email:
         self.logger.info("Дополняем платёж полученный после парсинга страницы заказа информацией из БД, если она там найдётся.")
         self.logger.info(">>>>Class_Email.addition_of_payment_information_from_db begin")
         task.payment = payment
-        payment_id, participant_id, participant_type = postgres.create_payment_in_db(task)
-        task.payment["task_uuid"] = payment_id
-        task.payment["participant_id"] = participant_id
-        task.payment["participant_type"] = participant_type
-        self.logger.info(f"Payment {payment_id} for participant {participant_id}|{participant_type} created")
+        postgres.create_payment_in_db(task)
         self.logger.info(f'Платёж после дополнения:\n{task.payment}')
         self.logger.info(">>>>Class_Email.addition_of_payment_information_from_db end")
 

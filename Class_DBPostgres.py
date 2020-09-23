@@ -86,6 +86,7 @@ class DBPostgres:
         :param task:
         :return: True - It is new task; False - It is reprocessing task
         """
+        cursor = None
         try:
             cursor = self.conn.cursor()
             # Решил не писать в tasks поля body, т.к. база пухнет, а эту информацию можно и в почте посмотреть.
@@ -98,10 +99,7 @@ class DBPostgres:
             """ If that row already exist, than update attempts"""
             self.conn.rollback()
             cursor.close()
-            # print("="*45)
-            # print("psycopg2.Error::")
-            # print(e.pgerror)
-            # print(e.diag.message_detail)
+            self.logger.error(f"psycopg2.Error::\n{e.pgerror}\n{e.diag.message_detail}")
             try:
                 cursor = self.conn.cursor()
                 sql_text = """UPDATE tasks set number_of_attempts = number_of_attempts + 1 where task_uuid=%s;"""
@@ -110,12 +108,14 @@ class DBPostgres:
                 self.conn.commit()
                 return False
             except Exception as e:
+                self.logger.error(f"Exception::\n{e}")
                 raise
         try:
             sql_text = """INSERT INTO sessions_tasks(task_uuid, session_id) VALUES (%s, %s);"""
             values_tuple = (task.uuid, session_id)
             cursor.execute(sql_text, values_tuple)
         except Exception as e:
+            self.logger.error(f"Exception::\n{e}")
             raise
         self.conn.commit()
         # task_uuid_ = cursor.fetchone()[0]
@@ -155,32 +155,32 @@ class DBPostgres:
         self.logger.info(f">>>>Class_DBPostgres.create_payment_in_db begin")
         # Ищем участника сначала по email
         self.logger.info(f"Ищем участника сначала по email - {task.payment['Электронная почта']}")
-        participant_id, p_type = self.find_participant_by('email', task.payment["Электронная почта"])
-        if participant_id is None:
+        participant = self.find_participant_by('email', task.payment["Электронная почта"])
+        if participant is None:
             # Ищем по fio в зависимости от языка RUS\ENG
             self.logger.info(f"Ищем участника по fio - {task.payment['Фамилия Имя']}")
             if task.payment["fio_lang"] == "RUS":
                 self.logger.info(f"fio_lang = RUS")
-                participant_id, p_type = self.find_participant_by('fio', task.payment["Фамилия Имя"])
+                participant = self.find_participant_by('fio', task.payment["Фамилия Имя"])
             else:  # Иначе ищем по ENG потому что после парсера никаких других языков быть не может
                 self.logger.info(f"fio_lang = ENG")
-                participant_id, p_type = self.find_participant_by('fio_eng', task.payment["Фамилия Имя"])
-            if participant_id is None and task.payment["Платежная система"] == 1:
+                participant = self.find_participant_by('fio_eng', task.payment["Фамилия Имя"])
+            if participant is None and task.payment["Платежная система"] == 1:
                 self.logger.info(f"Ничего не найдено, поэтому пробуем парсить страницу заказа")
                 # Если это Getcourse и ничего по ФИО и почте (которой могло и не быть) не нашлось,
                 # тогда парсим страницу GetCourse и пытаемся еще раз поискать по почте и телеграм
                 payment_creater.parse_getcourse_page(task.payment["Кассовый чек 54-ФЗ"], task.payment, self.logger)
                 self.logger.info(f"Ищем участника повторно по email - {task.payment['Электронная почта']}")
-                participant_id, p_type = self.find_participant_by('email', task.payment["Электронная почта"])
-                if participant_id is None:
+                participant = self.find_participant_by('email', task.payment["Электронная почта"])
+                if participant is None:
                     self.logger.info(f"Ищем участника по Telegram - {task.payment['telegram']}")
-                    participant_id, p_type = self.find_participant_by('telegram', task.payment["telegram"])
+                    participant = self.find_participant_by('telegram', task.payment["telegram"])
         cursor = self.conn.cursor()
         sql_text = """INSERT INTO payments(task_uuid, name_of_service, payment_id, amount, participant_id, 
         sales_slip, card_number, card_type, payment_purpose, last_name, first_name, fio, email, payment_system, 
         log_file) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING task_uuid; """
         values_tuple = (task.uuid, task.payment["Наименование услуги"], task.payment["ID платежа"],
-                        task.payment["Оплаченная сумма"], participant_id, task.payment["Кассовый чек 54-ФЗ"],
+                        task.payment["Оплаченная сумма"], participant['id'], task.payment["Кассовый чек 54-ФЗ"],
                         task.payment["Номер карты"], task.payment["Тип карты"], 1, task.payment["Фамилия"],
                         task.payment["Имя"], task.payment["Фамилия Имя"], task.payment["Электронная почта"],
                         task.payment["Платежная система"], self.logger.handlers[0].baseFilename)
@@ -190,10 +190,15 @@ class DBPostgres:
         self.conn.commit()
         id_ = cursor.fetchone()[0]
         cursor.close()
+        task.payment["task_uuid"] = id_
+        task.payment["participant_id"] = participant['id']
+        task.payment["participant_type"] = participant['type']
+        task.payment["deadline"] = participant['deadline']
+        task.payment["until_date"] = participant['until_date']
+        self.logger.info(f"Payment {task.payment['task_uuid']} for participant {task.payment['participant_id']}|{task.payment['participant_type']} created")
         self.logger.info(f">>>>Class_DBPostgres.create_payment_in_db end")
-        return id_, participant_id, p_type
 
-    def create_column(self, col_name, logger):
+    def create_column(self, col_name):
         sql_text = f"SELECT column_name FROM information_schema.columns WHERE table_name='zoom_table' and column_name" \
                    f"=%s; "
         values_tuple = (col_name,)
@@ -213,7 +218,7 @@ class DBPostgres:
             self.logger.info(f"update zoom_table set {col_name}=null;")
             self.execute_dml(sql_text, values_tuple)
 
-    def mark_zoom_attendance(self, col_name, pid, participant, logger):
+    def mark_zoom_attendance(self, col_name, pid, participant):
         count = 0
         self.logger.info(f"Отмечаем присутствие {col_name}|{pid}")
         for i in pid:
@@ -298,24 +303,28 @@ class DBPostgres:
                     raise
             self.logger.info(f"Осуществляем поиск участника по {criterion}={value}")
             # Искать нужно с любым type т.к. заблокированный участник тоже может вновь оплатить
-            sql_text = f"select id, type from participants where {criterion}=%s;"
+            sql_text = f"select id, type, deadline, until_date from participants where {criterion}=%s;"
             values_tuple = (value,)
             records = self.execute_select(sql_text, values_tuple)
             # print(records)
+            participant = None
             if len(records) > 1:
-                raise (f"Поиск участника по {criterion}={value} возвращает больше одной строки. Возможно дублирование!")
+                self.logger.error(f"Поиск участника по {criterion}={value} возвращает больше одной строки. Возможно дублирование!")
+                raise
             elif len(records) == 0:
-                id_ = None
-                type_ = None
+                participant = None
             else:
-                id_ = records[0][0]
-                type_ = records[0][1]
-            return id_, type_
+                participant = {
+                    'id': records[0][0],
+                    'type': records[0][1],
+                    'deadline': records[0][2],
+                    'until_date': records[0][3]
+                }
+            return participant
 
     def find_participant_by_telegram_username(self, value):
         """
         Find participant by email or telegram or fio or fio_eng
-        :param criterion: Search criteria
         :param value: Search value
         :return: None - if search nothing or ID participant and his type
         """
@@ -352,10 +361,10 @@ if __name__ == "__main__":
     import os
 
     program_file = os.path.realpath(__file__)
-    logger = custom_logger.get_logger(program_file=program_file)
+    logger1 = custom_logger.get_logger(program_file=program_file)
 
     postgres = DBPostgres(dbname=PASSWORDS.settings['postgres_dbname'], user=PASSWORDS.settings['postgres_user'],
-                          logger=logger,
+                          logger=logger1,
                           password=PASSWORDS.settings['postgres_password'], host=PASSWORDS.settings['postgres_host'],
                           port=PASSWORDS.settings['postgres_port'])
 
@@ -369,5 +378,5 @@ if __name__ == "__main__":
         'Иванов Иван', '', datetime.datetime(2020, 4, 10, 20, 48, 52), datetime.datetime(2020, 4, 10, 20, 59, 32),
         11,
         305)
-    res = postgres.find_zoom_participant_by(p)
-    print(res)
+    res1 = postgres.find_zoom_participant_by(p)
+    print(res1)

@@ -18,6 +18,7 @@ def get_clear_payment():
         "participant_id": None,
         "number_of_days": 30,
         "deadline": None,
+        "until_date": None,
         "fio_lang": "RUS",
         "participant_type": None,
         "login": None,

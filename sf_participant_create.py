@@ -91,6 +91,10 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         mm.text += "Текст уведомления:\n\n\n" + notification_text
     else:
         logger.info("Отмечаем оплату в БД")
+        logger.debug(f"Время проведения|{type(payment['Время проведения'])}|{payment['Время проведения']}")
+        logger.debug(f"number_of_days|{type(payment['number_of_days'])}|{payment['number_of_days']}")
+        logger.debug(f"deadline|{type(payment['deadline'])}|{payment['deadline']}")
+        logger.debug(f"until_date|{type(payment['until_date'])}|{payment['until_date']}")
         sql_text = """UPDATE participants 
         SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s 
         WHERE id=%s;"""

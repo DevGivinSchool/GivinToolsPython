@@ -76,8 +76,10 @@ def payment_normalization2(payment):
         payment["telegram"] = payment["telegram"].lower()
 
 
-def payment_computation(payment):
+def payment_computation(payment, logger):
     # По сумме оплаты вычислить за сколько месяцев оплачено
+    logger.debug(f">>>>payment_creater.payment_computation begin")
+    logger.debug(f"payment[Оплаченная сумма]=|{type(payment['Оплаченная сумма'])}|{payment['Оплаченная сумма']}|")
     if payment["Оплаченная сумма"] < 3980:  # <=1990 >1990 <3980 весь этот промежуток это 30 дней
         payment["number_of_days"] = 30
     elif 3980 <= payment["Оплаченная сумма"] < 5580:
@@ -92,9 +94,13 @@ def payment_computation(payment):
         payment["number_of_days"] = 180
     elif payment["Оплаченная сумма"] >= 20280:
         payment["number_of_days"] = 365
+    logger.debug(f"payment[number_of_days]=|{type(payment['number_of_days'])}|{payment['number_of_days']}|")
     # Вычисляем до какой даты произведена оплата
     if isinstance(payment["Время проведения"], datetime):
+        logger.debug(f"payment[Время проведения]=|{type(payment['Время проведения'])}|{payment['Время проведения']}|")
         payment["deadline"] = payment["Время проведения"] + timedelta(days=payment["number_of_days"])
+        logger.debug(f"payment[deadline]=|{type(payment['deadline'])}|{payment['deadline']}|")
+    logger.debug(f">>>>payment_creater.payment_computation end")
 
 
 def parse_getcourse_html(body_html, logger):
@@ -178,7 +184,7 @@ def parse_getcourse_html(body_html, logger):
     payment["Время проведения"] = datetime.now()
     payment["Платежная система"] = 1
     payment_normalization(payment)
-    payment_computation(payment)
+    payment_computation(payment, logger)
     logger.info(f'payment after parsing\n{payment}')
     logger.info(">>>> parse_getcourse_html end")
     return payment
@@ -219,7 +225,7 @@ def parse_paykeeper_html(body_html, logger):
     payment["Время проведения"] = datetime.strptime(payment["Время проведения"], '%Y-%m-%d %H:%M:%S')
     payment["Платежная система"] = 2
     payment_normalization(payment)
-    payment_computation(payment)
+    payment_computation(payment, logger)
     logger.info(f'payment after parsing\n{payment}')
     logger.info(">>>> parse_paykeeper_html end")
     return payment
@@ -349,7 +355,7 @@ def get_telegram_from_text(text, logger):
             mask = r'[a-zA-Z0-9_]+'
             result = re.search(mask, text)
             if result is None:
-                result=""
+                result = ""
             else:
                 result = "@" + result.group(0)
         else:

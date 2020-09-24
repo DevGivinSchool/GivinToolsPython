@@ -120,12 +120,13 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
 
 
 def participant_notification(payment, subject, logger):
-    logger.info(">>>> participant_notification begin")
+    logger.info(">>>> sf_participant_create.participant_notification begin")
     logger.info("Уведомление участника")
     mail_text2 = get_participant_notification_text(payment['Фамилия'], payment['Имя'], payment['login'], payment['password'])
-    logger.info(f"Текст оповещения\n{mail_text2}")
+    logger.info(f"Message Subject: {subject}")
+    logger.info(f"Message text:\n{mail_text2}")
     send_mail([payment["Электронная почта"]], subject, mail_text2, logger)
-    logger.info(">>>> participant_notification end")
+    logger.info(">>>> sf_participant_create.participant_notification end")
     return mail_text2
 
 
@@ -161,7 +162,7 @@ def from_list_create_sf_participants(list_, database, logger):
         payment["Время проведения"] = datetime.now()
         payment["auto"] = False
         payment_creater.payment_normalization(payment)
-        payment_creater.payment_computation(payment)
+        payment_creater.payment_computation(payment, logger)
         # noinspection PyBroadException
         try:
             create_sf_participant(payment, database, logger)

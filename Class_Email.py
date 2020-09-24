@@ -124,7 +124,9 @@ class Email:
                 self.move_email_to_trash(uuid)
                 continue
             # Create Task and insert it to DB
+            self.logger.info(f"Create Task")
             task = Task(uuid, ffrom, fsubject, self.logger, self.postgres)
+            self.logger.info(f"Insert Task to DB")
             task_is_new = self.postgres.create_task(self.session_id, task)
             self.logger.info(f"Task begin: ID={uuid}|NEW={task_is_new}")
             if task_is_new:

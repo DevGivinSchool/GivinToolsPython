@@ -33,7 +33,7 @@ if __name__ == "__main__":
     try:
         client = IMAPClient(host="imap.yandex.ru", use_uid=True)
         client.login(PASSWORDS.settings['ymail_login'], PASSWORDS.settings['ymail_password'])
-        # Список папко
+        # Список папок в почтовом ящике robot
         # print(client.list_folders())
         """
         [((b'\\HasNoChildren', b'\\Marked'), b'|', 'Archive'),

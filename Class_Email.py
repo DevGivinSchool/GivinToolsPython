@@ -222,9 +222,7 @@ class Email:
             self.logger.info(f"Task end: ID={uuid}|NEW={task_is_new}")
             print(uuid)
             # print('-' * 45)
-            self.logger.info('=' * 45)
-            self.logger.info('=' * 45)
-            self.logger.info('=' * 45)
+            self.logger.info('\n'+('=' * 120) + '\n' + ('=' * 120) + '\n' + ('=' * 120))
             # -----------------------------------------------------------------
         self.client.expunge()
         self.logger.info("sort_mail end")
@@ -283,7 +281,6 @@ class Email:
         self.logger.info(">>>>Class_Email.addition_of_payment_information_from_db begin")
         task.payment = payment
         postgres.create_payment_in_db(task)
-        self.logger.info(f'Платёж после дополнения:\n{task.payment}')
         self.logger.info(">>>>Class_Email.addition_of_payment_information_from_db end")
 
     def get_decoded_email_body(self, msg):

@@ -9,7 +9,7 @@ def participants_block(list_participants, logger2):
     # Подключение к БД
     postgres = DBPostgres(dbname=PASSWORDS.settings['postgres_dbname'], user=PASSWORDS.settings['postgres_user'],
                           password=PASSWORDS.settings['postgres_password'], host=PASSWORDS.settings['postgres_host'],
-                          port=PASSWORDS.settings['postgres_port'])
+                          port=PASSWORDS.settings['postgres_port'], logger=logger2)
     for p in list_participants.splitlines():
         block_one_participant(p, postgres, logger2)
     postgres.disconnect()
@@ -19,14 +19,13 @@ def block_one_participant(p, postgres, logger):
     print(f"Попытка блокировки участника |{p}|")
     logger.info(f"Попытка блокировки участника |{p}|")
     # Проверяем что p это ID
-    participant_id = None
-    p_type = None
     sql_instr = ""
+    participant = None
     if isinstance(p, int):
         sql_instr = "id"
         print(f"Ищем участника по ID - {p}")
         logger.info(f"Ищем участника по ID - {p}")
-        participant_id, p_type = postgres.find_participant_by('id', p)
+        participant = postgres.find_participant_by('id', p)
     else:
         p = p.strip()
         if p[0] == '@':
@@ -35,34 +34,34 @@ def block_one_participant(p, postgres, logger):
             p = p.lower()
             print(f"Ищем участника по Telegram - {p}")
             logger.info(f"Ищем участника по Telegram - {p}")
-            participant_id, p_type = postgres.find_participant_by('telegram', p)
+            participant = postgres.find_participant_by('telegram', p)
         elif '@' in p:
             # Ищем участника по email
             sql_instr = "email"
             p = p.lower()
             print(f"Ищем участника по email - {p}")
             logger.info(f"Ищем участника по email - {p}")
-            participant_id, p_type = postgres.find_participant_by('email', p)
+            participant = postgres.find_participant_by('email', p)
         elif is_rus(p):
             # Ищем участника по fio
             sql_instr = "fio"
             p = p.upper()
             print(f"Ищем участника по fio - {p}")
             logger.info(f"Ищем участника по fio - {p}")
-            participant_id, p_type = postgres.find_participant_by('fio', p)
+            participant = postgres.find_participant_by('fio', p)
         elif is_eng(p):
             # Ищем участника по fio_eng
             sql_instr = "fio_eng"
             p = p.upper()
             print(f"Ищем участника по fio_eng - {p}")
             logger.info(f"Ищем участника по fio_eng - {p}")
-            participant_id, p_type = postgres.find_participant_by('fio_eng', p)
-    if participant_id is None:
+            participant = postgres.find_participant_by('fio_eng', p)
+    if participant is None:
         print(f"******* ВНИМАНИЕ: По значению {p} ничего не нашлось")
         logger.warning(f"******* ВНИМАНИЕ: По значению {p} ничего не нашлось")
         print("-" * 45)
     else:
-        if p_type == 'N' or p_type == 'P':
+        if participant['type'] == 'N' or participant['type'] == 'P':
             # Блокируем пользователя
             # sql_text = f"UPDATE participants SET type='B', password=password||'55' where {sql_instr}=%s RETURNING id;"
             sql_text = f"UPDATE participants SET type='B' where {sql_instr}=%s RETURNING id;"
@@ -76,7 +75,7 @@ def block_one_participant(p, postgres, logger):
                 logger.info(f"Блокировка участника ID={id_}")
                 # Состояние участник
                 sql_text = 'SELECT id, fio, login, password, type FROM participants where id=%s;'
-                # [(1420, 'ВОЛЬНЫХ НАТАЛЬЯ', 'volnyh_natalja@givinschool.org', 'Z7#A5Ycddq55', 'B')]
+                # [(1420, 'ВОЛЬНЫХ НАТАЛЬЯ', 'volnyh_natalja@givinschool.org', 'password', 'B')]
                 values_tuple = (id_,)
                 participant = postgres.execute_select(sql_text, values_tuple)[0]
                 print(participant)
@@ -101,12 +100,12 @@ def block_one_participant(p, postgres, logger):
                 else:
                     print("Учётка Zoom успешно заблокирована")
                     logger.info("Учётка Zoom успешно заблокирована")
-        elif p_type == 'B':
+        elif participant['type'] == 'B':
             print("ЭТОТ УЧАСТНИК УЖЕ ЗАБЛОКИРОВАН")
             logger.info("ЭТОТ УЧАСТНИК УЖЕ ЗАБЛОКИРОВАН")
         else:
-            print(f"Неизвестный тип участника type={p_type}")
-            logger.warning(f"Неизвестный тип участника type={p_type}")
+            print(f"Неизвестный тип участника type={participant['type']}")
+            logger.warning(f"Неизвестный тип участника type={participant['type']}")
         print("-" * 45)
         logger.info("-" * 45)
 

@@ -24,6 +24,7 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None,
     :param int port: Порт
     :return:
     """
+    logger.debug(f">>>>alert_to_mail.send_mail begin")
     logger.info(f"Отправка почтовых оповещений")
     # Все письма отправляются на почту robot для хранения.
     if PASSWORDS.settings['ymail_login'] not in receiver_emails:
@@ -67,6 +68,7 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None,
         except Exception:
             logger.error(f"ERROR: Can't send email to {one_receiver}:\n" + traceback.format_exc())
     server.quit()
+    logger.debug(f">>>>alert_to_mail.send_mail end")
 
 
 def send_error_to_admin(subject, logger, prog_name="NONE"):

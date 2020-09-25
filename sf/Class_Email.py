@@ -70,7 +70,7 @@ class Email:
 
     def move_email_to_trash(self, uuid):
         self.logger.info(f"Удаляю сообщение: {uuid}")
-        self.client.move(uuid, "Archive")
+        self.client.move(uuid, "Trash")
 
     def sort_mail(self):
         """Sort mail and start work """
@@ -98,6 +98,8 @@ class Email:
             fsubject = get_decoded_str(email_message.get('Subject'))
             self.logger.debug(f"ffrom={ffrom}")
             self.logger.debug(f"fsubject={fsubject}")
+            fdate = email.utils.parsedate_to_datetime(email_message.get('Date'))
+            self.logger.debug(f"fdate=|{type(fdate)}|{fdate}|")
             body = self.get_decoded_email_body(email_message)
             if body is None:
                 error_text = 'ERROR: Неизвестный формат письма'
@@ -122,7 +124,9 @@ class Email:
                 self.move_email_to_trash(uuid)
                 continue
             # Create Task and insert it to DB
+            self.logger.info(f"Create Task")
             task = Task(uuid, ffrom, fsubject, self.logger, self.postgres)
+            self.logger.info(f"Insert Task to DB")
             task_is_new = self.postgres.create_task(self.session_id, task)
             self.logger.info(f"Task begin: ID={uuid}|NEW={task_is_new}")
             if task_is_new:
@@ -218,9 +222,7 @@ class Email:
             self.logger.info(f"Task end: ID={uuid}|NEW={task_is_new}")
             print(uuid)
             # print('-' * 45)
-            self.logger.info('=' * 45)
-            self.logger.info('=' * 45)
-            self.logger.info('=' * 45)
+            self.logger.info('\n'+('=' * 120) + '\n' + ('=' * 120) + '\n' + ('=' * 120))
             # -----------------------------------------------------------------
         self.client.expunge()
         self.logger.info("sort_mail end")
@@ -278,12 +280,7 @@ class Email:
         self.logger.info("Дополняем платёж полученный после парсинга страницы заказа информацией из БД, если она там найдётся.")
         self.logger.info(">>>>Class_Email.addition_of_payment_information_from_db begin")
         task.payment = payment
-        payment_id, participant_id, participant_type = postgres.create_payment_in_db(task)
-        task.payment["task_uuid"] = payment_id
-        task.payment["participant_id"] = participant_id
-        task.payment["participant_type"] = participant_type
-        self.logger.info(f"Payment {payment_id} for participant {participant_id}|{participant_type} created")
-        self.logger.info(f'Платёж после дополнения:\n{task.payment}')
+        postgres.create_payment_in_db(task)
         self.logger.info(">>>>Class_Email.addition_of_payment_information_from_db end")
 
     def get_decoded_email_body(self, msg):

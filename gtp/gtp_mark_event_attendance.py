@@ -135,7 +135,7 @@ def mark_attendance(event, db, logger):
     event_time_end = event[3]
     # Создание столбца
     try:
-        db.create_column(col_name, logger)
+        db.create_column(col_name)
     except:
         raise
     # Парсинг заголовка отчёта
@@ -180,7 +180,7 @@ def mark_attendance(event, db, logger):
                 list_p.append(p)
             else:
                 # Отметить присутствие в таблице
-                row_count = db.mark_zoom_attendance(col_name, pid, p, logger)
+                row_count = db.mark_zoom_attendance(col_name, pid, p)
                 if row_count == 0:
                     logger.warning(f"Ничего не отметилось")
         except:

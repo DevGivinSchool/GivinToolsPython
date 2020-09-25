@@ -91,6 +91,10 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         mm.text += "Текст уведомления:\n\n\n" + notification_text
     else:
         logger.info("Отмечаем оплату в БД")
+        logger.debug(f"Время проведения|{type(payment['Время проведения'])}|{payment['Время проведения']}")
+        logger.debug(f"number_of_days|{type(payment['number_of_days'])}|{payment['number_of_days']}")
+        logger.debug(f"deadline|{type(payment['deadline'])}|{payment['deadline']}")
+        logger.debug(f"until_date|{type(payment['until_date'])}|{payment['until_date']}")
         sql_text = """UPDATE participants 
         SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s 
         WHERE id=%s;"""
@@ -116,12 +120,13 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
 
 
 def participant_notification(payment, subject, logger):
-    logger.info(">>>> participant_notification begin")
+    logger.info(">>>> sf_participant_create.participant_notification begin")
     logger.info("Уведомление участника")
     mail_text2 = get_participant_notification_text(payment['Фамилия'], payment['Имя'], payment['login'], payment['password'])
-    logger.info(f"Текст оповещения\n{mail_text2}")
+    logger.info(f"Message Subject: {subject}")
+    logger.info(f"Message text:\n{mail_text2}")
     send_mail([payment["Электронная почта"]], subject, mail_text2, logger)
-    logger.info(">>>> participant_notification end")
+    logger.info(">>>> sf_participant_create.participant_notification end")
     return mail_text2
 
 
@@ -164,7 +169,7 @@ def from_list_create_sf_participants(list_, database, logger):
         payment["Время проведения"] = datetime.now()
         payment["auto"] = False
         payment_creater.payment_normalization(payment)
-        payment_creater.payment_computation(payment)
+        payment_creater.payment_computation(payment, logger)
         # noinspection PyBroadException
         try:
             create_sf_participant(payment, database, logger)

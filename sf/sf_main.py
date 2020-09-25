@@ -31,16 +31,17 @@ if __name__ == "__main__":
     try:
         client = IMAPClient(host="imap.yandex.ru", use_uid=True)
         client.login(PASSWORDS.settings['ymail_login'], PASSWORDS.settings['ymail_password'])
-        # Список папко
+        # Список папок в почтовом ящике robot
         # print(client.list_folders())
         """
-        [((b'\\Unmarked', b'\\HasNoChildren', b'\\Drafts'), b'|', 'Drafts'),
-        ((b'\\Unmarked', b'\\NoInferiors'), b'|', 'INBOX'),
-        ((b'\\Unmarked', b'\\HasNoChildren'), b'|', 'Outbox'),
-        ((b'\\Unmarked', b'\\HasNoChildren'), b'|', 'Queue'),
-        ((b'\\Unmarked', b'\\HasNoChildren', b'\\Sent'), b'|', 'Sent'),
-        ((b'\\Unmarked', b'\\HasNoChildren', b'\\Junk'), b'|', 'Spam'),
-        ((b'\\Unmarked', b'\\HasNoChildren', b'\\Trash'), b'|', 'Trash')]
+        [((b'\\HasNoChildren', b'\\Marked'), b'|', 'Archive'),
+         ((b'\\HasNoChildren', b'\\Unmarked', b'\\Drafts'), b'|', 'Drafts'),
+         ((b'\\HasNoChildren', b'\\Unmarked', b'\\NoInferiors'), b'|', 'INBOX'),
+         ((b'\\HasNoChildren', b'\\Marked'), b'|', 'Notification'),
+         ((b'\\HasNoChildren', b'\\Unmarked'), b'|', 'Outbox'),
+         ((b'\\HasNoChildren', b'\\Unmarked', b'\\Sent'), b'|', 'Sent'),
+         ((b'\\HasNoChildren', b'\\Unmarked', b'\\Junk'), b'|', 'Spam'),
+         ((b'\\HasNoChildren', b'\\Marked', b'\\Trash'), b'|', 'Trash')]
         """
         client.select_folder('INBOX')
         logger.info('Connect Yandex server successful')

@@ -156,6 +156,7 @@ class DBPostgres:
         """
         self.logger.info(f">>>>Class_DBPostgres.create_payment_in_db begin")
         # Ищем участника сначала по email
+        self.logger.info(f"Поиск участника по различным критериям (если это новенький, то ничего не найдётся")
         self.logger.info(f"Ищем участника сначала по email - {task.payment['Электронная почта']}")
         participant = self.find_participant_by('email', task.payment["Электронная почта"])
         if participant['id'] is None:
@@ -177,14 +178,43 @@ class DBPostgres:
                 if participant['id'] is None:
                     self.logger.info(f"Ищем участника по Telegram - {task.payment['telegram']}")
                     participant = self.find_participant_by('telegram', task.payment["telegram"])
+        self.logger.info(f"Поиск участника окончен")
+        self.logger.info(f"Дополнение платежа созданного после парсинга письма сведениями из БД из найденого участника")
+        # Дополнение платежа созданного после парсинга письма сведениями из БД из найденого участника.
+        if participant['id'] is not None:  # Для новеньких ничего не найдётся.
+            self.logger.info(f"Участник найден - это не новичёк")
+            task.payment["participant_id"] = participant['id']
+            task.payment["participant_type"] = participant['type']
+            task.payment["Электронная почта"] = participant['email']
+            task.payment["telegram"] = participant['telegram']
+            task.payment["login"] = participant['login']
+            task.payment["password"] = participant['password']
+            # issues 2. Если срок платежа не закончился то нужно прибавлять эти дни.
+            # Для новеньких это не нужно.
+            # Срок окончания оплаченного периода может быть как deadline, так и until_date.
+            if participant['until_date'] is not None:
+                end_date = participant['until_date']
+                self.logger.debug(f"end_date=until_date=|{type(end_date)}|{end_date}|")
+            else:
+                end_date = participant['deadline']
+                self.logger.debug(f"end_date=deadline=|{type(end_date)}|{end_date}|")
+            if task.payment["Время проведения"].date() < end_date:
+                days_ = (end_date - task.payment["Время проведения"].date()).days
+                self.logger.debug(f"task.payment[deadline]=|{type(task.payment['deadline'])}|{task.payment['deadline']}|")
+                task.payment["deadline"] = task.payment["deadline"] + datetime.timedelta(days=days_)
+                self.logger.debug(f"task.payment[deadline]=|{type(task.payment['deadline'])}|{task.payment['deadline']}|")
+                self.logger.info(f"Добавлено {days_} дней")
+            #
+        self.logger.info(f'payment\n{task.payment}')
         cursor = self.conn.cursor()
         sql_text = """INSERT INTO payments(task_uuid, name_of_service, payment_id, amount, participant_id, 
         sales_slip, card_number, card_type, payment_purpose, last_name, first_name, fio, email, payment_system, 
         log_file) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING task_uuid; """
         values_tuple = (task.uuid, task.payment["Наименование услуги"], task.payment["ID платежа"],
-                        task.payment["Оплаченная сумма"], participant['id'], task.payment["Кассовый чек 54-ФЗ"],
+                        task.payment["Оплаченная сумма"], task.payment["participant_id"],
+                        task.payment["Кассовый чек 54-ФЗ"],
                         task.payment["Номер карты"], task.payment["Тип карты"], 1, task.payment["Фамилия"],
-                        task.payment["Имя"], task.payment["Фамилия Имя"], participant['email'],
+                        task.payment["Имя"], task.payment["Фамилия Имя"], task.payment["Электронная почта"],
                         task.payment["Платежная система"], self.logger.handlers[0].baseFilename)
         # print(values_tuple)
         self.logger.debug(f'values_tuple={values_tuple}')
@@ -192,30 +222,10 @@ class DBPostgres:
         self.conn.commit()
         id_ = cursor.fetchone()[0]
         cursor.close()
-        # Дополнение платежа созданного после парсинга письма сведениями из БД из найденого участника
         task.payment["task_uuid"] = id_
-        if participant['id'] is not None:
-            task.payment["participant_id"] = participant['id']
-            task.payment["participant_type"] = participant['type']
-            task.payment["Электронная почта"] = participant['email']
-            task.payment["telegram"] = participant['telegram']
-            task.payment["login"] = participant['login']
-            task.payment["password"] = participant['password']
-        #    task.payment["deadline"] = participant['deadline']
-        #    task.payment["until_date"] = participant['until_date']
-        # issues 2. Если срок платежа не закончился то нужно прибавлять эти дни.
-        if participant['until_date'] is not None:  # Срок окончания оплаченного периода может быть как deadline, так и until_date.
-            end_date = participant['until_date']
-        else:
-            end_date = participant['deadline']
-        self.logger.debug(f"end_date=|{type(end_date)}|{end_date}|")
-        if task.payment["Время проведения"] < end_date:
-            task.payment["deadline"] = task.payment["deadline"] + datetime.timedelta(days=(end_date - task.payment["Время проведения"]).days)
-        self.logger.debug(f"task.payment[deadline]=|{type(task.payment['deadline'])}|{task.payment['deadline']}|")
-        # 
         self.logger.info(
             f"Payment {task.payment['task_uuid']} for participant {task.payment['participant_id']}|{task.payment['participant_type']} created")
-        self.logger.info(f'Платёж после дополнения:\n{task.payment}')
+        self.logger.info(f'Платёж после всех дополнений:\n{task.payment}')
         self.logger.info(f">>>>Class_DBPostgres.create_payment_in_db end")
 
     def create_column(self, col_name):

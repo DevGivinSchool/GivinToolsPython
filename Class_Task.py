@@ -32,7 +32,7 @@ class Task:
         :return:
         """
         self.logger.info('>>>>task_run begin')
-        self.logger.info(f'task_run payment = {self.payment}')
+        self.logger.info(f'task_run payment = \n{self.payment}')
         if self.payment["participant_id"] is None:
             # This is new participant
             self.logger.info('СОЗДАЁМ НОВОГО ПОЛЬЗОВАТЕЛЯ')

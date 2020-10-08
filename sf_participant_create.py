@@ -74,14 +74,22 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         zoom_user = ZoomUS(logger)
         zoom_result = zoom_user.zoom_users_userstatus(payment["login"], "activate")
         if zoom_result is not None:
-            logger.error("+" * 60)
-            mail_text = f"\nПроцедура не смогла автоматически разблокировать участника. Ошибка:\n" \
-                        f"{zoom_result}" \
-                        f"ID={payment['participant_id']}\n{payment['Фамилия Имя']}:" \
-                        f"\nLogin: {payment['login']}\nPassword: {payment['password']}"
-            send_mail(PASSWORDS.settings['admin_emails'], "UNBLOCK PARTICIPANT ERROR", mail_text, logger)
-            logger.error(mail_text)
-            logger.error("+" * 60)
+            if zoom_result["message"].startswith("User does not exist"):
+                # Если вдруг оказалось что такого пользователя нет в zoom - пробуем его создать
+                mm = create_sf_participant_zoom(logger, payment, mm)
+                logger.info("Участник заново создан в Zoom")
+            else:
+                logger.error("+" * 60)
+                mail_text = f"Процедура не смогла автоматически разблокировать участника.\n" \
+                            f"Ошибка:\n" \
+                            f"{zoom_result}\n" \
+                            f"ID      : {payment['participant_id']}\n" \
+                            f"ФИО     : {payment['Фамилия Имя']}\n" \
+                            f"Login   : {payment['login']}\n" \
+                            f"Password: {payment['password']}"
+                send_mail(PASSWORDS.settings['admin_emails'], "UNBLOCK PARTICIPANT ERROR", mail_text, logger, attached_file=logger.handlers[0].baseFilename)
+                logger.error(mail_text)
+                logger.error("+" * 60)
         else:
             logger.info("Участник активирован в Zoom")
         # Уведомление участника
@@ -243,12 +251,13 @@ def create_sf_participant_yandex(logger, payment, mm):
     # payment["login"] = get_login(payment["Фамилия"], payment["Имя"])
     # добавил эти 4 строчки вместо предыдущей
     payment["login"] = get_login(payment["Фамилия"], payment["Имя"]) + '@givinschool.org'
-    message = f'Создать почту для\nЛогин:{payment["login"].lower()}' \
-              f'\nПароль: {PASSWORDS.settings["default_ymail_password"]}' \
-              f'\n{payment["Фамилия"]}' \
-              f'\n{payment["Имя"]}' \
-              f'\nemail: {payment["Электронная почта"]}' \
-              f'\ntelegram: {payment["telegram"]} '
+    message = f'Создать почту для:\n' \
+              f'Логин   : {payment["login"].lower()}\n' \
+              f'Пароль  : {PASSWORDS.settings["default_ymail_password"]}\n' \
+              f'Фамилия : {payment["Фамилия"]}\n' \
+              f'Имя     : {payment["Имя"]}\n' \
+              f'email   : {payment["Электронная почта"]}\n' \
+              f'telegram: {payment["telegram"]}'
     print(message)
     logger.info(message)
     # region Сейчас учётка zoom создаётся из кода приложения, без получения подтверждения на email, поэтому реально почта не нужна.
@@ -289,14 +298,17 @@ def create_sf_participant_zoom(logger, payment, mm):
     if zoom_result is not None:
         logger.error("+" * 60)
         mm.subject += " + !ZOOM ERROR"
-        error_text = f"\nПрограмма не смогла создать учётку Zoom.\n" \
-                     f"ВНИМАНИЕ: Необходимо создать участнику учётку в Zoom вручную." \
-                     f"Создать учётку zoom участнику\nID={payment['participant_id']}\n" \
-                     f"{payment['Фамилия'].title()}\n{payment['Имя'].title()}\n" \
-                     f"Login: {payment['login']}\nPassword: {payment['password']}\n" \
-                     f"Сведения по участнику и платежу можно посмотреть по ссылке - " \
-                     f"{payment['Кассовый чек 54-ФЗ']}" \
-                     f"\nERROR:\n{zoom_result}\n\n"
+        error_text = f"\n" \
+                     f"Программа не смогла создать учётку Zoom.\n" \
+                     f"ВНИМАНИЕ: Необходимо создать участнику учётку в Zoom вручную!\n" \
+                     f"Создать учётку zoom участнику:\n" \
+                     f"ID      : {payment['participant_id']}\n" \
+                     f"Фамилия : {payment['Фамилия'].title()}\n" \
+                     f"Имя     : {payment['Имя'].title()}\n" \
+                     f"Login   : {payment['login']}\n" \
+                     f"Password: {payment['password']}\n" \
+                     f"Сведения по участнику и платежу можно посмотреть по ссылке - {payment['Кассовый чек 54-ФЗ']}\n" \
+                     f"ERROR:\n{zoom_result}\n\n"
         mm.text += error_text
         logger.error(error_text)
         logger.error("+" * 60)

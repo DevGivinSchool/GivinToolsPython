@@ -151,7 +151,7 @@ if __name__ == '__main__':
         sql_text = f"UPDATE telegram_bot_added set new=FALSE where new=TRUE"
         rowcount = dbconnect.execute_dml(sql_text, None)
         logger.info(f"rowcount={rowcount}")
-    # Удаление строк из telegram_bot_added старше 14 дней.
-    sql_text = f"delete from telegram_bot_added where insert_date < NOW() - INTERVAL '14 days'"
+    # Удаление строк из telegram_bot_added старше 31 дней.
+    sql_text = f"delete from telegram_bot_added where insert_date < NOW() - INTERVAL '31 days'"
     rowcount = dbconnect.execute_dml(sql_text, None)
     logger.info(f"rowcount={rowcount}")

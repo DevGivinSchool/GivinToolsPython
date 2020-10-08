@@ -84,48 +84,53 @@ if __name__ == '__main__':
             raise_error("Не могу получить chat_id", logger, prog_name="sf_telegram_bot.py")
         logger.info(f"chat_id={chat_id}")
         if chat_id > 0:
+            # username как оказалось может и не быть - https://gist.github.com/MinistrBob/6bdca92c42d5de2b4204369fb213c892
+            username = None
             try:
                 username = f"@{update['message']['chat']['username'].lower()}"
             except:
-                raise_error("Не могу получить username", logger, prog_name="sf_telegram_bot.py")
-            logger.info(f"Поиск по username={username}")
-            person = dbconnect.find_participant_by_telegram_username(username)
-            logger.info(person)
-            if person is None:
-                # Ничего не нашлось. Значит человек добавил себе бота, но пока еще не оплатил,
-                # т.к. запись в таблице появляется только после оплаты,
-                # поэтому заносим его в специальный список, как только оплатит, получит оповещение в Telegram.
-                logger.info(f"Нет участника с таким telegram username={username}")
-                # Добавляем этого пользователя в telegram_bot_added
-                try:
-                    sql_text = f"INSERT INTO telegram_bot_added (telegram_id, telegram_username, insert_date) VALUES (%s, %s, NOW())"
-                    values_tuple = (chat_id, username)
-                    rowcount = dbconnect.execute_dml(sql_text, values_tuple)
-                except:
-                    raise_error("Не могу выполнить INSERT INTO telegram_bot_added", logger, prog_name="sf_telegram_bot.py")
-                mark_telegram_update_id(telegram_update_id, logger)
-            else:
-                if person['telegram_id'] is None:
-                    # Это новый пользователь, ему нужно отправить логин
-                    message = get_participant_notification_text(person['last_name'],
-                                                                person['first_name'],
-                                                                person['login'],
-                                                                person['password'])
-                    logger.info(f"message=\n{message}")
-                    send_message(tb, chat_id, message, logger)
-                    # Если да - отметить в БД:
-                    # 1) внести telegram_id в participants
-                    sql_text = f"UPDATE participants SET telegram_id=%s where id=%s RETURNING id;"
-                    values_tuple = (chat_id, person['id'])
-                    id_ = dbconnect.execute_dml_id(sql_text, values_tuple)
-                    logger.info(f"id_={id_}")
-                    if not id_:
-                        raise_error(f"Не могу обновить telegram_id={person['telegram_id']} для участника id={person['id']}", logger, prog_name="sf_telegram_bot.py")
+                logger.error(f"username не найден")
+            # Ищем в БД участника по telegram username если он есть
+            # если username нет то такое сообщение игнорируется
+            if username is not None:
+                logger.info(f"Поиск по username={username}")
+                person = dbconnect.find_participant_by_telegram_username(username)
+                logger.info(person)
+                if person is None:
+                    # Ничего не нашлось. Значит человек добавил себе бота, но пока еще не оплатил,
+                    # т.к. запись в таблице появляется только после оплаты,
+                    # поэтому заносим его в специальный список, как только оплатит, получит оповещение в Telegram.
+                    logger.info(f"Нет участника с таким telegram username={username}")
+                    # Добавляем этого пользователя в telegram_bot_added
+                    try:
+                        sql_text = f"INSERT INTO telegram_bot_added (telegram_id, telegram_username, insert_date) VALUES (%s, %s, NOW())"
+                        values_tuple = (chat_id, username)
+                        rowcount = dbconnect.execute_dml(sql_text, values_tuple)
+                    except:
+                        raise_error("Не могу выполнить INSERT INTO telegram_bot_added", logger, prog_name="sf_telegram_bot.py")
                     mark_telegram_update_id(telegram_update_id, logger)
-                    logger.info('\n' + '#' * 120)
                 else:
-                    logger.info(f"Ничего не отправляю, это старый участник telegram_id={person['telegram_id']}")
-                    mark_telegram_update_id(telegram_update_id, logger)
+                    if person['telegram_id'] is None:
+                        # Это новый пользователь, ему нужно отправить логин
+                        message = get_participant_notification_text(person['last_name'],
+                                                                    person['first_name'],
+                                                                    person['login'],
+                                                                    person['password'])
+                        logger.info(f"message=\n{message}")
+                        send_message(tb, chat_id, message, logger)
+                        # Если да - отметить в БД:
+                        # 1) внести telegram_id в participants
+                        sql_text = f"UPDATE participants SET telegram_id=%s where id=%s RETURNING id;"
+                        values_tuple = (chat_id, person['id'])
+                        id_ = dbconnect.execute_dml_id(sql_text, values_tuple)
+                        logger.info(f"id_={id_}")
+                        if not id_:
+                            raise_error(f"Не могу обновить telegram_id={person['telegram_id']} для участника id={person['id']}", logger, prog_name="sf_telegram_bot.py")
+                        mark_telegram_update_id(telegram_update_id, logger)
+                        logger.info('\n' + '#' * 120)
+                    else:
+                        logger.info(f"Ничего не отправляю, это старый участник telegram_id={person['telegram_id']}")
+                        mark_telegram_update_id(telegram_update_id, logger)
     # Процедура обработки списка проверки telegram_bot_added
     logger.info('Процедура обработки списка проверки telegram_bot_added')
     rows = dbconnect.execute_select(f"select telegram_id, telegram_username from telegram_bot_added where new=FALSE", None)

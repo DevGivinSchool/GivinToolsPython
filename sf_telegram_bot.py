@@ -2,7 +2,7 @@ import PASSWORDS
 import sys
 from Class_TelegramBot import TelegramBot
 from Class_DBPostgres import DBPostgres
-from alert_to_mail import raise_error, get_participant_notification_text
+from alert_to_mail import send_mail, raise_error, get_participant_notification_text
 
 
 def mark_telegram_update_id(telegram_update_id_, logger_):
@@ -19,7 +19,7 @@ def mark_telegram_update_id(telegram_update_id_, logger_):
         raise_error("Не могу обновить telegram_update_id", logger_)
 
 
-def send_message(tb_, chat_id_, message_, logger_):
+def send_message_to_telegram(tb_, chat_id_, message_, logger_):
     global success
     logger_.info("Отправляю сообщение в Telegram новому участнику")
     success, result = tb_.send_text_message(chat_id_, message_)
@@ -71,6 +71,8 @@ if __name__ == '__main__':
     logger.info(f"updates={updates}")
     if not success:
         raise_error(f"Не могу получить updates={updates}", logger, prog_name="sf_telegram_bot.py")
+    # Хочу получить лог если процесс идёт удачно
+    send_email_alert = False
     # Цикл по сообщениям telegram полученных ботом
     for update in updates['result']:
         try:
@@ -96,6 +98,7 @@ if __name__ == '__main__':
                 logger.info(f"Поиск по username={username}")
                 person = dbconnect.find_participant_by_telegram_username(username)
                 logger.info(person)
+                send_email_alert = True
                 if person is None:
                     # Ничего не нашлось. Значит человек добавил себе бота, но пока еще не оплатил,
                     # т.к. запись в таблице появляется только после оплаты,
@@ -117,7 +120,7 @@ if __name__ == '__main__':
                                                                     person['login'],
                                                                     person['password'])
                         logger.info(f"message=\n{message}")
-                        send_message(tb, chat_id, message, logger)
+                        send_message_to_telegram(tb, chat_id, message, logger)
                         # Если да - отметить в БД:
                         # 1) внести telegram_id в participants
                         sql_text = f"UPDATE participants SET telegram_id=%s where id=%s RETURNING id;"
@@ -137,6 +140,7 @@ if __name__ == '__main__':
     if not rows:
         logger.info("Списко проверки пустой")
     else:
+        send_email_alert = True
         for row in rows:
             logger.info(f"Поиск по username={row[1]}")
             person = dbconnect.find_participant_by_telegram_username(row[1])
@@ -146,7 +150,7 @@ if __name__ == '__main__':
                                                             person['first_name'],
                                                             person['login'],
                                                             person['password'])
-                send_message(tb, person['telegram_id'], message, logger)
+                send_message_to_telegram(tb, person['telegram_id'], message, logger)
         # Сбросить все строки (new) в telegram_bot_added в FALSE
         sql_text = f"UPDATE telegram_bot_added set new=FALSE where new=TRUE"
         rowcount = dbconnect.execute_dml(sql_text, None)
@@ -155,3 +159,5 @@ if __name__ == '__main__':
     sql_text = f"delete from telegram_bot_added where insert_date < NOW() - INTERVAL '31 days'"
     rowcount = dbconnect.execute_dml(sql_text, None)
     logger.info(f"rowcount={rowcount}")
+    if send_email_alert:
+        send_mail(PASSWORDS.settings['admin_emails'], "[sf_telegram_bot.py]:УДАЧНОЕ ВЫПОЛНЕНИЕ", "см.лог во вложении", logger, attached_file=logger.handlers[0].baseFilename)

@@ -404,10 +404,10 @@ if __name__ == '__main__':
     # print(ZoomUS.generate_jwt(PASSWORDS.logins['zoom03_api_key'], PASSWORDS.logins['zoom03_api_secret']))
 
     # Создание пользователя Zoom
-    print(create_zoom_user('xxxx@givinschool.org', "name", "surname", "password", logger=logger))
+    # print(create_zoom_user('xxxx@givinschool.org', "name", "surname", "password", logger=logger))
 
     # Получение списка встреч
-    # get_list_meetings(logger)
+    get_list_meetings(logger)
 
 # ==========================================================================================
 """

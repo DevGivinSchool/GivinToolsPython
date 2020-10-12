@@ -23,15 +23,33 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h1 class="mt-4">{{ the_participant.last_name }} {{ the_participant.first_name }}</h1>
-    <p><a href="/sf">Вернуться назад</a></p>
-    <p>Имя: {{ the_participant.first_name }}</p>
-    <p>Фамилия: {{ the_participant.last_name }}</p>
-    <p>Email: {{ the_participant.email }}</p>
-    <p>Telegram: {{ the_participant.telegram }}</p>
+<div class="container mt-4 mb-4">
 
-    <table class="table">
+    <h1 class="mt-4">Список Друзей Школы</h1>
+
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary mb-4" data-toggle="modal" data-target="#exampleModal">
+        Создать участника
+    </button>
+
+    {% if success_create %}
+    <p style="color:red">Участник создан</p>
+    {% endif %}
+    {% if success_edit %}
+    <p style="color:red">Участник обновлён</p>
+    {% endif %}
+
+    {% if edit %}
+    <p class="mt-4">Страница редактирования</p>
+    <p><a href="{% url 'sf_edit' %}">Вернуться назад</a></p>
+    <form id="edit_form" method="post">
+        {% csrf_token %}
+        {{form}}
+    </form>
+    <button form="edit_form" type="submit" class="btn btn-primary">Обновить</button>
+    {% else %}
+
+    <table class="table table-bordered">
         <thead>
         <tr>
             <th scope="col">id</th>
@@ -51,11 +69,38 @@
             <td>{{ i.first_name }}</td>
             <td>{{ i.email|default_if_none:"" }}</td>
             <td>{{ i.telegram|default_if_none:"" }}</td>
-            <td><a href="">редактировать</a></td>
-            <td><a href="">удалить</a></td>
+            <td><a href="{% url 'sf_participant_edit' i.id %}">редактировать</a></td>
+            <td><a href="{% url 'sf_participant_delete' i.id %}">удалить</a></td>
         </tr>
         {% endfor %}
         </tbody>
     </table>
+
+    {% endif %}
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="create_form" method="post">
+                        {% csrf_token %}
+                        {{form}}
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    <button form="create_form" type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 {% endblock %}

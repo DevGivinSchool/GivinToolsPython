@@ -1,8 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template import loader
 from gtp_index.models import Article, Participant
 from django.views.generic import ListView, DetailView
+from .forms import ParticipantCreateForm, ParticipantEditForm
+from django.urls import reverse
 
 
 # Create your views here.
@@ -61,8 +63,45 @@ def my_view(request):
 
 
 def sf_edit(request):
+    success_create = False
+    if request.method == 'POST':
+        form = ParticipantCreateForm(request.POST)
+        if form.is_valid():
+            # TODO Здесь нужно вызывать процедуру создания участника
+            #  from_list_create_sf_participants(list_, database, logger)
+            form.save()
+            success_create = True
     template = "sf_edit.html"
     context = {
-        'sf_list': Participant.objects.all().order_by('last_name')
+        'sf_list': Participant.objects.all().order_by('last_name'),
+        'form': ParticipantCreateForm(),
+        'success_create': success_create
     }
     return render(request, template, context)
+
+
+def sf_participant_edit(request, pk):
+    get_participant = Participant.objects.get(pk=pk)
+    success_edit = False
+    if request.method == 'POST':
+        form = ParticipantCreateForm(request.POST, instance=get_participant)
+        if form.is_valid():
+            # TODO Здесь нужно вызывать процедуру ОБНОВЛЕНИЯ участника
+            #  from_list_create_sf_participants(list_, database, logger)
+            form.save()
+            success_edit = True
+    template = "sf_edit.html"
+
+    context = {
+        'get_participant': get_participant,
+        'edit': True,
+        'form': ParticipantEditForm(instance=get_participant),
+        'success_edit': success_edit
+    }
+    return render(request, template, context)
+
+
+def sf_participant_delete(request, pk):
+    get_participant = Participant.objects.get(pk=pk)
+    get_participant.delete()
+    return redirect(reverse('sf_edit'))

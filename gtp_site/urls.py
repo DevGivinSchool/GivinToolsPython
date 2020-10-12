@@ -27,4 +27,6 @@ urlpatterns = [
     path('sf/', views.ParticipantListView.as_view(), name='sf'),
     path('sf-edit/', views.sf_edit, name='sf_edit'),
     path('sf-detail/<int:pk>', views.ParticipantDetailView.as_view(), name='detail_page'),
+    path('sf-participant-edit/<int:pk>', views.sf_participant_edit, name='sf_participant_edit'),
+    path('sf-participant-delete/<int:pk>', views.sf_participant_delete, name='sf_participant_delete'),
 ]

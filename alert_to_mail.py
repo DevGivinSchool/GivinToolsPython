@@ -79,7 +79,7 @@ def send_error_to_admin(subject, logger, prog_name="NONE"):
     """
     if not prog_name:
         prog_name = os.path.basename(logger.handlers[0].baseFilename.split(".")[0])
-    subject = f"[{prog_name}]:{subject}"
+    subject = f"[ERROR][{prog_name}]:{subject}"
     error_text = f"{subject}:\n" + traceback.format_exc()
     print(error_text)
     logger.error(error_text)

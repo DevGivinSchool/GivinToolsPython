@@ -195,7 +195,7 @@ class Email:
                     # if payment:
                     #    self.logger.info(f"payment for {ffrom}:\n{payment}")
                 except Exception:
-                    error_text = "TASK ERROR:\n" + traceback.format_exc()
+                    error_text = "[ERROR][TASK]\n" + traceback.format_exc()
                     # print(uuid, error_text)
 
                     self.logger.error(error_text)

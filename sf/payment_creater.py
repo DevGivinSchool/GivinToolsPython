@@ -332,7 +332,7 @@ def parse_getcourse_page(link, payment, logger):
     except:
         mail_text = f'Ошибка парсинга страницы заказа GetCourse\n' + traceback.format_exc()
         logger.error(mail_text)
-        send_mail(PASSWORDS.settings['admin_emails'], "ERROR PARSING", mail_text, logger)
+        send_mail(PASSWORDS.settings['admin_emails'], "[ERROR][PARSING]", mail_text, logger)
     finally:
         # закрываем браузер даже в случае ошибки
         browser.quit()

@@ -8,7 +8,7 @@ import html2text
 from . import payment_creater
 # from core.Class_DBPostgres import DBPostgres
 from .Class_Task import Task
-from core.alert_to_mail import raise_error
+from core.alert_to_mail import raise_error, send_error_to_admin
 
 
 def get_first_email_from_line(line):
@@ -101,7 +101,9 @@ class Email:
             fdate = email.utils.parsedate_to_datetime(email_message.get('Date'))
             self.logger.debug(f"fdate=|{type(fdate)}|{fdate}|")
             body = self.get_decoded_email_body(email_message)
+            task_error = False
             if body is None:
+                task_error = True
                 error_text = 'ERROR: Неизвестный формат письма'
                 self.logger.error(error_text)
                 if uuid is not None:
@@ -120,9 +122,9 @@ class Email:
                         self.logger.error(f"BODY\n: {body['body_text']}")
                 self.logger.info('-' * 45)
                 self.postgres.task_error(error_text, uuid)
-                raise_error(f"TASK {uuid} ERROR: {error_text}", self.logger, prog_name="Class_Email.py")
+                send_error_to_admin(f"[ERROR][TASK {uuid}] {error_text}", self.logger, prog_name="Class_Email.py")
                 self.move_email_to_trash(uuid)
-                continue
+                # continue
             # Create Task and insert it to DB
             self.logger.info(f"Create Task")
             task = Task(uuid, ffrom, fsubject, self.logger, self.postgres)
@@ -130,93 +132,98 @@ class Email:
             task_is_new = self.postgres.create_task(self.session_id, task)
             self.logger.info(f"Task begin: ID={uuid}|NEW={task_is_new}")
             if task_is_new:
-                payment = None
-                try:
-                    """Определяем типа письма (платёж / не платёж) и вытаскиваем данные платежа в payment."""
-                    # PayKeeper
-                    if ffrom == 'noreply@server.paykeeper.ru' and fsubject == 'Принята оплата':
-                        self.logger.info(f'Это письмо от платежной системы - PayKeeper')
-                        try:
-                            self.logger.info(
-                                f"Текст полученного оповещения (письма), используется для первоначального парсинга\n{body['body_html']}")
-                            payment = payment_creater.parse_paykeeper_html(body['body_html'], self.logger)
-                        except Exception:
-                            raise_error("ERROR: parse_paykeeper_html", self.logger, prog_name="payment_creater.py")
-                            sys.exit(1)
-                        self.payment_verification_for_school_friends(ffrom, fsubject, payment, self.postgres, task,
-                                                                     uuid)
-                    # Getcourse
-                    elif (
-                            ffrom == 'no-reply@getcourse.ru' or ffrom == 'info@study.givinschool.org' or ffrom == 'info@givin.school') \
-                            and fsubject.startswith("Поступил платеж"):
-                        self.logger.info(f'Это письмо от платежной системы - GetCourse')
-                        # print(f'Это письмо от платежной системы - GetCourse')
-                        try:
-                            self.logger.info(
-                                f"Текст полученного оповещения (письма), используется для первоначального парсинга\n{body['body_html']}")
-                            payment = payment_creater.parse_getcourse_html(body['body_html'], self.logger)
-                        except Exception:
-                            raise_error("ERROR: parse_getcourse_html", self.logger, prog_name="payment_creater.py")
-                            sys.exit(1)
-                        self.payment_verification_for_school_friends(ffrom, fsubject, payment, self.postgres, task,
-                                                                     uuid)
-                    # Это письмо вообще не платёж
-                    else:
-                        self.logger.info(f'ЭТО ПИСЬМО НЕ ОТ ПЛАТЁЖНЫХ СИСТЕМ (ничего с ним не делаю, пока...)')
-                        # print(f'Это письмо НЕ от платежных систем - ничего с ним не делаю, пока...')
-                        # Если в тема письма начинается на #
-                        # значит это команда иначе удалить
-                        if not fsubject.startswith("#"):
-                            if uuid is not None:
-                                self.logger.info(f"    UUID   : {uuid}")
-                            if ffrom is not None:
-                                self.logger.info(f"    FROM   : {ffrom}")
-                            if fsubject is not None:
-                                self.logger.info(f"    SUBJECT: {fsubject}")
-                            if body is not None:
-                                self.logger.info(f"    body_type: {body['body_type']}")
-                                if body['body_type'] == 'mix':
-                                    self.logger.info(f"    BODY\n: {body['body_text']}")
-                                elif body['body_type'] == 'html':
-                                    # Преобразование письма в формате html в текст
-                                    self.logger.info(f"Преобразование письма в формате html в текст")
-                                    h = html2text.HTML2Text()
-                                    h.ignore_links = False
-                                    h.single_line_break = True
-                                    body_html = h.handle(body['body_html'])
-                                    self.logger.info(f"    BODY\n: {body_html}")
-                                else:
-                                    self.logger.info(f"    BODY\n: {body['body_text']}")
-                            self.move_email_to_trash(uuid)
+                if task_error:
+                    continue  # Если ERROR: Неизвестный формат письма, то первый раз continue, а потом письмо больше не будет обрабатываться.
+                else:
+                    payment = None
+                    try:
+                        """Определяем типа письма (платёж / не платёж) и вытаскиваем данные платежа в payment."""
+                        # PayKeeper
+                        if ffrom == 'noreply@server.paykeeper.ru' and fsubject == 'Принята оплата':
+                            self.logger.info(f'Это письмо от платежной системы - PayKeeper')
+                            try:
+                                self.logger.info(
+                                    f"Текст полученного оповещения (письма), используется для первоначального парсинга\n{body['body_html']}")
+                                payment = payment_creater.parse_paykeeper_html(body['body_html'], self.logger)
+                            except Exception:
+                                raise_error("ERROR: parse_paykeeper_html", self.logger, prog_name="payment_creater.py")
+                                sys.exit(1)
+                            self.payment_verification_for_school_friends(ffrom, fsubject, payment, self.postgres, task,
+                                                                         uuid)
+                        # Getcourse
+                        elif (
+                                ffrom == 'no-reply@getcourse.ru' or ffrom == 'info@study.givinschool.org' or ffrom == 'info@givin.school') \
+                                and fsubject.startswith("Поступил платеж"):
+                            self.logger.info(f'Это письмо от платежной системы - GetCourse')
+                            # print(f'Это письмо от платежной системы - GetCourse')
+                            try:
+                                self.logger.info(
+                                    f"Текст полученного оповещения (письма), используется для первоначального парсинга\n{body['body_html']}")
+                                payment = payment_creater.parse_getcourse_html(body['body_html'], self.logger)
+                                if fdate is not None:  # #4
+                                    payment["Время проведения"] = fdate
+                            except Exception:
+                                raise_error("ERROR: parse_getcourse_html", self.logger, prog_name="payment_creater.py")
+                                sys.exit(1)
+                            self.payment_verification_for_school_friends(ffrom, fsubject, payment, self.postgres, task,
+                                                                         uuid)
+                        # Это письмо вообще не платёж
                         else:
-                            # Процедура обработки писем с командами (fsubject.startswith("#"))
-                            # https://github.com/DevGivinSchool/GivinToolsPython/projects/1#card-41171908
-                            pass
-                    # if payment:
-                    #    self.logger.info(f"payment for {ffrom}:\n{payment}")
-                except Exception:
-                    error_text = "TASK ERROR:\n" + traceback.format_exc()
-                    # print(uuid, error_text)
+                            self.logger.info(f'ЭТО ПИСЬМО НЕ ОТ ПЛАТЁЖНЫХ СИСТЕМ (ничего с ним не делаю, пока...)')
+                            # print(f'Это письмо НЕ от платежных систем - ничего с ним не делаю, пока...')
+                            # Если в тема письма начинается на #
+                            # значит это команда иначе удалить
+                            if not fsubject.startswith("#"):
+                                if uuid is not None:
+                                    self.logger.info(f"    UUID   : {uuid}")
+                                if ffrom is not None:
+                                    self.logger.info(f"    FROM   : {ffrom}")
+                                if fsubject is not None:
+                                    self.logger.info(f"    SUBJECT: {fsubject}")
+                                if body is not None:
+                                    self.logger.info(f"    body_type: {body['body_type']}")
+                                    if body['body_type'] == 'mix':
+                                        self.logger.info(f"    BODY\n: {body['body_text']}")
+                                    elif body['body_type'] == 'html':
+                                        # Преобразование письма в формате html в текст
+                                        self.logger.info(f"Преобразование письма в формате html в текст")
+                                        h = html2text.HTML2Text()
+                                        h.ignore_links = False
+                                        h.single_line_break = True
+                                        body_html = h.handle(body['body_html'])
+                                        self.logger.info(f"    BODY\n: {body_html}")
+                                    else:
+                                        self.logger.info(f"    BODY\n: {body['body_text']}")
+                                self.move_email_to_trash(uuid)
+                            else:
+                                # Процедура обработки писем с командами (fsubject.startswith("#"))
+                                # https://github.com/DevGivinSchool/GivinToolsPython/projects/1#card-41171908
+                                pass
+                        # if payment:
+                        #    self.logger.info(f"payment for {ffrom}:\n{payment}")
+                    except Exception:
+                        error_text = "[ERROR][TASK]\n" + traceback.format_exc()
+                        # print(uuid, error_text)
 
-                    self.logger.error(error_text)
-                    if uuid is not None:
-                        self.logger.error(f"UUID: {uuid}")
-                    if ffrom is not None:
-                        self.logger.error(f"FROM: {ffrom}")
-                    if fsubject is not None:
-                        self.logger.error(f"SUBJECT: {fsubject}")
-                    if body is not None:
-                        if body['body_type'] == 'mix':
-                            self.logger.error(f"BODY\n: {body['body_text']}")
-                        elif body['body_type'] == 'html':
+                        self.logger.error(error_text)
+                        if uuid is not None:
+                            self.logger.error(f"UUID: {uuid}")
+                        if ffrom is not None:
+                            self.logger.error(f"FROM: {ffrom}")
+                        if fsubject is not None:
+                            self.logger.error(f"SUBJECT: {fsubject}")
+                        if body is not None:
+                            if body['body_type'] == 'mix':
+                                self.logger.error(f"BODY\n: {body['body_text']}")
+                            elif body['body_type'] == 'html':
 
-                            self.logger.error(f"BODY\n: {body['body_html']}")
-                        else:
-                            self.logger.error(f"BODY\n: {body['body_text']}")
-                    self.logger.info('-' * 45)
-                    self.postgres.task_error(error_text, uuid)
-                    raise_error(f"TASK {uuid} ERROR: {error_text}", self.logger, prog_name="Class_Email.py")
-                    continue
+                                self.logger.error(f"BODY\n: {body['body_html']}")
+                            else:
+                                self.logger.error(f"BODY\n: {body['body_text']}")
+                        self.logger.info('-' * 45)
+                        self.postgres.task_error(error_text, uuid)
+                        raise_error(f"TASK {uuid} ERROR: {error_text}", self.logger, prog_name="Class_Email.py")
+                        continue
             else:
                 self.logger.warning(f"ВНИМАНИЕ: Это письмо уже обрабатывалось!")
             self.logger.info(f"Task end: ID={uuid}|NEW={task_is_new}")

@@ -1,5 +1,6 @@
 import core.PASSWORDS as PASSWORDS
 import sys
+import psycopg2
 from Class_TelegramBot import TelegramBot
 from Class_DBPostgres import DBPostgres
 from alert_to_mail import send_mail, raise_error, get_participant_notification_text
@@ -38,7 +39,7 @@ if __name__ == '__main__':
     Если IF участник находиться в participants - значит он оплатил и ему можно отправить сообщение.
     Иначе ELSE - участник добавил себе бота но пока не оплатил, заносим его в список проверки telegram_bot_added.
     Отдельно обрабатываем список проверки, если пользователь находиться в participants = оплатил = оповещение.
-    Записи в списке проверки храняться 14 дней.
+    Записи в списке проверки храняться 31 день.
     """
     import custom_logger
     import os
@@ -109,6 +110,8 @@ if __name__ == '__main__':
                         sql_text = f"INSERT INTO telegram_bot_added (telegram_id, telegram_username, insert_date) VALUES (%s, %s, NOW())"
                         values_tuple = (chat_id, username)
                         rowcount = dbconnect.execute_dml(sql_text, values_tuple)
+                    except psycopg2.errors.UniqueViolation:
+                        logger.info(f"Участник с таким telegram_username={username} уже есть в таблице telegram_bot_added")
                     except:
                         raise_error("Не могу выполнить INSERT INTO telegram_bot_added", logger, prog_name="sf_telegram_bot.py")
                     mark_telegram_update_id(telegram_update_id, logger)

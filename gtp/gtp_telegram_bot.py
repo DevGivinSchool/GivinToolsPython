@@ -26,13 +26,13 @@ WHERE time_end IS NULL
         congratulation += "\n"
         logger.info(f"Текст сообщения=\n{congratulation}")
         tb = TelegramBot(PASSWORDS.settings['telegram_bot_url1'], logger)
-        for chat_id in PASSWORDS.settings['telegram_chats_1']:
-            logger.info(f"Отправляю сообщение в чат {chat_id}")
-            success, result = tb.send_text_message(chat_id, congratulation)
+        for chat in PASSWORDS.settings['telegram_chats_1']:
+            logger.info(f"Отправляю сообщение в чат {chat['chat_id']},chat_name={chat['chat_name']}")
+            success, result = tb.send_text_message(chat['chat_id'], congratulation)
             logger.debug(f"success={success}")
             logger.debug(f"result=\n{result}")
             if not success:
-                raise_error(f"Не могу отправить сообщение в чат chat_id={chat_id}\n{result}", logger)
+                raise_error(f"Не могу отправить сообщение в чат chat_id={chat['chat_id']},chat_name={chat['chat_name']}\n{result}", logger)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 import PASSWORDS
 import sys
+import psycopg2
 from Class_TelegramBot import TelegramBot
 from Class_DBPostgres import DBPostgres
 from alert_to_mail import send_mail, raise_error, get_participant_notification_text
@@ -109,6 +110,8 @@ if __name__ == '__main__':
                         sql_text = f"INSERT INTO telegram_bot_added (telegram_id, telegram_username, insert_date) VALUES (%s, %s, NOW())"
                         values_tuple = (chat_id, username)
                         rowcount = dbconnect.execute_dml(sql_text, values_tuple)
+                    except psycopg2.errors.UniqueViolation:
+                        logger.info(f"Участник с таким telegram_username={username} уже есть в таблице telegram_bot_added")
                     except:
                         raise_error("Не могу выполнить INSERT INTO telegram_bot_added", logger, prog_name="sf_telegram_bot.py")
                     mark_telegram_update_id(telegram_update_id, logger)

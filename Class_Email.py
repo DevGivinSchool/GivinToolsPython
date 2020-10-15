@@ -155,6 +155,8 @@ class Email:
                             self.logger.info(
                                 f"Текст полученного оповещения (письма), используется для первоначального парсинга\n{body['body_html']}")
                             payment = payment_creater.parse_getcourse_html(body['body_html'], self.logger)
+                            if fdate is not None:  # #4
+                                payment["Время проведения"] = fdate
                         except Exception:
                             raise_error("ERROR: parse_getcourse_html", self.logger, prog_name="payment_creater.py")
                             sys.exit(1)
@@ -195,7 +197,7 @@ class Email:
                     # if payment:
                     #    self.logger.info(f"payment for {ffrom}:\n{payment}")
                 except Exception:
-                    error_text = "TASK ERROR:\n" + traceback.format_exc()
+                    error_text = "[ERROR][TASK]\n" + traceback.format_exc()
                     # print(uuid, error_text)
 
                     self.logger.error(error_text)

@@ -91,7 +91,7 @@ def sf_participant_edit(request, pk):
             #  from_list_create_sf_participants(list_, database, logger)
             form.save()
             success_edit = True
-    template = "sf_edit.html"
+    template = "sf_list.html"
 
     context = {
         'get_participant': get_participant,
@@ -106,7 +106,7 @@ def sf_participant_edit(request, pk):
 def sf_participant_delete(request, pk):
     get_participant = Participant.objects.get(pk=pk)
     get_participant.delete()
-    return redirect(reverse('sf_edit'))
+    return redirect(reverse('sf_list'))
 
 
 # Список основной команды

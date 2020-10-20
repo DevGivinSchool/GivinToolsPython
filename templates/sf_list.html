@@ -21,7 +21,7 @@
 
     {% if edit %}
     <p class="mt-4">Страница редактирования</p>
-    <p><a href="{% url 'sf_edit' %}">Вернуться назад</a></p>
+    <p><a href="{% url 'sf_list' %}">Вернуться назад</a></p>
     <form id="edit_form" method="post">
         {% csrf_token %}
         {{form}}

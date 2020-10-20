@@ -22,16 +22,16 @@ def index(request):
     return render(request, template, context)
 
 
-class HomeListView(ListView):
-    model = Article
-    template_name = 'sf_list.html'
-    context_object_name = 'list_articles'
+# class HomeListView(ListView):
+#     model = Article
+#     template_name = 'sf_list.html'
+#     context_object_name = 'list_articles'
 
-
-class ParticipantListView(ListView):
-    model = Participant
-    template_name = 'sf_list.html'
-    context_object_name = 'participant_list'
+# Список ДШ
+# class ParticipantListView(ListView):
+#     model = Participant
+#     template_name = 'sf_list.html'
+#     context_object_name = 'participant_list'
 
 
 class ParticipantDetailView(DetailView):
@@ -49,20 +49,20 @@ class ParticipantDetailView(DetailView):
 #     return render(request, template, context=context)
 
 
-class HomeDetailView(DetailView):
-    model = Article
-    template_name = 'sf_detail.html'
-    context_object_name = 'get_article'
+# class HomeDetailView(DetailView):
+#     model = Article
+#     template_name = 'sf_detail.html'
+#     context_object_name = 'get_article'
 
 
-def my_view(request):
-    # t = loader.get_template('gtp_index/sf_list.html')
-    # context = {'foo': 'bar'}
-    # return HttpResponse(t.render(context, request))
-    return render(request, 'sf_list.html', context={'foo': 'bar'})
+# def my_view(request):
+#     # t = loader.get_template('gtp_index/sf_list.html')
+#     # context = {'foo': 'bar'}
+#     # return HttpResponse(t.render(context, request))
+#     return render(request, 'sf_list.html', context={'foo': 'bar'})
 
-
-def sf_edit(request):
+# Список ДШ
+def sf_list(request):
     success_create = False
     if request.method == 'POST':
         form = ParticipantCreateForm(request.POST)
@@ -71,7 +71,7 @@ def sf_edit(request):
             #  from_list_create_sf_participants(list_, database, logger)
             form.save()
             success_create = True
-    template = "sf_edit.html"
+    template = "sf_list.html"
     context = {
         'sf_list': Participant.objects.all().order_by('last_name'),
         'form': ParticipantCreateForm(),
@@ -80,6 +80,7 @@ def sf_edit(request):
     return render(request, template, context)
 
 
+# Редактирование участника
 def sf_participant_edit(request, pk):
     get_participant = Participant.objects.get(pk=pk)
     success_edit = False
@@ -101,7 +102,27 @@ def sf_participant_edit(request, pk):
     return render(request, template, context)
 
 
+# Удаление участника
 def sf_participant_delete(request, pk):
     get_participant = Participant.objects.get(pk=pk)
     get_participant.delete()
     return redirect(reverse('sf_edit'))
+
+
+# Список основной команды
+def team_list(request):
+    success_create = False
+    if request.method == 'POST':
+        form = ParticipantCreateForm(request.POST)
+        if form.is_valid():
+            # TODO Здесь нужно вызывать процедуру создания участника
+            #  from_list_create_sf_participants(list_, database, logger)
+            form.save()
+            success_create = True
+    template = "team_list.html"
+    context = {
+        'team_list': Participant.objects.all().order_by('last_name'),
+        'form': ParticipantCreateForm(),
+        'success_create': success_create
+    }
+    return render(request, template, context)

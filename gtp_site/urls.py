@@ -18,15 +18,18 @@ from django.urls import path
 from gtp_index import views
 
 urlpatterns = [
-    path('my_view/', views.my_view),
+    # path('my_view/', views.my_view),
     # path('', views.index),
     # path('', views.HomeListView.as_view(), name='home'),
     # path('detail/<int:id>', views.detail_page),
-    path('', views.index, name='home'),
-    path('admin/', admin.site.urls),
-    path('sf/', views.ParticipantListView.as_view(), name='sf'),
-    path('sf-edit/', views.sf_edit, name='sf_edit'),
+    path('', views.index, name='home'),  # Home
+    path('admin/', admin.site.urls),  # Админка
+    # path('sf/', views.ParticipantListView.as_view(), name='sf'),  # Список ДШ
+    path('sf-list/', views.sf_list, name='sf_list'),  # Список ДШ
     path('sf-detail/<int:pk>', views.ParticipantDetailView.as_view(), name='detail_page'),
     path('sf-participant-edit/<int:pk>', views.sf_participant_edit, name='sf_participant_edit'),
     path('sf-participant-delete/<int:pk>', views.sf_participant_delete, name='sf_participant_delete'),
+    path('team-list', views.team_list, name='team_list'),  # Список основной команды
+    path('team-participant-edit/<int:pk>', views.sf_participant_edit, name='team_participant_edit'),
+    path('team-participant-delete/<int:pk>', views.sf_participant_delete, name='team_participant_delete'),
 ]

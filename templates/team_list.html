@@ -1,31 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}{{ the_participant.last_name }} {{ the_participant.first_name }}{% endblock %}
-
-{% block menu %}
-<div class="container mt-4">
-    <ul class="nav nav-pills">
-        <li class="nav-item">
-            {% url 'home' as url_home %}
-            <a class="nav-link {% if url_home == request.path%}active{% endif %}" href="{{url_home}}">Главная</a>
-        </li>
-        <li class="nav-item">
-            {% url 'sf' as url_sf %}
-            <a class="nav-link {% if url_sf == request.path%}active{% endif %}" href="{{url_sf}}">Список ДШ</a>
-        </li>
-        <li class="nav-item">
-            {% url 'sf_edit' as url_sf_edit %}
-            <a class="nav-link {% if url_sf_edit == request.path%}active{% endif %}" href="{{url_sf_edit}}">Редактирование
-                ДШ</a>
-        </li>
-    </ul>
-</div>
-{% endblock %}
+{% block title %}Список участников команды{% endblock %}
 
 {% block content %}
 <div class="container mt-4 mb-4">
 
-    <h1 class="mt-4">Список Друзей Школы</h1>
+    <h1 class="mt-4">Список участников команды</h1>
 
     <!-- Button trigger modal -->
     <button type="button" class="btn btn-primary mb-4" data-toggle="modal" data-target="#exampleModal">
@@ -41,7 +21,7 @@
 
     {% if edit %}
     <p class="mt-4">Страница редактирования</p>
-    <p><a href="{% url 'sf_edit' %}">Вернуться назад</a></p>
+    <p><a href="{% url 'team_edit' %}">Вернуться назад</a></p>
     <form id="edit_form" method="post">
         {% csrf_token %}
         {{form}}
@@ -62,15 +42,15 @@
         </tr>
         </thead>
         <tbody>
-        {% for i in sf_list %}
+        {% for i in team_list %}
         <tr>
             <th>{{i.id}}</th>
             <td>{{ i.last_name }}</td>
             <td>{{ i.first_name }}</td>
             <td>{{ i.email|default_if_none:"" }}</td>
             <td>{{ i.telegram|default_if_none:"" }}</td>
-            <td><a href="{% url 'sf_participant_edit' i.id %}">редактировать</a></td>
-            <td><a href="{% url 'sf_participant_delete' i.id %}">удалить</a></td>
+            <td><a href="{% url 'team_participant_edit' i.id %}">редактировать</a></td>
+            <td><a href="{% url 'team_participant_delete' i.id %}">удалить</a></td>
         </tr>
         {% endfor %}
         </tbody>
@@ -83,7 +63,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Создать нового участника команды</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>

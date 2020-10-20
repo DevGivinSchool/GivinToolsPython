@@ -9,11 +9,30 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
           integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
 
-    <title>{% block title %}Школы Гивина. Личный кабинет{% endblock %}</title>
+    <title>{% block title %}Школа Гивина. Личный кабинет{% endblock %}</title>
 </head>
 <body>
 <div id="menu">
-    {% block menu %}NULL{% endblock %}
+    {% block menu %}
+    <div class="container mt-4">
+        <ul class="nav nav-pills">
+            <li class="nav-item">
+                {% url 'home' as url_home %}
+                <a class="nav-link {% if url_home == request.path%}active{% endif %}" href="{{url_home}}">Главная</a>
+            </li>
+            <li class="nav-item">
+                {% url 'sf_list' as url_sf_list %}
+                <a class="nav-link {% if url_sf_list == request.path%}active{% endif %}" href="{{url_sf_list}}">Друзья
+                    Школы</a>
+            </li>
+            <li class="nav-item">
+                {% url 'team_list' as url_team_list %}
+                <a class="nav-link {% if url_team_list == request.path%}active{% endif %}"
+                   href="{{url_team_list}}">Команда</a>
+            </li>
+        </ul>
+    </div>
+    {% endblock %}
 </div>
 <div id="content">
     {% block content %}NULL{% endblock %}

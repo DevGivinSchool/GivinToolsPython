@@ -21,7 +21,7 @@ class Article(models.Model):
 # create_date = models.DateTimeField(default=timezone.now)
 class Participant(models.Model):
     """
-    Участник
+    Участник проекта Друзья Школы
     """
     PARTICIPANT_TYPE_VOC = [
         ('N', 'новый участник (первый месяц)'),

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Participant
+from sf.models import Participant
 
 
 class ParticipantCreateForm(forms.ModelForm):

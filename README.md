@@ -34,7 +34,8 @@
 ## Команды
 ```
 python manage.py makemigrations  
-python manage.py migrate
+python manage.py migrate  
+python manage.py makemigrations --name migration_name app_name --empty  
 ```
 
 

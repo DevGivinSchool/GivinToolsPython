@@ -1,8 +1,6 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.template import loader
-from gtp_index.models import Article, Participant
-from django.views.generic import ListView, DetailView
+from sf.models import Participant
+from django.views.generic import DetailView
 from .forms import ParticipantCreateForm, ParticipantEditForm
 from django.urls import reverse
 

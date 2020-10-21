@@ -13,8 +13,5 @@ class Migration(migrations.Migration):
             sql="""ALTER TABLE gtp_index_participant ALTER COLUMN time_begin SET DEFAULT CURRENT_TIMESTAMP""",
             reverse_sql="ALTER TABLE gtp_index_participant ALTER COLUMN time_begin DROP DEFAULT",
         ),
-        migrations.RunSQL(
-            sql="""ALTER TABLE gtp_index_participant ALTER COLUMN payment_date SET DEFAULT CURRENT_DATE""",
-            reverse_sql="ALTER TABLE gtp_index_participant ALTER COLUMN payment_date DROP DEFAULT",
-        ),
+
     ]

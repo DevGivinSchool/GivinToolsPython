@@ -21,7 +21,7 @@
 
     {% if edit %}
     <p class="mt-4">Страница редактирования</p>
-    <p><a href="{% url 'team_edit' %}">Вернуться назад</a></p>
+    <p><a href="{% url 'team_list' %}">Вернуться назад</a></p>
     <form id="edit_form" method="post">
         {% csrf_token %}
         {{form}}
@@ -49,8 +49,8 @@
             <td>{{ i.first_name }}</td>
             <td>{{ i.email|default_if_none:"" }}</td>
             <td>{{ i.telegram|default_if_none:"" }}</td>
-            <td><a href="{% url 'team_participant_edit' i.id %}">редактировать</a></td>
-            <td><a href="{% url 'team_participant_delete' i.id %}">удалить</a></td>
+            <td><a href="{% url 'team_member_edit' i.id %}">редактировать</a></td>
+            <td><a href="{% url 'team_member_delete' i.id %}">удалить</a></td>
         </tr>
         {% endfor %}
         </tbody>

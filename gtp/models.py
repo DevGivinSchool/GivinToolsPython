@@ -19,7 +19,9 @@ class TeamMember(models.Model):
     filial = models.CharField(blank=True, null=True, max_length=255, verbose_name="К какому филиалу относится")
     retrit = models.CharField(blank=True, null=True, max_length=255, verbose_name="С какого ретрита")
     birthday = models.DateField(blank=True, null=True, verbose_name="Дата выдачи отсрочки")
-    type = models.CharField(
+    sex = models.CharField(
+        blank=True,
+        null=True,
         max_length=1,
         choices=MEMBER_SEX_VOC,
         default='М',

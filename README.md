@@ -37,7 +37,11 @@ python manage.py makemigrations
 python manage.py migrate  
 python manage.py makemigrations --name migration_name app_name --empty  
 ```
-
+### Миграция 
+```
+INSERT INTO gtp_teammember (id, last_name, first_name, telegram, email, password, filial, retrit, comment, time_begin, time_end, birthday) select id, last_name, first_name, telegram, email, password, filial, retrit, comment, time_begin, time_end, birthday FROM team_members ;
+```
+Установить последовательности на максимальное ID - https://wiki.postgresql.org/wiki/Fixing_Sequences
 
 ## Установка зависимостей  
 `pip freeze > c:\MyGit\GivinToolsPython\requirements.txt`  

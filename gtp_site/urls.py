@@ -30,6 +30,6 @@ urlpatterns = [
     path('sf-participant-edit/<int:pk>', views.sf_participant_edit, name='sf_participant_edit'),
     path('sf-participant-delete/<int:pk>', views.sf_participant_delete, name='sf_participant_delete'),
     path('team-list', views.team_list, name='team_list'),  # Список основной команды
-    path('team-participant-edit/<int:pk>', views.sf_participant_edit, name='team_participant_edit'),
-    path('team-participant-delete/<int:pk>', views.sf_participant_delete, name='team_participant_delete'),
+    path('team-member-edit/<int:pk>', views.team_member_edit, name='team_member_edit'),
+    path('team-member-delete/<int:pk>', views.team_member_delete, name='team_member_delete'),
 ]

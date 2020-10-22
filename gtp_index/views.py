@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from sf.models import Participant
+from gtp.models import TeamMember
 from django.views.generic import DetailView
-from .forms import ParticipantCreateForm, ParticipantEditForm
+from .forms import ParticipantCreateForm, ParticipantEditForm, TeamMemberCreateForm, TeamMemberEditForm
 from django.urls import reverse
 
 
@@ -80,10 +81,10 @@ def sf_list(request):
 
 # Редактирование участника
 def sf_participant_edit(request, pk):
-    get_participant = Participant.objects.get(pk=pk)
+    participant = Participant.objects.get(pk=pk)
     success_edit = False
     if request.method == 'POST':
-        form = ParticipantCreateForm(request.POST, instance=get_participant)
+        form = ParticipantCreateForm(request.POST, instance=participant)
         if form.is_valid():
             # TODO Здесь нужно вызывать процедуру ОБНОВЛЕНИЯ участника
             #  from_list_create_sf_participants(list_, database, logger)
@@ -92,9 +93,9 @@ def sf_participant_edit(request, pk):
     template = "sf_list.html"
 
     context = {
-        'get_participant': get_participant,
+        'participant': participant,
         'edit': True,
-        'form': ParticipantEditForm(instance=get_participant),
+        'form': ParticipantEditForm(instance=participant),
         'success_edit': success_edit
     }
     return render(request, template, context)
@@ -102,8 +103,8 @@ def sf_participant_edit(request, pk):
 
 # Удаление участника
 def sf_participant_delete(request, pk):
-    get_participant = Participant.objects.get(pk=pk)
-    get_participant.delete()
+    participant = Participant.objects.get(pk=pk)
+    participant.delete()
     return redirect(reverse('sf_list'))
 
 
@@ -111,7 +112,7 @@ def sf_participant_delete(request, pk):
 def team_list(request):
     success_create = False
     if request.method == 'POST':
-        form = ParticipantCreateForm(request.POST)
+        form = TeamMemberCreateForm(request.POST)
         if form.is_valid():
             # TODO Здесь нужно вызывать процедуру создания участника
             #  from_list_create_sf_participants(list_, database, logger)
@@ -119,8 +120,37 @@ def team_list(request):
             success_create = True
     template = "team_list.html"
     context = {
-        'team_list': Participant.objects.all().order_by('last_name'),
-        'form': ParticipantCreateForm(),
+        'team_list': TeamMember.objects.all().order_by('last_name'),
+        'form': TeamMemberCreateForm(),
         'success_create': success_create
     }
     return render(request, template, context)
+
+
+# Редактирование участника команды
+def team_member_edit(request, pk):
+    team_member = TeamMember.objects.get(pk=pk)
+    success_edit = False
+    if request.method == 'POST':
+        form = TeamMemberCreateForm(request.POST, instance=team_member)
+        if form.is_valid():
+            # TODO Здесь нужно вызывать процедуру ОБНОВЛЕНИЯ участника
+            #  from_list_create_sf_participants(list_, database, logger)
+            form.save()
+            success_edit = True
+    template = "team_list.html"
+
+    context = {
+        'team_member': team_member,
+        'edit': True,
+        'form': TeamMemberEditForm(instance=team_member),
+        'success_edit': success_edit
+    }
+    return render(request, template, context)
+
+
+# Удаление участника команды
+def team_member_delete(request, pk):
+    team_member = TeamMember.objects.get(pk=pk)
+    team_member.delete()
+    return redirect(reverse('team_list'))

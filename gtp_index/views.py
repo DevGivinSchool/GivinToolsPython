@@ -150,56 +150,104 @@ class ParticipantDeleteView(DeleteView):
     success_url = reverse_lazy('sf_list')
 
 
-# Удаление участника
-def sf_participant_delete(request, pk):
-    participant = Participant.objects.get(pk=pk)
-    participant.delete()
-    return redirect(reverse('sf_list'))
+# # Удаление участника
+# def sf_participant_delete(request, pk):
+#     participant = Participant.objects.get(pk=pk)
+#     participant.delete()
+#     return redirect(reverse('sf_list'))
 
 
 # Список основной команды
-def team_list(request):
-    success_create = False
-    if request.method == 'POST':
-        form = TeamMemberCreateForm(request.POST)
-        if form.is_valid():
-            # TODO Здесь нужно вызывать процедуру создания участника
-            #  from_list_create_sf_participants(list_, database, logger)
-            form.save()
-            success_create = True
-    template = "team_list.html"
-    context = {
-        'team_list': TeamMember.objects.all().order_by('last_name'),
-        'form': TeamMemberCreateForm(),
-        'success_create': success_create
-    }
-    return render(request, template, context)
+class TeamMemberCreateView(CreateView):
+    model = TeamMember
+    template_name = 'team_list.html'
+    form_class = TeamMemberCreateForm
+    success_url = reverse_lazy('team_list')
+
+    def get_context_data(self, **kwargs):
+        kwargs['team_list'] = TeamMember.objects.all().order_by('last_name')
+        return super().get_context_data(**kwargs)
+
+    def form_valid(self, form_class):
+        # This method is called when valid form data has been POSTed.
+        # It should return an HttpResponse.
+        # form_class.send_email()
+        # print("test test")
+        # TODO Здесь нужно вызывать процедуру создания участника
+        #      from_list_create_sf_participants(list_, database, logger)
+        return super(TeamMemberCreateView, self).form_valid(form_class)
 
 
 # Редактирование участника команды
-def team_member_edit(request, pk):
-    team_member = TeamMember.objects.get(pk=pk)
-    success_edit = False
-    if request.method == 'POST':
-        form = TeamMemberCreateForm(request.POST, instance=team_member)
-        if form.is_valid():
-            # TODO Здесь нужно вызывать процедуру ОБНОВЛЕНИЯ участника
-            #  from_list_create_sf_participants(list_, database, logger)
-            form.save()
-            success_edit = True
-    template = "team_list.html"
+class TeamMemberEditView(UpdateView):
+    model = TeamMember
+    template_name = 'team_list.html'
+    form_class = TeamMemberEditForm
+    success_url = reverse_lazy('team_list')
 
-    context = {
-        'team_member': team_member,
-        'edit': True,
-        'form': TeamMemberEditForm(instance=team_member),
-        'success_edit': success_edit
-    }
-    return render(request, template, context)
+    def get_context_data(self, **kwargs):
+        kwargs['edit'] = True
+        return super().get_context_data(**kwargs)
+
+    def form_valid(self, form_class):
+        # This method is called when valid form data has been POSTed.
+        # It should return an HttpResponse.
+        # form_class.send_email()
+        # print("test test")
+        # TODO Здесь нужно вызывать процедуру создания участника
+        #      from_list_create_sf_participants(list_, database, logger)
+        return super(TeamMemberEditView, self).form_valid(form_class)
 
 
 # Удаление участника команды
-def team_member_delete(request, pk):
-    team_member = TeamMember.objects.get(pk=pk)
-    team_member.delete()
-    return redirect(reverse('team_list'))
+class TeamMemberDeleteView(DeleteView):
+    model = TeamMember
+    template_name = 'team_list.html'
+    success_url = reverse_lazy('team_list')
+
+# Список основной команды
+# def team_list(request):
+#     success_create = False
+#     if request.method == 'POST':
+#         form = TeamMemberCreateForm(request.POST)
+#         if form.is_valid():
+#             # TODO Здесь нужно вызывать процедуру создания участника
+#             #  from_list_create_sf_participants(list_, database, logger)
+#             form.save()
+#             success_create = True
+#     template = "team_list.html"
+#     context = {
+#         'team_list': TeamMember.objects.all().order_by('last_name'),
+#         'form': TeamMemberCreateForm(),
+#         'success_create': success_create
+#     }
+#     return render(request, template, context)
+
+
+# # Редактирование участника команды
+# def team_member_edit(request, pk):
+#     team_member = TeamMember.objects.get(pk=pk)
+#     success_edit = False
+#     if request.method == 'POST':
+#         form = TeamMemberCreateForm(request.POST, instance=team_member)
+#         if form.is_valid():
+#             # TODO Здесь нужно вызывать процедуру ОБНОВЛЕНИЯ участника
+#             #  from_list_create_sf_participants(list_, database, logger)
+#             form.save()
+#             success_edit = True
+#     template = "team_list.html"
+#
+#     context = {
+#         'team_member': team_member,
+#         'edit': True,
+#         'form': TeamMemberEditForm(instance=team_member),
+#         'success_edit': success_edit
+#     }
+#     return render(request, template, context)
+
+
+# Удаление участника команды
+# def team_member_delete(request, pk):
+#     team_member = TeamMember.objects.get(pk=pk)
+#     team_member.delete()
+#     return redirect(reverse('team_list'))

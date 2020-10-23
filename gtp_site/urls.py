@@ -25,10 +25,12 @@ urlpatterns = [
     path('', views.index, name='home'),  # Home
     path('admin/', admin.site.urls),  # Админка
     # path('sf/', views.ParticipantListView.as_view(), name='sf'),  # Список ДШ
-    path('sf-list/', views.sf_list, name='sf_list'),  # Список ДШ
+    # path('sf-list/', views.sf_list, name='sf_list'),  # Список ДШ
+    path('sf-list/', views.ParticipantCreateView.as_view(), name='sf_list'),  # Список ДШ
     path('sf-detail/<int:pk>', views.ParticipantDetailView.as_view(), name='detail_page'),
-    path('sf-participant-edit/<int:pk>', views.sf_participant_edit, name='sf_participant_edit'),
-    path('sf-participant-delete/<int:pk>', views.sf_participant_delete, name='sf_participant_delete'),
+    # path('sf-participant-edit/<int:pk>', views.sf_participant_edit, name='sf_participant_edit'),
+    path('sf-participant-edit/<int:pk>', views.ParticipantEditView.as_view(), name='sf_participant_edit'),
+    path('sf-participant-delete/<int:pk>', views.ParticipantDeleteView.as_view(), name='sf_participant_delete'),
     path('team-list', views.team_list, name='team_list'),  # Список основной команды
     path('team-member-edit/<int:pk>', views.team_member_edit, name='team_member_edit'),
     path('team-member-delete/<int:pk>', views.team_member_delete, name='team_member_delete'),

@@ -50,7 +50,18 @@
             <td>{{ i.email|default_if_none:"" }}</td>
             <td>{{ i.telegram|default_if_none:"" }}</td>
             <td><a href="{% url 'sf_participant_edit' i.id %}">редактировать</a></td>
-            <td><a href="{% url 'sf_participant_delete' i.id %}">удалить</a></td>
+            <td>
+                <form id="delete_form" action="{% url 'sf_participant_delete' i.id %}" method="post">{% csrf_token %}</form>
+                <a href="javascript:void" onclick="delete_question()">удалить</a>
+                <script>
+                    function delete_question() {
+                        if (confirm("Вы уверены?")) {
+                            document.getElementById('delete_form').submit()
+                        }
+
+                    }
+                </script>
+            </td>
         </tr>
         {% endfor %}
         </tbody>

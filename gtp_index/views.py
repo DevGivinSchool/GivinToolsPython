@@ -1,7 +1,8 @@
+# import pdb  # pdb.set_trace()
 from django.shortcuts import render, redirect
 from sf.models import Participant
 from gtp.models import TeamMember
-from django.views.generic import DetailView, CreateView
+from django.views.generic import DetailView, CreateView, UpdateView, DeleteView
 from .forms import ParticipantCreateForm, ParticipantEditForm, TeamMemberCreateForm, TeamMemberEditForm
 from django.urls import reverse, reverse_lazy
 
@@ -60,63 +61,93 @@ class ParticipantDetailView(DetailView):
 #     # return HttpResponse(t.render(context, request))
 #     return render(request, 'sf_list.html', context={'foo': 'bar'})
 
-# Переделка функции на класс, но пока оставляю функцию
-# class ParticipantCreateView(CreateView):
-#     model = Participant
-#     template_name = 'sf_list.html'
-#     form_class = ParticipantCreateForm
-#     success_url = reverse_lazy('sf_list')
-#
-#     def get_context_data(self, **kwargs):
-#         kwargs['sf_list'] = Participant.objects.all().order_by('last_name')
-#         return super().get_context_data(**kwargs)
-#
-#     def form_valid(self, form):
-#         # This method is called when valid form data has been POSTed.
-#         # It should return an HttpResponse.
-#         # form.send_email()
-#         print("test test")
-#         return super(ParticipantCreateView, self).form_valid(form)
+# Список ДШ создание участника ДШ
+class ParticipantCreateView(CreateView):
+    model = Participant
+    template_name = 'sf_list.html'
+    form_class = ParticipantCreateForm
+    success_url = reverse_lazy('sf_list')
+
+    def get_context_data(self, **kwargs):
+        kwargs['sf_list'] = Participant.objects.all().order_by('last_name')
+        return super().get_context_data(**kwargs)
+
+    def form_valid(self, form_class):
+        # This method is called when valid form data has been POSTed.
+        # It should return an HttpResponse.
+        # form_class.send_email()
+        # print("test test")
+        # TODO Здесь нужно вызывать процедуру создания участника
+        #      from_list_create_sf_participants(list_, database, logger)
+        return super(ParticipantCreateView, self).form_valid(form_class)
+
 
 # Список ДШ
-def sf_list(request):
-    success_create = False
-    if request.method == 'POST':
-        form = ParticipantCreateForm(request.POST)
-        if form.is_valid():
-            # TODO Здесь нужно вызывать процедуру создания участника
-            #  from_list_create_sf_participants(list_, database, logger)
-            form.save()
-            success_create = True
-    template = "sf_list.html"
-    context = {
-        'sf_list': Participant.objects.all().order_by('last_name'),
-        'form': ParticipantCreateForm(),
-        'success_create': success_create
-    }
-    return render(request, template, context)
+# def sf_list(request):
+#     success_create = False
+#     if request.method == 'POST':
+#         form = ParticipantCreateForm(request.POST)
+#         if form.is_valid():
+#             # TODO Здесь нужно вызывать процедуру создания участника
+#             #  from_list_create_sf_participants(list_, database, logger)
+#             form.save()
+#             success_create = True
+#     template = "sf_list.html"
+#     context = {
+#         'sf_list': Participant.objects.all().order_by('last_name'),
+#         'form': ParticipantCreateForm(),
+#         'success_create': success_create
+#     }
+#     return render(request, template, context)
+
+# Редактирование участника
+class ParticipantEditView(UpdateView):
+    model = Participant
+    template_name = 'sf_list.html'
+    form_class = ParticipantEditForm
+    success_url = reverse_lazy('sf_list')
+
+    def get_context_data(self, **kwargs):
+        kwargs['edit'] = True
+        return super().get_context_data(**kwargs)
+
+    def form_valid(self, form_class):
+        # This method is called when valid form data has been POSTed.
+        # It should return an HttpResponse.
+        # form_class.send_email()
+        # print("test test")
+        # TODO Здесь нужно вызывать процедуру создания участника
+        #      from_list_create_sf_participants(list_, database, logger)
+        return super(ParticipantEditView, self).form_valid(form_class)
 
 
 # Редактирование участника
-def sf_participant_edit(request, pk):
-    participant = Participant.objects.get(pk=pk)
-    success_edit = False
-    if request.method == 'POST':
-        form = ParticipantCreateForm(request.POST, instance=participant)
-        if form.is_valid():
-            # TODO Здесь нужно вызывать процедуру ОБНОВЛЕНИЯ участника
-            #  from_list_create_sf_participants(list_, database, logger)
-            form.save()
-            success_edit = True
-    template = "sf_list.html"
+# def sf_participant_edit(request, pk):
+#     participant = Participant.objects.get(pk=pk)
+#     success_edit = False
+#     if request.method == 'POST':
+#         form = ParticipantCreateForm(request.POST, instance=participant)
+#         if form.is_valid():
+#             # TODO Здесь нужно вызывать процедуру ОБНОВЛЕНИЯ участника
+#             #  from_list_create_sf_participants(list_, database, logger)
+#             form.save()
+#             success_edit = True
+#     template = "sf_list.html"
+#
+#     context = {
+#         'participant': participant,
+#         'edit': True,
+#         'form': ParticipantEditForm(instance=participant),
+#         'success_edit': success_edit
+#     }
+#     return render(request, template, context)
 
-    context = {
-        'participant': participant,
-        'edit': True,
-        'form': ParticipantEditForm(instance=participant),
-        'success_edit': success_edit
-    }
-    return render(request, template, context)
+# Удаление участника
+# Класс DeleteView в отличие от функции sf_participant_delete работает методом POST!!!
+class ParticipantDeleteView(DeleteView):
+    model = Participant
+    template_name = 'sf_list.html'
+    success_url = reverse_lazy('sf_list')
 
 
 # Удаление участника

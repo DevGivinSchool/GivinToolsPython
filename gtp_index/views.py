@@ -5,6 +5,7 @@ from gtp.models import TeamMember
 from django.views.generic import DetailView, CreateView, UpdateView, DeleteView
 from .forms import ParticipantCreateForm, ParticipantEditForm, TeamMemberCreateForm, TeamMemberEditForm
 from django.urls import reverse, reverse_lazy
+from django.contrib import messages
 
 
 # Create your views here.
@@ -61,12 +62,25 @@ class ParticipantDetailView(DetailView):
 #     # return HttpResponse(t.render(context, request))
 #     return render(request, 'sf_list.html', context={'foo': 'bar'})
 
+class SuccessMessageMixin:
+    """Выводит сообщения об успешных действиях."""
+
+    @property
+    def success_message(self):
+        return False
+
+    def form_valid(self, form):
+        messages.success(self.request, self.success_message)
+        return super().form_valid(form)
+
+
 # Список ДШ создание участника ДШ
-class ParticipantCreateView(CreateView):
+class ParticipantCreateView(SuccessMessageMixin, CreateView):
     model = Participant
     template_name = 'sf_list.html'
     form_class = ParticipantCreateForm
     success_url = reverse_lazy('sf_list')
+    success_message = "Участник создан"
 
     def get_context_data(self, **kwargs):
         kwargs['sf_list'] = Participant.objects.all().order_by('last_name')
@@ -101,11 +115,12 @@ class ParticipantCreateView(CreateView):
 #     return render(request, template, context)
 
 # Редактирование участника
-class ParticipantEditView(UpdateView):
+class ParticipantEditView(SuccessMessageMixin, UpdateView):
     model = Participant
     template_name = 'sf_list.html'
     form_class = ParticipantEditForm
     success_url = reverse_lazy('sf_list')
+    success_message = "Участник изменён"
 
     def get_context_data(self, **kwargs):
         kwargs['edit'] = True
@@ -158,11 +173,12 @@ class ParticipantDeleteView(DeleteView):
 
 
 # Список основной команды
-class TeamMemberCreateView(CreateView):
+class TeamMemberCreateView(SuccessMessageMixin, CreateView):
     model = TeamMember
     template_name = 'team_list.html'
     form_class = TeamMemberCreateForm
     success_url = reverse_lazy('team_list')
+    success_message = "Участник создан"
 
     def get_context_data(self, **kwargs):
         kwargs['team_list'] = TeamMember.objects.all().order_by('last_name')
@@ -179,11 +195,12 @@ class TeamMemberCreateView(CreateView):
 
 
 # Редактирование участника команды
-class TeamMemberEditView(UpdateView):
+class TeamMemberEditView(SuccessMessageMixin, UpdateView):
     model = TeamMember
     template_name = 'team_list.html'
     form_class = TeamMemberEditForm
     success_url = reverse_lazy('team_list')
+    success_message = "Участник изменён"
 
     def get_context_data(self, **kwargs):
         kwargs['edit'] = True

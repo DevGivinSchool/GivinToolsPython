@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect
 from sf.models import Participant
 from gtp.models import TeamMember
-from django.views.generic import DetailView
+from django.views.generic import DetailView, CreateView
 from .forms import ParticipantCreateForm, ParticipantEditForm, TeamMemberCreateForm, TeamMemberEditForm
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 
 
 # Create your views here.
@@ -59,6 +59,24 @@ class ParticipantDetailView(DetailView):
 #     # context = {'foo': 'bar'}
 #     # return HttpResponse(t.render(context, request))
 #     return render(request, 'sf_list.html', context={'foo': 'bar'})
+
+# Переделка функции на класс, но пока оставляю функцию
+# class ParticipantCreateView(CreateView):
+#     model = Participant
+#     template_name = 'sf_list.html'
+#     form_class = ParticipantCreateForm
+#     success_url = reverse_lazy('sf_list')
+#
+#     def get_context_data(self, **kwargs):
+#         kwargs['sf_list'] = Participant.objects.all().order_by('last_name')
+#         return super().get_context_data(**kwargs)
+#
+#     def form_valid(self, form):
+#         # This method is called when valid form data has been POSTed.
+#         # It should return an HttpResponse.
+#         # form.send_email()
+#         print("test test")
+#         return super(ParticipantCreateView, self).form_valid(form)
 
 # Список ДШ
 def sf_list(request):

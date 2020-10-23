@@ -73,6 +73,9 @@ class SuccessMessageMixin:
         messages.success(self.request, self.success_message)
         return super().form_valid(form)
 
+    def get_success_url(self):
+        return '%s?id=%s' % (self.success_url, self.object.id)
+
 
 # Список ДШ создание участника ДШ
 class ParticipantCreateView(SuccessMessageMixin, CreateView):
@@ -163,6 +166,11 @@ class ParticipantDeleteView(DeleteView):
     model = Participant
     template_name = 'sf_list.html'
     success_url = reverse_lazy('sf_list')
+    success_message = "Участник удалён"
+
+    def post(self, request, *args, **kwargs):
+        messages.success(self.request, self.success_message)
+        return super().post(request)
 
 
 # # Удаление участника
@@ -221,6 +229,12 @@ class TeamMemberDeleteView(DeleteView):
     model = TeamMember
     template_name = 'team_list.html'
     success_url = reverse_lazy('team_list')
+    success_message = "Участник удалён"
+
+    def post(self, request, *args, **kwargs):
+        messages.success(self.request, self.success_message)
+        return super().post(request)
+
 
 # Список основной команды
 # def team_list(request):

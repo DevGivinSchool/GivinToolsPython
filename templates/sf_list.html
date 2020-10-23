@@ -52,7 +52,7 @@
         </thead>
         <tbody>
         {% for i in sf_list %}
-        <tr>
+        <tr {% if i.id|slugify == request.GET.id %}style="background:#FFFF99"{% endif %}>
             <th>{{i.id}}</th>
             <td>{{ i.last_name }}</td>
             <td>{{ i.first_name }}</td>

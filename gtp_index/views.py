@@ -3,10 +3,23 @@ from django.shortcuts import render, redirect
 from sf.models import Participant
 from gtp.models import TeamMember
 from django.views.generic import DetailView, CreateView, UpdateView, DeleteView
-from .forms import ParticipantCreateForm, ParticipantEditForm, TeamMemberCreateForm, TeamMemberEditForm
+from .forms import ParticipantCreateForm, ParticipantEditForm, TeamMemberCreateForm, TeamMemberEditForm, AuthForm
 from django.urls import reverse, reverse_lazy
 from django.contrib import messages
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.models import User
 
+
+class LoginView(LoginView):
+    template_name = 'gs_login.html'
+    form_class = AuthForm
+    success_url = reverse_lazy('home')
+
+
+class LogoutView(LoginView):
+    template_name = 'gs_logout.html'
+    form_class = AuthForm
+    success_url = reverse_lazy('home')
 
 # Create your views here.
 # def index(request):

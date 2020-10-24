@@ -1,6 +1,14 @@
 from django import forms
 from sf.models import Participant
 from gtp.models import TeamMember
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import User
+
+
+class AuthForm(AuthenticationForm, forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('username', 'password')
 
 
 class ParticipantCreateForm(forms.ModelForm):

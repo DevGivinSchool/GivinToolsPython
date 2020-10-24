@@ -24,6 +24,8 @@ urlpatterns = [
     # path('detail/<int:id>', views.detail_page),
     path('', views.index, name='home'),  # Home
     path('admin/', admin.site.urls),  # Админка
+    path('gs-login/', views.LoginView.as_view(), name='gs_login'),
+    path('gs-logout/', views.LogoutView.as_view(), name='gs_logout'),
     ###########################################################################
     # path('sf/', views.ParticipantListView.as_view(), name='sf'),  # Список ДШ
     # path('sf-list/', views.sf_list, name='sf_list'),  # Список ДШ

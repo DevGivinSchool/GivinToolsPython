@@ -18,7 +18,7 @@
         <button class="navbar-toggler mr-2" type="button" data-toggle="collapse" data-target="#gs">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <span class="navbar-brand mr-5">Школа Гивина</span>
+        <span class="navbar-brand mr-5">ШГ</span>
         <div class="navbar-collapse collapse w-100" id="gs">
             <ul class="navbar-nav justify-content-center">
                 <li class="nav-item">
@@ -38,14 +38,17 @@
             </ul>
             <ul class="navbar-nav justify-content-end">
                 <li class="nav-item">
-                    <a class="nav-link active btn-dark ml-5" href="">Вход</a>
+                    {% url 'gs_login' as url_login %}
+                    <a class="nav-link active btn-dark ml-5" href="{{url_login}}">Вход</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active btn-dark ml-5" href="">Выход</a>
+                    {% url 'gs_logout' as url_logout %}
+                    <a class="nav-link active btn-dark ml-5" href="{{url_logout}}">Выход</a>
                 </li>
             </ul>
         </div>
     </nav>
+
     {% endblock %}
 </div>
 <div id="content">

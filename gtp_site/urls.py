@@ -23,13 +23,13 @@ urlpatterns = [
     # path('', views.HomeListView.as_view(), name='home'),
     # path('detail/<int:id>', views.detail_page),
     path('', views.index, name='home'),  # Home
-    path('admin/', admin.site.urls),  # Админка
-    path('gs-login/', views.LoginView.as_view(), name='gs_login'),
-    path('gs-logout/', views.LogoutView.as_view(), name='gs_logout'),
+    path('gs-admin', admin.site.urls),  # Админка
+    path('gs-login', views.GSLoginView.as_view(), name='gs_login'),
+    path('gs-logout', views.GSLogoutView.as_view(), name='gs_logout'),
     ###########################################################################
     # path('sf/', views.ParticipantListView.as_view(), name='sf'),  # Список ДШ
     # path('sf-list/', views.sf_list, name='sf_list'),  # Список ДШ
-    path('sf-list/', views.ParticipantCreateView.as_view(), name='sf_list'),  # Список ДШ
+    path('sf-list', views.ParticipantCreateView.as_view(), name='sf_list'),  # Список ДШ
     path('sf-detail/<int:pk>', views.ParticipantDetailView.as_view(), name='detail_page'),
     # path('sf-participant-edit/<int:pk>', views.sf_participant_edit, name='sf_participant_edit'),
     path('sf-participant-edit/<int:pk>', views.ParticipantEditView.as_view(), name='sf_participant_edit'),

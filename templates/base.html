@@ -37,14 +37,17 @@
                 </li>
             </ul>
             <ul class="navbar-nav justify-content-end">
-                <li class="nav-item">
-                    {% url 'gs_login' as url_login %}
-                    <a class="nav-link active btn-dark ml-5" href="{{url_login}}">Вход</a>
-                </li>
+                {% if request.user.is_authenticated %}
                 <li class="nav-item">
                     {% url 'gs_logout' as url_logout %}
                     <a class="nav-link active btn-dark ml-5" href="{{url_logout}}">Выход</a>
                 </li>
+                {% else %}
+                <li class="nav-item">
+                    {% url 'gs_login' as url_login %}
+                    <a class="nav-link active btn-dark ml-5" href="{{url_login}}">Вход</a>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </nav>

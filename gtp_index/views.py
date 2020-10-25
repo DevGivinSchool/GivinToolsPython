@@ -6,20 +6,22 @@ from django.views.generic import DetailView, CreateView, UpdateView, DeleteView
 from .forms import ParticipantCreateForm, ParticipantEditForm, TeamMemberCreateForm, TeamMemberEditForm, AuthForm
 from django.urls import reverse, reverse_lazy
 from django.contrib import messages
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.models import User
 
 
-class LoginView(LoginView):
+class GSLoginView(LoginView):
     template_name = 'gs_login.html'
     form_class = AuthForm
     success_url = reverse_lazy('home')
 
+    def get_success_url(self):
+        return self.success_url
 
-class LogoutView(LoginView):
-    template_name = 'gs_logout.html'
-    form_class = AuthForm
-    success_url = reverse_lazy('home')
+
+class GSLogoutView(LogoutView):
+    next_page = reverse_lazy('home')
+
 
 # Create your views here.
 # def index(request):
@@ -247,7 +249,6 @@ class TeamMemberDeleteView(DeleteView):
     def post(self, request, *args, **kwargs):
         messages.success(self.request, self.success_message)
         return super().post(request)
-
 
 # Список основной команды
 # def team_list(request):

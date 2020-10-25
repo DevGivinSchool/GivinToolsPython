@@ -5,6 +5,12 @@
 <div class="container mt-4">
     <h1 class="mt-4">Авторизация</h1>
     <p><a href="/">Вернуться назад</a></p>
-
+    <div class="col-4">
+        <form id="login_form" method="post">
+            {% csrf_token %}
+            {{form}}
+        </form>
+        <button form="login_form" type="submit" class="btn btn-primary mt-4">Войти</button>
+    </div>
 </div>
 {% endblock %}

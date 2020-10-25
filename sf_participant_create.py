@@ -178,6 +178,7 @@ def from_list_create_sf_participants(list_, database, logger):
             mail_text = f'Ошибка создания участника\n' + traceback.format_exc()
             logger.error(mail_text)
             send_mail(PASSWORDS.settings['admin_emails'], "ERROR CREATE PARTICIPANT", mail_text, logger)
+    logger.info("\n"*7)
     logger.info("Обработка списка закончена")
 
 

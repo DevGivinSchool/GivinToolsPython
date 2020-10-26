@@ -60,12 +60,12 @@
             <td>{{ i.telegram|default_if_none:"" }}</td>
             <td><a href="{% url 'sf_participant_edit' i.id %}">редактировать</a></td>
             <td>
-                <form id="delete_form" action="{% url 'sf_participant_delete' i.id %}" method="post">{% csrf_token %}</form>
-                <a href="javascript:void" onclick="delete_question()">удалить</a>
+                <form id="delete_form{{i.id}}" action="{% url 'sf_participant_delete' i.id %}" method="post">{% csrf_token %}</form>
+                <a href="javascript:void" onclick="delete_question{{i.id}}()">удалить</a>
                 <script>
-                    function delete_question() {
+                    function delete_question{{i.id}}() {
                         if (confirm("Вы уверены?")) {
-                            document.getElementById('delete_form').submit()
+                            document.getElementById('delete_form{{i.id}}').submit()
                         }
 
                     }

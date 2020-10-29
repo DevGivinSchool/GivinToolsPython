@@ -8,19 +8,20 @@ from django.urls import reverse, reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.models import User
+from django.http import HttpResponseRedirect
 
 
 class GSLoginView(LoginView):
     template_name = 'gs_login.html'
     form_class = AuthForm
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('index')
 
     def get_success_url(self):
         return self.success_url
 
 
 class GSLogoutView(LogoutView):
-    next_page = reverse_lazy('home')
+    next_page = reverse_lazy('index')
 
 
 # Create your views here.
@@ -33,7 +34,32 @@ class GSLogoutView(LogoutView):
 #     return render(request, template, context=context)
 
 def index(request):
-    template = "index.html"
+    # Если пользователь не аутентифицирован, то перенаправлять на страницу входа
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('gs_login'))
+
+    # суперпользователь, то ему можно всё и показывать всё
+    if request.user.is_superuser:
+        template = 'index.html'
+    # пользователь с галочкой персонал, а так же принадлежащий группе manager
+    # elif request.user.is_staff and request.user.groups.filter(name='manager').exists():
+    #     template = 'account_personal_role.html'
+    # sf_admin_group (Администраторы Друзей Школы)
+    elif request.user.groups.filter(name='sf_admin_group').exists():
+        template = 'sf_list.html'
+    # sf_user_group (участники Друзей Школы)
+    elif request.user.groups.filter(name='sf_user_group').exists():
+        template = 'sf_user.html'
+    # gs_admin_group (Администраторы Основной комманды)
+    elif request.user.groups.filter(name='gs_admin_group').exists():
+        template = 'team_list.html'
+    # gs_user_group (участники Основной комманды)
+    elif request.user.groups.filter(name='gs_user_group').exists():
+        template = 'team_user.html'
+    # иначе все остальные (пользователи без группы не имеют прав и должны обратиться к администратору)
+    else:
+        template = 'no_authenticated.html'
+
     context = {}
     return render(request, template, context)
 

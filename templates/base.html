@@ -22,9 +22,9 @@
         <div class="navbar-collapse collapse w-100" id="gs">
             <ul class="navbar-nav justify-content-center">
                 <li class="nav-item">
-                    {% url 'home' as url_home %}
-                    <a class="nav-link {% if url_home == request.path%}active{% endif %}"
-                       href="{{url_home}}">Главная</a>
+                    {% url 'index' as url_index %}
+                    <a class="nav-link {% if url_index == request.path%}active{% endif %}"
+                       href="{{url_index}}">Главная</a>
                 </li>
                 <li class="nav-item">
                     {% url 'sf_list' as url_sf_list %}

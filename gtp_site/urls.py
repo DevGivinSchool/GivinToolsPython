@@ -22,7 +22,7 @@ urlpatterns = [
     # path('', views.index),
     # path('', views.HomeListView.as_view(), name='home'),
     # path('detail/<int:id>', views.detail_page),
-    path('', views.index, name='home'),  # Home
+    path('', views.index, name='index'),  # Home
     path('gs-admin', admin.site.urls),  # Админка
     path('gs-login', views.GSLoginView.as_view(), name='gs_login'),
     path('gs-logout', views.GSLogoutView.as_view(), name='gs_logout'),

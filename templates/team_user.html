@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}{{ the_participant.last_name }} {{ the_participant.first_name }}{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mt-4">{{ the_participant.last_name }} {{ the_participant.first_name }}</h1>
+    <p><a href="/sf">Вернуться назад</a></p>
+    <p>Имя: {{ the_participant.first_name }}</p>
+    <p>Фамилия: {{ the_participant.last_name }}</p>
+    <p>Email: {{ the_participant.email }}</p>
+    <p>Telegram: {{ the_participant.telegram }}</p>
+</div>
+{% endblock %}

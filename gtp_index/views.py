@@ -8,7 +8,28 @@ from django.urls import reverse, reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
+from django.contrib.auth.models import Group
+
+
+def get_group(request):
+    if request.user.is_superuser:
+        return 'superuser'
+    else:
+        query_set = Group.objects.filter(user=request.user)
+        list_group = ''
+        for group in query_set:
+            list_group += group.name
+        return list_group
+
+
+def not_authorized(request):
+    template = 'not_authorized.html'
+    context = {
+        'user_name': 'None',
+        'group_name': 'None'
+    }
+    return render(request, template, context=context)
 
 
 class GSLoginView(LoginView):
@@ -38,30 +59,41 @@ def index(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('gs_login'))
 
+    # # pdb.set_trace()
+    # print(request.user)
+    # query_set = Group.objects.filter(user=request.user)
+    # print(query_set)
+    # # print to console for debug/checking
+    # for g in query_set:
+    #     # this should print all group names for the user
+    #     print(g.name)  # or id or whatever Group field that you want to display
+
     # суперпользователь, то ему можно всё и показывать всё
     if request.user.is_superuser:
         template = 'index.html'
+        context = {
+            'user_name': request.user,
+            'group_name': 'superuser'
+        }
+        return render(request, template, context)
     # пользователь с галочкой персонал, а так же принадлежащий группе manager
     # elif request.user.is_staff and request.user.groups.filter(name='manager').exists():
     #     template = 'account_personal_role.html'
     # sf_admin_group (Администраторы Друзей Школы)
     elif request.user.groups.filter(name='sf_admin_group').exists():
-        template = 'sf_list.html'
+        return HttpResponseRedirect(reverse('sf_list'))
     # sf_user_group (участники Друзей Школы)
     elif request.user.groups.filter(name='sf_user_group').exists():
-        template = 'sf_user.html'
+        return HttpResponseRedirect(reverse('sf_user_page'))
     # gs_admin_group (Администраторы Основной комманды)
     elif request.user.groups.filter(name='gs_admin_group').exists():
-        template = 'team_list.html'
+        return HttpResponseRedirect(reverse('team_list'))
     # gs_user_group (участники Основной комманды)
     elif request.user.groups.filter(name='gs_user_group').exists():
-        template = 'team_user.html'
+        return HttpResponseRedirect(reverse('team_user_page'))
     # иначе все остальные (пользователи без группы не имеют прав и должны обратиться к администратору)
     else:
-        template = 'no_authenticated.html'
-
-    context = {}
-    return render(request, template, context)
+        return HttpResponseRedirect(reverse('not_authorized'))
 
 
 # class HomeListView(ListView):
@@ -78,7 +110,7 @@ def index(request):
 
 class ParticipantDetailView(DetailView):
     model = Participant
-    template_name = 'sf_detail.html'
+    template_name = 'sf_user.html'
     context_object_name = 'the_participant'
 
 
@@ -87,13 +119,13 @@ class ParticipantDetailView(DetailView):
 #     context = {
 #         'get_article': get_article
 #     }
-#     template = 'sf_detail.html'
+#     template = 'sf_user.html'
 #     return render(request, template, context=context)
 
 
 # class HomeDetailView(DetailView):
 #     model = Article
-#     template_name = 'sf_detail.html'
+#     template_name = 'sf_user.html'
 #     context_object_name = 'get_article'
 
 
@@ -128,6 +160,8 @@ class ParticipantCreateView(SuccessMessageMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         kwargs['sf_list'] = Participant.objects.all().order_by('last_name')
+        kwargs['user_name'] = self.request.user
+        kwargs['group_name'] = get_group(self.request)
         return super().get_context_data(**kwargs)
 
     def form_valid(self, form_class):
@@ -231,6 +265,8 @@ class TeamMemberCreateView(SuccessMessageMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         kwargs['team_list'] = TeamMember.objects.all().order_by('last_name')
+        kwargs['user_name'] = self.request.user
+        kwargs['group_name'] = get_group(self.request)
         return super().get_context_data(**kwargs)
 
     def form_valid(self, form_class):

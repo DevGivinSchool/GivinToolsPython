@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Not authorized user{% endblock %}
+
+{% block menu_index %}{% endblock %}
+{% block menu_gs %}{% endblock %}
+{% block menu_team %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mt-4">Вы не авторизованы.</h1>
+    <div class="mt-4">
+        <p>Пользователь <b>{{request.user}}</b> не авторизован.<br>
+           Пожалуйста обратитесь к администратору, чтобы он включил вас в необходимую группу.</p>
+    </div>
+</div>
+{% endblock %}

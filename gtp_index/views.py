@@ -8,7 +8,7 @@ from django.urls import reverse, reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.contrib.auth.models import Group
 
 
@@ -84,13 +84,34 @@ def index(request):
         return HttpResponseRedirect(reverse('sf_list'))
     # sf_user_group (участники Друзей Школы)
     elif request.user.groups.filter(name='sf_user_group').exists():
-        return HttpResponseRedirect(reverse('sf_user_page'))
+        print(f"request.user={request.user}")
+        if request.user.username.endswith('@givinschool.org'):
+            try:
+                user_ = Participant.objects.get(login=request.user)
+            except Participant.DoesNotExist:
+                raise Http404("Такой участник не существует")
+            print(f"user_name={user_}")
+            return HttpResponseRedirect(reverse('sf_user_page', args=[user_.id]))
+        else:
+            messages.success(request, "Пользователь должен быть из домена @givinschool.org. Обратитесь к Администратору.")
+            return HttpResponseRedirect(reverse('gs_login'))
     # gs_admin_group (Администраторы Основной комманды)
     elif request.user.groups.filter(name='gs_admin_group').exists():
         return HttpResponseRedirect(reverse('team_list'))
     # gs_user_group (участники Основной комманды)
     elif request.user.groups.filter(name='gs_user_group').exists():
-        return HttpResponseRedirect(reverse('team_user_page'))
+        print(f"request.user={request.user}")
+        if request.user.username.endswith('@givinschool.org'):
+            try:
+                user_ = TeamMember.objects.get(login=request.user)
+            except TeamMember.DoesNotExist:
+                raise Http404("Такой участник не существует")
+            print(f"user_name={user_}")
+            return HttpResponseRedirect(reverse('team_user_page', args=[user_.id]))
+        else:
+            messages.success(request,
+                             "Пользователь должен быть из домена @givinschool.org. Обратитесь к Администратору.")
+            return HttpResponseRedirect(reverse('gs_login'))
     # иначе все остальные (пользователи без группы не имеют прав и должны обратиться к администратору)
     else:
         return HttpResponseRedirect(reverse('not_authorized'))
@@ -106,6 +127,15 @@ def index(request):
 #     model = Participant
 #     template_name = 'sf_list.html'
 #     context_object_name = 'participant_list'
+class TeamMemberDetailView(DetailView):
+    model = TeamMember
+    template_name = 'team_user.html'
+    context_object_name = 'the_member'
+
+    def get_context_data(self, **kwargs):
+        kwargs['user_name'] = self.request.user
+        kwargs['group_name'] = get_group(self.request)
+        return super().get_context_data(**kwargs)
 
 
 class ParticipantDetailView(DetailView):
@@ -113,6 +143,10 @@ class ParticipantDetailView(DetailView):
     template_name = 'sf_user.html'
     context_object_name = 'the_participant'
 
+    def get_context_data(self, **kwargs):
+        kwargs['user_name'] = self.request.user
+        kwargs['group_name'] = get_group(self.request)
+        return super().get_context_data(**kwargs)
 
 # def detail_page(request, id):
 #     get_article = Article.objects.get(id=id)

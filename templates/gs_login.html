@@ -5,6 +5,13 @@
 {% block content %}
 <div class="container mt-4">
     <h1 class="mt-4">Введите логин для входа.</h1>
+    {% if messages %}
+    <div class="alert alert-danger">
+        {% for m in messages %}
+            {{m}}
+        {% endfor %}
+    </div>
+    {% endif %}
     <div class="col-4">
         <form id="login_form" method="post">
             {% csrf_token %}

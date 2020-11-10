@@ -43,4 +43,5 @@ urlpatterns = [
     path('team-member-edit/<int:pk>', views.TeamMemberEditView.as_view(), name='team_member_edit'),
     # path('team-member-delete/<int:pk>', views.team_member_delete, name='team_member_delete'),
     path('team-member-delete/<int:pk>', views.TeamMemberDeleteView.as_view(), name='team_member_delete'),
+    path('team-detail/<int:pk>', views.ParticipantDetailView.as_view(), name='team_user_page'),
 ]

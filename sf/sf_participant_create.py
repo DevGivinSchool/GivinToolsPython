@@ -94,7 +94,7 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
             logger.info("Участник активирован в Zoom")
         # Уведомление участника
         logger.info("Уведомление участника")
-        notification_text = participant_notification(payment, r"[ШКОЛА ГИВИНА]. Ваша учтёная запись в Друзьях Школы разблокирована.", logger)
+        notification_text = participant_notification(payment, r"[ШКОЛА ГИВИНА]. Ваша учётная запись в Друзьях Школы разблокирована.", logger)
         mm.subject = "[ДШ] РАЗБЛОКИРОВКА УЧАСТНИКА"
         mm.text += "Текст уведомления:\n\n\n" + notification_text
     else:

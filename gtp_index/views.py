@@ -7,13 +7,23 @@ from .forms import ParticipantCreateForm, ParticipantEditForm, TeamMemberCreateF
 from django.urls import reverse, reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
-from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseForbidden
 from django.contrib.auth.models import Group
 
 
-def get_group(request):
+def is_superuser(request):
+    """ Проверяет является ли пользователь superuser. """
     if request.user.is_superuser:
+        return True
+    else:
+        return False
+
+
+def get_group(request):
+    """ Проверяет является ли пользователь superuser, тогда ему всё разрешено, или в каких группах состоит пользователь.
+    :param request:
+    :return: Либо 'superuser' либо список групп. """
+    if is_superuser(request):
         return 'superuser'
     else:
         query_set = Group.objects.filter(user=request.user)
@@ -23,7 +33,20 @@ def get_group(request):
         return list_group
 
 
+def user_belongs_to_group(request, group_name):
+    """ Проверяет входит ли пользователь в группу. """
+    # query_set = Group.objects.filter(user=request.user)
+    if request.user.groups.filter(name=group_name).exists():
+        return True
+    else:
+        return False
+
+
 def not_authorized(request):
+    """ Страница для неавторизованных пользователей, которые не включены ни в какую группу,
+    поэтому не имеют гикаких прав и должны обратиться к администратору.
+    :param request:
+    :return: """
     template = 'not_authorized.html'
     context = {
         'user_name': 'None',
@@ -33,6 +56,7 @@ def not_authorized(request):
 
 
 class GSLoginView(LoginView):
+    """ Страница Login. """
     template_name = 'gs_login.html'
     form_class = AuthForm
     success_url = reverse_lazy('index')
@@ -42,32 +66,18 @@ class GSLoginView(LoginView):
 
 
 class GSLogoutView(LogoutView):
+    """ Logout - перенаправление на главную страницу. """
     next_page = reverse_lazy('index')
 
 
-# Create your views here.
-# def index(request):
-#     list_articles = Article.objects.all()
-#     context = {
-#         'list_articles': list_articles
-#     }
-#     template = 'sf_list.html'
-#     return render(request, template, context=context)
-
 def index(request):
+    """ Главная страница. Здесь проверяется авторизация пользователя и в зависимости от его группы,
+    происходит перенаправление на необходимую страницу.
+    :param request:
+    :return: """
     # Если пользователь не аутентифицирован, то перенаправлять на страницу входа
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('gs_login'))
-
-    # # pdb.set_trace()
-    # print(request.user)
-    # query_set = Group.objects.filter(user=request.user)
-    # print(query_set)
-    # # print to console for debug/checking
-    # for g in query_set:
-    #     # this should print all group names for the user
-    #     print(g.name)  # or id or whatever Group field that you want to display
-
     # суперпользователь, то ему можно всё и показывать всё
     if request.user.is_superuser:
         template = 'index.html'
@@ -76,9 +86,6 @@ def index(request):
             'group_name': 'superuser'
         }
         return render(request, template, context)
-    # пользователь с галочкой персонал, а так же принадлежащий группе manager
-    # elif request.user.is_staff and request.user.groups.filter(name='manager').exists():
-    #     template = 'account_personal_role.html'
     # sf_admin_group (Администраторы Друзей Школы)
     elif request.user.groups.filter(name='sf_admin_group').exists():
         return HttpResponseRedirect(reverse('sf_list'))
@@ -93,7 +100,8 @@ def index(request):
             print(f"user_name={user_}")
             return HttpResponseRedirect(reverse('sf_user_page', args=[user_.id]))
         else:
-            messages.success(request, "Пользователь должен быть из домена @givinschool.org. Обратитесь к Администратору.")
+            messages.success(request,
+                             "Пользователь должен быть из домена @givinschool.org. Обратитесь к Администратору.")
             return HttpResponseRedirect(reverse('gs_login'))
     # gs_admin_group (Администраторы Основной комманды)
     elif request.user.groups.filter(name='gs_admin_group').exists():
@@ -117,58 +125,6 @@ def index(request):
         return HttpResponseRedirect(reverse('not_authorized'))
 
 
-# class HomeListView(ListView):
-#     model = Article
-#     template_name = 'sf_list.html'
-#     context_object_name = 'list_articles'
-
-# Список ДШ
-# class ParticipantListView(ListView):
-#     model = Participant
-#     template_name = 'sf_list.html'
-#     context_object_name = 'participant_list'
-class TeamMemberDetailView(DetailView):
-    model = TeamMember
-    template_name = 'team_user.html'
-    context_object_name = 'the_member'
-
-    def get_context_data(self, **kwargs):
-        kwargs['user_name'] = self.request.user
-        kwargs['group_name'] = get_group(self.request)
-        return super().get_context_data(**kwargs)
-
-
-class ParticipantDetailView(DetailView):
-    model = Participant
-    template_name = 'sf_user.html'
-    context_object_name = 'the_participant'
-
-    def get_context_data(self, **kwargs):
-        kwargs['user_name'] = self.request.user
-        kwargs['group_name'] = get_group(self.request)
-        return super().get_context_data(**kwargs)
-
-# def detail_page(request, id):
-#     get_article = Article.objects.get(id=id)
-#     context = {
-#         'get_article': get_article
-#     }
-#     template = 'sf_user.html'
-#     return render(request, template, context=context)
-
-
-# class HomeDetailView(DetailView):
-#     model = Article
-#     template_name = 'sf_user.html'
-#     context_object_name = 'get_article'
-
-
-# def my_view(request):
-#     # t = loader.get_template('gtp_index/sf_list.html')
-#     # context = {'foo': 'bar'}
-#     # return HttpResponse(t.render(context, request))
-#     return render(request, 'sf_list.html', context={'foo': 'bar'})
-
 class SuccessMessageMixin:
     """Выводит сообщения об успешных действиях."""
 
@@ -184,13 +140,19 @@ class SuccessMessageMixin:
         return '%s?id=%s' % (self.success_url, self.object.id)
 
 
-# Список ДШ создание участника ДШ
 class ParticipantCreateView(SuccessMessageMixin, CreateView):
+    """ Страница показывает список ДШ и обеспечивает создание новых членов ДШ. """
     model = Participant
     template_name = 'sf_list.html'
     form_class = ParticipantCreateForm
     success_url = reverse_lazy('sf_list')
     success_message = "Участник создан"
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_superuser or user_belongs_to_group(request, "sf_admin_group"):
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
 
     def get_context_data(self, **kwargs):
         kwargs['sf_list'] = Participant.objects.all().order_by('last_name')
@@ -208,31 +170,19 @@ class ParticipantCreateView(SuccessMessageMixin, CreateView):
         return super(ParticipantCreateView, self).form_valid(form_class)
 
 
-# Список ДШ
-# def sf_list(request):
-#     success_create = False
-#     if request.method == 'POST':
-#         form = ParticipantCreateForm(request.POST)
-#         if form.is_valid():
-#             # TODO Здесь нужно вызывать процедуру создания участника
-#             #  from_list_create_sf_participants(list_, database, logger)
-#             form.save()
-#             success_create = True
-#     template = "sf_list.html"
-#     context = {
-#         'sf_list': Participant.objects.all().order_by('last_name'),
-#         'form': ParticipantCreateForm(),
-#         'success_create': success_create
-#     }
-#     return render(request, template, context)
-
-# Редактирование участника
 class ParticipantEditView(SuccessMessageMixin, UpdateView):
+    """ Страница редактирования участника ДШ. """
     model = Participant
     template_name = 'sf_list.html'
     form_class = ParticipantEditForm
     success_url = reverse_lazy('sf_list')
     success_message = "Участник изменён"
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_superuser or user_belongs_to_group(request, "sf_admin_group"):
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
 
     def get_context_data(self, **kwargs):
         kwargs['edit'] = True
@@ -248,54 +198,57 @@ class ParticipantEditView(SuccessMessageMixin, UpdateView):
         return super(ParticipantEditView, self).form_valid(form_class)
 
 
-# Редактирование участника
-# def sf_participant_edit(request, pk):
-#     participant = Participant.objects.get(pk=pk)
-#     success_edit = False
-#     if request.method == 'POST':
-#         form = ParticipantCreateForm(request.POST, instance=participant)
-#         if form.is_valid():
-#             # TODO Здесь нужно вызывать процедуру ОБНОВЛЕНИЯ участника
-#             #  from_list_create_sf_participants(list_, database, logger)
-#             form.save()
-#             success_edit = True
-#     template = "sf_list.html"
-#
-#     context = {
-#         'participant': participant,
-#         'edit': True,
-#         'form': ParticipantEditForm(instance=participant),
-#         'success_edit': success_edit
-#     }
-#     return render(request, template, context)
+class ParticipantDetailView(DetailView):
+    """ Страница детальной информации об участнике ДШ. """
+    model = Participant
+    template_name = 'sf_user.html'
+    context_object_name = 'the_participant'
 
-# Удаление участника
-# Класс DeleteView в отличие от функции sf_participant_delete работает методом POST!!!
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_superuser or user_belongs_to_group(request, "sf_user_group") or user_belongs_to_group(
+                request, "sf_admin_group"):
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
+
+    def get_context_data(self, **kwargs):
+        kwargs['user_name'] = self.request.user
+        kwargs['group_name'] = get_group(self.request)
+        return super().get_context_data(**kwargs)
+
+
 class ParticipantDeleteView(DeleteView):
+    """ Страница удаления участника ДШ.
+    (Класс DeleteView в отличие от функции sf_participant_delete работает методом POST!!!) """
     model = Participant
     template_name = 'sf_list.html'
     success_url = reverse_lazy('sf_list')
     success_message = "Участник удалён"
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_superuser or user_belongs_to_group(request, "sf_admin_group"):
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
 
     def post(self, request, *args, **kwargs):
         messages.success(self.request, self.success_message)
         return super().post(request)
 
 
-# # Удаление участника
-# def sf_participant_delete(request, pk):
-#     participant = Participant.objects.get(pk=pk)
-#     participant.delete()
-#     return redirect(reverse('sf_list'))
-
-
-# Список основной команды
 class TeamMemberCreateView(SuccessMessageMixin, CreateView):
+    """ Страница показывает список команды и обеспечивает создание новых членов команды. """
     model = TeamMember
     template_name = 'team_list.html'
     form_class = TeamMemberCreateForm
     success_url = reverse_lazy('team_list')
     success_message = "Участник создан"
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_superuser or user_belongs_to_group(request, "gs_admin_group"):
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
 
     def get_context_data(self, **kwargs):
         kwargs['team_list'] = TeamMember.objects.all().order_by('last_name')
@@ -313,13 +266,19 @@ class TeamMemberCreateView(SuccessMessageMixin, CreateView):
         return super(TeamMemberCreateView, self).form_valid(form_class)
 
 
-# Редактирование участника команды
 class TeamMemberEditView(SuccessMessageMixin, UpdateView):
+    """ Страница редактирования участника команды. """
     model = TeamMember
     template_name = 'team_list.html'
     form_class = TeamMemberEditForm
     success_url = reverse_lazy('team_list')
     success_message = "Участник изменён"
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_superuser or user_belongs_to_group(request, "gs_admin_group"):
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
 
     def get_context_data(self, **kwargs):
         kwargs['edit'] = True
@@ -335,60 +294,39 @@ class TeamMemberEditView(SuccessMessageMixin, UpdateView):
         return super(TeamMemberEditView, self).form_valid(form_class)
 
 
-# Удаление участника команды
+class TeamMemberDetailView(DetailView):
+    """ Страница детальной информации о члене команды. """
+    model = TeamMember
+    template_name = 'team_user.html'
+    context_object_name = 'the_member'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_superuser or user_belongs_to_group(request, "gs_user_group") or user_belongs_to_group(
+                request, "gs_admin_group"):
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
+
+    def get_context_data(self, **kwargs):
+        kwargs['user_name'] = self.request.user
+        kwargs['group_name'] = get_group(self.request)
+        return super().get_context_data(**kwargs)
+
+
 class TeamMemberDeleteView(DeleteView):
+    """ Страница удаления участника команды.
+    (Класс DeleteView в отличие от функции sf_participant_delete работает методом POST!!!) """
     model = TeamMember
     template_name = 'team_list.html'
     success_url = reverse_lazy('team_list')
     success_message = "Участник удалён"
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_superuser or user_belongs_to_group(request, "gs_admin_group"):
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden()
+
     def post(self, request, *args, **kwargs):
         messages.success(self.request, self.success_message)
         return super().post(request)
-
-# Список основной команды
-# def team_list(request):
-#     success_create = False
-#     if request.method == 'POST':
-#         form = TeamMemberCreateForm(request.POST)
-#         if form.is_valid():
-#             # TODO Здесь нужно вызывать процедуру создания участника
-#             #  from_list_create_sf_participants(list_, database, logger)
-#             form.save()
-#             success_create = True
-#     template = "team_list.html"
-#     context = {
-#         'team_list': TeamMember.objects.all().order_by('last_name'),
-#         'form': TeamMemberCreateForm(),
-#         'success_create': success_create
-#     }
-#     return render(request, template, context)
-
-
-# # Редактирование участника команды
-# def team_member_edit(request, pk):
-#     team_member = TeamMember.objects.get(pk=pk)
-#     success_edit = False
-#     if request.method == 'POST':
-#         form = TeamMemberCreateForm(request.POST, instance=team_member)
-#         if form.is_valid():
-#             # TODO Здесь нужно вызывать процедуру ОБНОВЛЕНИЯ участника
-#             #  from_list_create_sf_participants(list_, database, logger)
-#             form.save()
-#             success_edit = True
-#     template = "team_list.html"
-#
-#     context = {
-#         'team_member': team_member,
-#         'edit': True,
-#         'form': TeamMemberEditForm(instance=team_member),
-#         'success_edit': success_edit
-#     }
-#     return render(request, template, context)
-
-
-# Удаление участника команды
-# def team_member_delete(request, pk):
-#     team_member = TeamMember.objects.get(pk=pk)
-#     team_member.delete()
-#     return redirect(reverse('team_list'))

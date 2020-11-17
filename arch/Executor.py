@@ -57,7 +57,7 @@ class Executor:
     def execute(self):
         """
         Waits indefinitely for an item to be written in the queue.
-        Finishes when the parent process terminates.
+        Finishes when the parents process terminates.
         """
         print("Process {0} started".format(getpid()))
         # print(type(self.logger))

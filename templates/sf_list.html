@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Список участников ДШ{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-4">
+
+    <h1 class="mt-4">Список Друзей Школы</h1>
+
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary mb-4" data-toggle="modal" data-target="#exampleModal">
+        Создать участника
+    </button>
+
+    {% if success_create %}
+    <div class="alert alert-success">Участник создан</div>
+    {% endif %}
+
+    {% if messages %}
+    <div class="alert alert-success">
+        {% for m in messages %}
+            {{m}}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if success_edit %}
+    <div class="alert alert-success">Участник обновлён</div>
+    {% endif %}
+
+    {% if edit %}
+    <p class="mt-4">Страница редактирования</p>
+    <p><a href="{% url 'sf_list' %}">Вернуться назад</a></p>
+    <form id="edit_form" method="post">
+        {% csrf_token %}
+        {{form}}
+    </form>
+    <button form="edit_form" type="submit" class="btn btn-primary">Обновить</button>
+    {% else %}
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th scope="col">id</th>
+            <th scope="col">Last Name</th>
+            <th scope="col">First Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Telegram</th>
+            <th scope="col">Редактирование</th>
+            <th scope="col">Удаление</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for i in sf_list %}
+        <tr {% if i.id|slugify == request.GET.id %}style="background:#FFFF99"{% endif %}>
+            <th>{{i.id}}</th>
+            <td>{{ i.last_name }}</td>
+            <td>{{ i.first_name }}</td>
+            <td>{{ i.email|default_if_none:"" }}</td>
+            <td>{{ i.telegram|default_if_none:"" }}</td>
+            <td><a href="{% url 'sf_participant_edit' i.id %}">редактировать</a></td>
+            <td>
+                <form id="delete_form{{i.id}}" action="{% url 'sf_participant_delete' i.id %}" method="post">{% csrf_token %}</form>
+                <a href="javascript:void" onclick="delete_question{{i.id}}()">удалить</a>
+                <script>
+                    function delete_question{{i.id}}() {
+                        if (confirm("Вы уверены?")) {
+                            document.getElementById('delete_form{{i.id}}').submit()
+                        }
+
+                    }
+                </script>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {% endif %}
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Создать нового участника ДШ</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="create_form" method="post">
+                        {% csrf_token %}
+                        {{form}}
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    <button form="create_form" type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

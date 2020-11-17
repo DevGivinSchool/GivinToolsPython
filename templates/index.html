@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="mt-4 ml-4">Школа Гивина</h1>
+<h1 class="mt-4 ml-4">Личный кабинет</h1>
+<div class="mt-4 ml-4">
+    <p>Добро пожаловать <b>{{request.user}}</b>.<br>Вы можете выбрать подсистему для работы.</p>
+</div>
+{% endblock %}

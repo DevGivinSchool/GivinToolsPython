@@ -1,0 +1,3 @@
+base.html Основной корневой шаблон, который расширяется
+index.html Home
+sf_list.html Список ДШ

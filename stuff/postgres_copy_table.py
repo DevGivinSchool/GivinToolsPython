@@ -5,8 +5,11 @@ import core.PASSWORDS as PASSWORDS
 
 def copy_table(connectionStringSrc, connectionStringDst, table_name_src, table_name_dst, verbose=False, condition=""):
     with psycopg2.connect(connectionStringSrc) as connSrc:
+        print(f"Source connect is OK: {connectionStringSrc}")
         with psycopg2.connect(connectionStringDst) as connDst:
+            print(f"Destination connect is OK: {connectionStringDst}")
             query = "SELECT * FROM {} {};".format(table_name_src, condition)
+            print(f"query = {query}")
             with connSrc.cursor() as curSrc:
                 curSrc.execute(query)
                 print("Source number of rows =", curSrc.rowcount)

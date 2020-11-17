@@ -1,3 +1,4 @@
+asgiref==3.2.10
 beautifulsoup4==4.8.1
 bitrix24-python3-client==0.4.0
 certifi==2019.11.28
@@ -5,6 +6,7 @@ chardet==3.0.4
 colorama==0.4.3
 configparser==4.0.2
 crayons==0.3.0
+Django==3.1
 docutils==0.15.2
 html2text==2019.9.26
 idna==2.8
@@ -12,11 +14,17 @@ IMAPClient==2.1.0
 lxml==4.4.2
 psycopg2==2.8.4
 psycopg2-binary==2.8.4
+pyaes==1.6.1
+pyasn1==0.4.8
 PyJWT==1.7.1
+pytz==2020.1
 requests==2.22.0
+rsa==4.6
 selenium==3.141.0
 six==1.13.0
 soupsieve==1.9.5
+sqlparse==0.3.1
+Telethon==1.15.0
 transliterate==1.10.2
 urllib3==1.25.7
 webdriver-manager==2.3.0

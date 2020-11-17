@@ -143,4 +143,5 @@ dmypy.json
 
 GivinToolsPython.sublime-project
 GivinToolsPython.sublime-workspace
-test.py
+activator.cmd
+list.txt

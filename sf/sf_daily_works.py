@@ -4,7 +4,7 @@ import traceback
 import xlsxwriter
 import os
 import core.PASSWORDS as PASSWORDS
-from .sf_participant_block import block_one_participant
+from sf.sf_participant_block import block_one_participant
 from core.Class_DBPostgres import DBPostgres
 from core.alert_to_mail import send_mail, send_error_to_admin
 from datetime import datetime

@@ -111,11 +111,12 @@ def block_one_participant(p, postgres, logger):
 
 
 if __name__ == '__main__':
-    import custom_logger
+    import core.custom_logger as custom_logger
     import os
-    from list_ import list_fio
+    # from list_ import list_fio
 
     program_file = os.path.realpath(__file__)
     logger_ = custom_logger.get_logger(program_file=program_file)
 
+    list_fio = ''  # TODO Это нужно переделать на процедруру file_processing(func) из gtp_create_logins.py
     participants_block(list_fio, logger_)

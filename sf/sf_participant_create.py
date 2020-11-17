@@ -9,7 +9,7 @@ from core.Class_ZoomUS import ZoomUS
 from core.Class_DBPostgres import DBPostgres
 from core.alert_to_mail import send_mail, get_participant_notification_text
 from core.utils import get_login
-from core.password_generator_for_sf import password_for_sf
+from core.password_generator import password_for_sf
 from datetime import datetime
 
 

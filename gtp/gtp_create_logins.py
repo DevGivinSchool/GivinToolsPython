@@ -182,4 +182,7 @@ if __name__ == "__main__":
 
     ans = input("Выберите вариант!")
     func = menu.get(ans, [None, invalid])[1]
-    file_processing(func)
+    if ans in ['1', '2', '3', '7']:
+        file_processing(func)
+    else:
+        func()

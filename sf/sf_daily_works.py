@@ -4,7 +4,7 @@ import traceback
 import xlsxwriter
 import os
 import core.PASSWORDS as PASSWORDS
-from . import sf_participant_block
+from .sf_participant_block import block_one_participant
 from core.Class_DBPostgres import DBPostgres
 from core.alert_to_mail import send_mail, send_error_to_admin
 from datetime import datetime
@@ -57,7 +57,7 @@ order by last_name"""
             until_date = p[7]
 
         try:
-            sf_participant_block.block_one_participant(p[9], dbconnect, logger)
+            block_one_participant(p[9], dbconnect, logger)
 
             mail_text = f"""Здравствуйте, {p[2].title()}!  
     
@@ -327,7 +327,7 @@ def main():
     Соединение с БД критично, поэтому при невозможности соединиться с БД осуществляется выход из приложения.
     :return:
     """
-    import custom_logger
+    import core.custom_logger as custom_logger
     import os
 
     program_file = os.path.realpath(__file__)

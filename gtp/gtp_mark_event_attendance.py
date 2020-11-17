@@ -272,7 +272,7 @@ if __name__ == '__main__':
          datetime(2020, 4, 20, 9, 00, 00))
     ]
 
-    import custom_logger
+    import core.custom_logger as custom_logger
     import os
 
     program_file = os.path.realpath(__file__)

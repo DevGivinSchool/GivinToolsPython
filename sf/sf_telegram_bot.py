@@ -1,9 +1,9 @@
 import core.PASSWORDS as PASSWORDS
 import sys
 import psycopg2
-from Class_TelegramBot import TelegramBot
-from Class_DBPostgres import DBPostgres
-from alert_to_mail import send_mail, raise_error, get_participant_notification_text
+from core.Class_TelegramBot import TelegramBot
+from core.Class_DBPostgres import DBPostgres
+from core.alert_to_mail import send_mail, raise_error, get_participant_notification_text
 
 
 def mark_telegram_update_id(telegram_update_id_, logger_):
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     Отдельно обрабатываем список проверки, если пользователь находиться в participants = оплатил = оповещение.
     Записи в списке проверки храняться 31 день.
     """
-    import custom_logger
+    import core.custom_logger as custom_logger
     import os
 
     logger = custom_logger.get_logger(program_file=os.path.realpath(__file__))

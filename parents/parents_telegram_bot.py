@@ -38,7 +38,7 @@ if __name__ == "__main__":
         cd c:\\yGit\\GivinToolsPython\\
         python parents_telegram_bot.py 1
     """
-    import custom_logger
+    import core.custom_logger as custom_logger
     import os
 
     program_file = os.path.realpath(__file__)

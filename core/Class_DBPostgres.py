@@ -406,7 +406,7 @@ class DBPostgres:
 
 
 if __name__ == "__main__":
-    import custom_logger
+    import core.custom_logger as custom_logger
     import os
 
     program_file = os.path.realpath(__file__)

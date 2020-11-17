@@ -123,7 +123,7 @@ def delete_obsolete_files(path, days, logger):
 
 
 if __name__ == '__main__':
-    import custom_logger
+    import core.custom_logger as custom_logger
     program_file = os.path.realpath(__file__)
     logger = custom_logger.get_logger(program_file=program_file)
     log_path = r"c:\\MyGit\\GivinToolsPython\\log\\"

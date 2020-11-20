@@ -20,7 +20,8 @@ def file_processing(func):
         reader = csv.reader(f, delimiter=';')
         # headers = next(reader, None)
         for row in reader:
-            # print(row)
+            print(row)
+            print(type(row))
             func(row)
 
 
@@ -29,7 +30,6 @@ def create_team_mail(line):
         В list_.py нужно внести список Фамилия + Имя
         Иванов Иван
     """
-    line = split_str(line)
     # ['Карякина', 'Наталья']
     login_ = get_login(line[0], line[1], type="team")
     print(f"Фамилия: {line[0]}; Имя: {line[1]}; Email: {login_}@givinschool.org")

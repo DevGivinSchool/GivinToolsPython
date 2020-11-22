@@ -28,11 +28,9 @@ def parents_telegram_bot(dbconnect, logger):
 if __name__ == "__main__":
     """
     Бот для проекта Мы Родители. Рассылка заданий по расписанию.
-    
     HTTP запрос на получение updates для бота чтобы посмотреть chat_id группы можно посмотерть в parents_PASSWORDS.py
-    
     Вручную можно отправить сообщение так (аргумент в командной строке это message_id):
-    Windows: 
+    Windows:
         cd c:\\Users\\MinistrBob\\.virtualenvs\\GivinToolsPython\\Scripts
         activate
         cd c:\\yGit\\GivinToolsPython\\
@@ -46,7 +44,8 @@ if __name__ == "__main__":
     logger.info('START parents_telegram_bot')
     logger.info("Try connect to DB")
     try:
-        dbconnect = DBPostgres(dbname=parents_PASSWORDS.settings['parents_dbname'], user=parents_PASSWORDS.settings['parents_user'],
+        dbconnect = DBPostgres(dbname=parents_PASSWORDS.settings['parents_dbname'],
+                               user=parents_PASSWORDS.settings['parents_user'],
                                password=parents_PASSWORDS.settings['parents_password'],
                                host=parents_PASSWORDS.settings['parents_host'],
                                port=parents_PASSWORDS.settings['parents_port'], logger=logger)

@@ -61,5 +61,5 @@ if __name__ == "__main__":
     client.logout()
     postgres.session_end(session_id)
     logger.info('#' * 45)
-    logger.info(f'Session end')
+    logger.info('Session end')
     logger.info('END gtp_school_friends')

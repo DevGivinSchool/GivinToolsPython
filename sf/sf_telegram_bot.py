@@ -36,8 +36,8 @@ if __name__ == '__main__':
     Никаких даже попыток отправить что-то в telegram при регистрации нового участника не делается.
     Добавил ли себе участник бота проверяется только в этом скрипте.
     Идём по сообщениям полученных ботом и сравнимаем telegram username с тем что в participants.
-    Если IF участник находиться в participants - значит он оплатил и ему можно отправить сообщение.
-    Иначе ELSE - участник добавил себе бота но пока не оплатил, заносим его в список проверки telegram_bot_added.
+    Если участник находиться в participants - значит он оплатил и ему можно отправить сообщение.
+    Иначе - участник добавил себе бота но пока не оплатил, заносим его в список проверки telegram_bot_added.
     Отдельно обрабатываем список проверки, если пользователь находиться в participants = оплатил = оповещение.
     Записи в списке проверки храняться 31 день.
     """
@@ -56,7 +56,7 @@ if __name__ == '__main__':
         sys.exit(1)
     # logger.info('\n' + '#' * 120)
     # Получить update_id из БД
-    rows = dbconnect.execute_select(f"select value from settings where key='telegram_update_id';", None)
+    rows = dbconnect.execute_select(r"select value from settings where key='telegram_update_id';", None)
     logger.info(f"rows={rows}")
     if not rows:
         raise_error("Select для telegram_update_id ничего не возвращает", logger, prog_name="sf_telegram_bot.py")

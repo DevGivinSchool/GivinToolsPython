@@ -11,7 +11,8 @@ def password_for_sf():
     digit_char = random.randint(1, 9)
     # special_chars = "@#$&"
     # special_char_index = random.randint(0, 3)
-    # password = f"{word[0].upper()}{word[0].upper()}{word[1]}{word[1]}{word[2]}{word[2]}{str(digit_char)}{special_chars[special_char_index]}"
+    # password = f"{word[0].upper()}{word[0].upper()}{word[1]}{word[1]}{word[2]}{word[2]}{str(digit_char)}" \
+    #            f"{special_chars[special_char_index]}"
     password = f"{word[0].upper()}{word[0].upper()}{word[1]}{word[1]}{word[2]}{word[2]}{str(digit_char)}{str(digit_char)}"
     return password
 
@@ -90,7 +91,7 @@ if __name__ == '__main__':
     n = 1
     try:
         n = int(argv[1])
-    except:
+    except:  # noqa: E722
         pass
     for _ in range(n):
         print(password_for_sf())

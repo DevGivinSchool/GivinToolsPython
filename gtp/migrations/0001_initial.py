@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -15,19 +14,27 @@ class Migration(migrations.Migration):
             name='TeamMember',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('last_name', models.CharField(blank=True, max_length=255, null=True, verbose_name='Фамилия по русски')),
+                (
+                'last_name', models.CharField(blank=True, max_length=255, null=True, verbose_name='Фамилия по русски')),
                 ('first_name', models.CharField(blank=True, max_length=255, null=True, verbose_name='Имя по русски')),
-                ('last_name_eng', models.CharField(blank=True, max_length=255, null=True, verbose_name='Фамилия по английски')),
-                ('first_name_eng', models.CharField(blank=True, max_length=255, null=True, verbose_name='Имя по английски')),
+                ('last_name_eng',
+                 models.CharField(blank=True, max_length=255, null=True, verbose_name='Фамилия по английски')),
+                ('first_name_eng',
+                 models.CharField(blank=True, max_length=255, null=True, verbose_name='Имя по английски')),
                 ('email', models.CharField(blank=True, db_index=True, max_length=254, null=True, verbose_name='Email')),
-                ('telegram', models.CharField(blank=True, db_index=True, max_length=32, null=True, verbose_name='Telegram name')),
-                ('filial', models.CharField(blank=True, max_length=255, null=True, verbose_name='К какому филиалу относится')),
+                ('telegram',
+                 models.CharField(blank=True, db_index=True, max_length=32, null=True, verbose_name='Telegram name')),
+                ('filial',
+                 models.CharField(blank=True, max_length=255, null=True, verbose_name='К какому филиалу относится')),
                 ('retrit', models.CharField(blank=True, max_length=255, null=True, verbose_name='С какого ретрита')),
                 ('birthday', models.DateField(blank=True, null=True, verbose_name='Дата выдачи отсрочки')),
-                ('type', models.CharField(choices=[('М', 'Мужской'), ('Ж', 'Женский')], default='М', max_length=1, verbose_name='Пол: М - мужской; Ж - женский')),
+                ('type', models.CharField(choices=[('М', 'Мужской'), ('Ж', 'Женский')], default='М', max_length=1,
+                                          verbose_name='Пол: М - мужской; Ж - женский')),
                 ('time_begin', models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')),
-                ('time_end', models.DateTimeField(blank=True, editable=False, null=True, verbose_name='Дата блокировки')),
-                ('login', models.CharField(blank=True, max_length=100, null=True, verbose_name='Логин пользователя в домене @givinschool.org, соответствует почте')),
+                ('time_end',
+                 models.DateTimeField(blank=True, editable=False, null=True, verbose_name='Дата блокировки')),
+                ('login', models.CharField(blank=True, max_length=100, null=True,
+                                           verbose_name='Логин пользователя в домене @givinschool.org, соответствует почте')),
                 ('password', models.CharField(blank=True, max_length=32, null=True, verbose_name='Пароль участника')),
                 ('comment', models.CharField(blank=True, max_length=4000, null=True, verbose_name='Комментарий')),
             ],

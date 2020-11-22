@@ -114,6 +114,7 @@ def zoom_member(file):  # Join zoom conference and team member
     with open(r'c:\!SAVE\inserts1.sql', 'w') as file:
         file.writelines("%s\n" % place for place in result)
 
+
 if __name__ == "__main__":
     file_name = r"c:\!SAVE\data-1586684131740.txt"
     # gsf()

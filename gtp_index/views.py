@@ -1,5 +1,5 @@
 # import pdb  # pdb.set_trace()
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from sf.models import Participant
 from gtp.models import TeamMember
 from django.views.generic import DetailView, CreateView, UpdateView, DeleteView
@@ -7,7 +7,7 @@ from .forms import ParticipantCreateForm, ParticipantEditForm, TeamMemberCreateF
 from django.urls import reverse, reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
-from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseForbidden
+from django.http import HttpResponseRedirect, Http404, HttpResponseForbidden
 from django.contrib.auth.models import Group
 
 
@@ -70,7 +70,7 @@ class GSLogoutView(LogoutView):
     next_page = reverse_lazy('index')
 
 
-def index(request):
+def index(request):  # noqa: C901
     """ Главная страница. Здесь проверяется авторизация пользователя и в зависимости от его группы,
     происходит перенаправление на необходимую страницу.
     :param request:

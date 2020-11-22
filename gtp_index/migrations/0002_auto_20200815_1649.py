@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('gtp_index', '0001_initial'),
     ]
@@ -14,7 +13,11 @@ class Migration(migrations.Migration):
             name='Participant',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.CharField(choices=[('N', 'новый участник (первый месяц)'), ('P', 'регулярный участник'), ('B', 'заблокированный'), ('E', 'наш сотрудник'), ('V', 'VIP (особые условия, например, участие без оплаты)')], default='N', max_length=1, verbose_name='Тип участника: P - регулярный участник; B - заблокированный; E - наш сотрудник; V - VIP (особые условия, например, участие без оплаты)')),
+                ('type', models.CharField(choices=[('N', 'новый участник (первый месяц)'), ('P', 'регулярный участник'),
+                                                   ('B', 'заблокированный'), ('E', 'наш сотрудник'),
+                                                   ('V', 'VIP (особые условия, например, участие без оплаты)')],
+                                          default='N', max_length=1,
+                                          verbose_name='Тип участника: P - регулярный участник; B - заблокированный; E - наш сотрудник; V - VIP (особые условия, например, участие без оплаты)')),
                 ('telegram_id', models.BigIntegerField(verbose_name='Telegram id')),
             ],
         ),

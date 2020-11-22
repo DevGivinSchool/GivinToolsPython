@@ -1,5 +1,5 @@
 import psycopg2
-import argparse
+# import argparse
 import core.PASSWORDS as PASSWORDS
 
 
@@ -46,8 +46,16 @@ if __name__ == '__main__':
     copy_table(args.cs_src, args.cs_dst, args.tablename, args.verbose, args.where)
 """
 if __name__ == '__main__':
-    connectionStringSrc = f"host={PASSWORDS.settings['postgres_host']} port={PASSWORDS.settings['postgres_port']} user={PASSWORDS.settings['postgres_user']} password={PASSWORDS.settings['postgres_password']} dbname={PASSWORDS.settings['postgres_dbname_src']}"
-    connectionStringDst = f"host={PASSWORDS.settings['postgres_host']} port={PASSWORDS.settings['postgres_port']} user={PASSWORDS.settings['postgres_user']} password={PASSWORDS.settings['postgres_password']} dbname={PASSWORDS.settings['postgres_dbname_dst']}"
+    connectionStringSrc = f"host={PASSWORDS.settings['postgres_host']} " \
+                          f"port={PASSWORDS.settings['postgres_port']} " \
+                          f"user={PASSWORDS.settings['postgres_user']} " \
+                          f"password={PASSWORDS.settings['postgres_password']} " \
+                          f"dbname={PASSWORDS.settings['postgres_dbname_src']}"
+    connectionStringDst = f"host={PASSWORDS.settings['postgres_host']} " \
+                          f"port={PASSWORDS.settings['postgres_port']} " \
+                          f"user={PASSWORDS.settings['postgres_user']} " \
+                          f"password={PASSWORDS.settings['postgres_password']} " \
+                          f"dbname={PASSWORDS.settings['postgres_dbname_dst']}"
     table_name_src = PASSWORDS.settings['table_name_src']
     table_name_dst = PASSWORDS.settings['table_name_dst']
     copy_table(connectionStringSrc, connectionStringDst, table_name_src, table_name_dst, verbose=True)

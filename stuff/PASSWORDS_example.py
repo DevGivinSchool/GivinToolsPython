@@ -40,7 +40,7 @@ settings = dict(
     getcourse_login_page="https://givinschoolru.getcourse.ru/cms/system/login",
     getcourse_login="getcourse_login@givinschool.org",
     getcourse_password="xxx",
-    getcourse_key="eWEuXoPxih6KU28tm45jndfnb875nvTFbutk8grXUhbH4X5bBUpx6cTjzv5v3ySXedflkrutnHFRndT4668rAOAcsJjt6GrB9cSzflAjDUBnQSvAqzpKCt1FU60F2",
+    getcourse_key="eWEuXoPxih6KU28tm45jndfnb875nvTFbutk8grXUhbH4X5bBUpx6cTjzv5v3ySXedflkrutnHFRndT4668rAOAcsJjt6",
     bitrix_clientId="777",
     bitrix_clientCode="local.5d2a5834b949b0.48729573",
     bitrix_clientSecret="nJPDHkLog6QCJTptynds7eGTbd34GbHckj955t0dFLN1S",
@@ -80,12 +80,12 @@ if PROFILE == 'DEV':
         full_list_participants_to_emails=['xxx@gmail.com']
     )
     # print(settings)
-    # merge dictionary Python 3.5 or greater (https://stackoverflow.com/questions/38987/how-do-i-merge-two-dictionaries-in-a-single-expression-in-python)
+    # merge dictionary Python 3.5 or greater
+    # (https://stackoverflow.com/questions/38987/how-do-i-merge-two-dictionaries-in-a-single-expression-in-python)
 
 settings = {**settings, **settings_debug}
 
 if __name__ == '__main__':
-    import pprint
     pp = pprint.PrettyPrinter(indent=2)
     pp.pprint(settings_debug)
     pp.pprint(settings)

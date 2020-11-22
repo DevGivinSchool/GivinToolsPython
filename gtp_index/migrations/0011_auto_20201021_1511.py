@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('gtp_index', '0010_auto_20200911_1757'),
     ]
@@ -34,12 +33,14 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='participant',
             name='fio',
-            field=models.CharField(blank=True, db_index=True, max_length=500, null=True, verbose_name='Фамилия и Имя по русски'),
+            field=models.CharField(blank=True, db_index=True, max_length=500, null=True,
+                                   verbose_name='Фамилия и Имя по русски'),
         ),
         migrations.AlterField(
             model_name='participant',
             name='fio_eng',
-            field=models.CharField(blank=True, db_index=True, max_length=500, null=True, verbose_name='Фамилия и Имя по английски'),
+            field=models.CharField(blank=True, db_index=True, max_length=500, null=True,
+                                   verbose_name='Фамилия и Имя по английски'),
         ),
         migrations.AlterField(
             model_name='participant',
@@ -64,7 +65,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='participant',
             name='login',
-            field=models.CharField(blank=True, max_length=100, null=True, verbose_name='Логин пользователя в домене @givinschool.org, соответствует почте'),
+            field=models.CharField(blank=True, max_length=100, null=True,
+                                   verbose_name='Логин пользователя в домене @givinschool.org, соответствует почте'),
         ),
         migrations.AlterField(
             model_name='participant',
@@ -99,7 +101,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='participant',
             name='type',
-            field=models.CharField(choices=[('N', 'новый участник (первый месяц)'), ('P', 'регулярный участник'), ('B', 'заблокированный'), ('E', 'наш сотрудник'), ('V', 'VIP (особые условия, например, участие без оплаты)')], default='N', max_length=1, verbose_name='Тип участника: N - новый участник (первый месяц); P - регулярный участник; B - заблокированный; E - наш сотрудник; V - VIP (особые условия, например, участие без оплаты)'),
+            field=models.CharField(
+                choices=[('N', 'новый участник (первый месяц)'), ('P', 'регулярный участник'), ('B', 'заблокированный'),
+                         ('E', 'наш сотрудник'), ('V', 'VIP (особые условия, например, участие без оплаты)')],
+                default='N', max_length=1,
+                verbose_name='Тип участника: N - новый участник (первый месяц); P - регулярный участник; B - заблокированный; E - наш сотрудник; V - VIP (особые условия, например, участие без оплаты)'),
         ),
         migrations.AlterField(
             model_name='participant',

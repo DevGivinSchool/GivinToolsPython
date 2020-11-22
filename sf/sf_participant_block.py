@@ -15,7 +15,7 @@ def participants_block(list_participants, logger2):
     postgres.disconnect()
 
 
-def block_one_participant(p, postgres, logger):
+def block_one_participant(p, postgres, logger):  # noqa: C901
     print(f"Попытка блокировки участника |{p}|")
     logger.info(f"Попытка блокировки участника |{p}|")
     # Проверяем что p это ID

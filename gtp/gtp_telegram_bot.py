@@ -32,7 +32,9 @@ WHERE time_end IS NULL
             logger.debug(f"success={success}")
             logger.debug(f"result=\n{result}")
             if not success:
-                raise_error(f"Не могу отправить сообщение в чат chat_id={chat['chat_id']},chat_name={chat['chat_name']}\n{result}", logger)
+                raise_error(
+                    f"Не могу отправить сообщение в чат chat_id={chat['chat_id']},chat_name={chat['chat_name']}\n{result}",
+                    logger)
 
 
 if __name__ == "__main__":

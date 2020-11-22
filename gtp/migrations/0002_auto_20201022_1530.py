@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('gtp', '0001_initial'),
     ]
@@ -17,6 +16,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='teammember',
             name='sex',
-            field=models.CharField(blank=True, choices=[('М', 'Мужской'), ('Ж', 'Женский')], default='М', max_length=1, null=True, verbose_name='Пол: М - мужской; Ж - женский'),
+            field=models.CharField(blank=True, choices=[('М', 'Мужской'), ('Ж', 'Женский')], default='М', max_length=1,
+                                   null=True, verbose_name='Пол: М - мужской; Ж - женский'),
         ),
     ]

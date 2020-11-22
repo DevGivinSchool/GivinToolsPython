@@ -1,6 +1,6 @@
 #!/home/robot/MyGit/GivinToolsPython/venv/bin/python3.8
 import sys
-import traceback
+# import traceback
 import xlsxwriter
 import os
 import core.PASSWORDS as PASSWORDS
@@ -20,18 +20,18 @@ def block_participants(dbconnect, logger):
     """
     logger.info("Блокировка участников у которых оплата просрочена на 5 дней")
     # Список участников подлежащих блокировке
-    sql_text = """SELECT 
+    sql_text = """SELECT
 --current_date,
 until_date - current_date as "INTERVAL2",
 deadline - current_date as "INTERVAL",
---last_name, 
+--last_name,
 --first_name,
-fio, 
-email, 
+fio,
+email,
 telegram,
-payment_date, 
-number_of_days, 
-deadline, 
+payment_date,
+number_of_days,
+deadline,
 until_date,
 --,comment
 id
@@ -45,45 +45,48 @@ order by last_name"""
     values_tuple = (None,)
     records = dbconnect.execute_select(sql_text, values_tuple)
     # (None, 7, 'АЛААА', 'anxxxxx@mail.ru', datetime.date(2019, 12, 31), None)
-    # (None, 7, 'БАРААААА', 'ИРАААА', 'barxxxx.xxx@inbox.ru', '@irinabar6', datetime.date(2019, 12, 8), 30, datetime.date(2020, 1, 7), None)
-    # (None, 7, 'БАРААААА ИРАААА', 'barxxxx.xxx@inbox.ru', '@irinabar6', datetime.date(2019, 12, 8), 30, datetime.date(2020, 1, 7), None)
+    # (None, 7, 'БАР', 'ИРА', 'xxx@inbox.ru', '@xxx', datetime.date(2019, 12, 8), 30, datetime.date(2020, 1, 7), None)
+    # (None, 7, 'БАР ИРА', 'xxx@inbox.ru', '@xxx', datetime.date(2019, 12, 8), 30, datetime.date(2020, 1, 7), None)
 
     for p in records:
         print(p)
         # Определяем что используется Срок оплаты или отсрочка
-        if p[7] is None:
-            until_date = p[8]
-        else:
-            until_date = p[7]
+        # if p[7] is None:
+        #     until_date = p[8]
+        # else:
+        #     until_date = p[7]
 
         try:
             block_one_participant(p[9], dbconnect, logger)
 
-            mail_text = f"""Здравствуйте, {p[2].title()}!  
-    
+            mail_text = f"""Здравствуйте, {p[2].title()}!
+
     Наша автоматическая система заблокировала вашу учётную запись для Друзей Школы (ДШ),
-    потому что вы {p[5].strftime("%d.%m.%Y")} оплатили период {p[6]} дней Друзей Школы (ДШ) 
+    потому что вы {p[5].strftime("%d.%m.%Y")} оплатили период {p[6]} дней Друзей Школы (ДШ)
     и ваша оплата просрочена на 5 дней.
     Система предупреждала вас за 3 и 7 дней до срока, письмом на email - {p[3]}.
     Для разблокировки достаточно просто оплатить ДШ.
     Если же вы больше не хотите участвовать в ДШ - система больше не будет вас беспокоить.
-    
-    Вы можете оплатить ДШ через страницу оплаты (доступен PayPal). Возможна оплата сразу за 3 или 6 месяцев, при этом вы полаете скидки 7% и 13% соответственно:
+
+    Вы можете оплатить ДШ через страницу оплаты (доступен PayPal). 
+    Возможна оплата сразу за 3 или 6 месяцев, при этом вы полаете скидки 7% и 13% соответственно:
     (+PayPal) https://givinschoolru.getcourse.ru/sf
-    
+
     Пожалуйста, при оплате, указывайте свои Фамилию, Имя, такие же как и при регистрации.
     В назначение платежа можно написать "друзья школы" или просто "дш".
-    
+
     Ваш email:    {p[3]}
     Ваш telegram: {p[4]}
-    
+
     С благодарностью и сердечным теплом,
     команда Школы Гивина.
         """
             logger.info(mail_text)
-            send_mail([p[3]] + PASSWORDS.settings['manager_emails'], r"[ШКОЛА ГИВИНА]. Оповещение о блокировке в ДШ", mail_text, logger)
+            send_mail([p[3]] + PASSWORDS.settings['manager_emails'],
+                      r"[ШКОЛА ГИВИНА]. Оповещение о блокировке в ДШ", mail_text, logger)
         except:
-            send_error_to_admin(f"DAILY WORKS ERROR: Ошибка при попытке заблокировать участника:\n{p}", logger, prog_name="sf_daily_works.py")
+            send_error_to_admin(f"DAILY WORKS ERROR: Ошибка при попытке заблокировать участника:\n{p}",
+                                logger, prog_name="sf_daily_works.py")
         logger.info('\n' + '=' * 120)
 
 

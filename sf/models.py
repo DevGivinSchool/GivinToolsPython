@@ -49,7 +49,12 @@ class Participant(models.Model):
         max_length=1,
         choices=PARTICIPANT_TYPE_VOC,
         default='N',
-        verbose_name="Тип участника: N - новый участник (первый месяц); P - регулярный участник; B - заблокированный; E - наш сотрудник; V - VIP (особые условия, например, участие без оплаты)",
+        verbose_name="Тип участника: "
+                     "N - новый участник (первый месяц); "
+                     "P - регулярный участник; "
+                     "B - заблокированный; "
+                     "E - наш сотрудник; "
+                     "V - VIP (особые условия, например, участие без оплаты)",
     )
     last_name_eng = models.CharField(blank=True, null=True, max_length=255, verbose_name="Фамилия по английски")
     first_name_eng = models.CharField(blank=True, null=True, max_length=255, verbose_name="Имя по английски")

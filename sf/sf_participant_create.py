@@ -62,7 +62,7 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         if payment["password"][-2:] == "55":
             payment["password"] = payment["password"][:-2]
         logger.info("Изменение статуса учатника в БД")
-        sql_text = """UPDATE participants 
+        sql_text = """UPDATE participants
         SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s, password=%s
         WHERE id=%s;"""
         values_tuple = (payment["Время проведения"], payment["number_of_days"],
@@ -87,14 +87,17 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
                             f"ФИО     : {payment['Фамилия Имя']}\n" \
                             f"Login   : {payment['login']}\n" \
                             f"Password: {payment['password']}"
-                send_mail(PASSWORDS.settings['admin_emails'], "UNBLOCK PARTICIPANT ERROR", mail_text, logger, attached_file=logger.handlers[0].baseFilename)
+                send_mail(PASSWORDS.settings['admin_emails'], "UNBLOCK PARTICIPANT ERROR", mail_text, logger,
+                          attached_file=logger.handlers[0].baseFilename)
                 logger.error(mail_text)
                 logger.error("+" * 60)
         else:
             logger.info("Участник активирован в Zoom")
         # Уведомление участника
         logger.info("Уведомление участника")
-        notification_text = participant_notification(payment, r"[ШКОЛА ГИВИНА]. Ваша учётная запись в Друзьях Школы разблокирована.", logger)
+        notification_text = participant_notification(payment,
+                                                     r"[ШКОЛА ГИВИНА]. Ваша учётная запись в Друзьях Школы разблокирована.",
+                                                     logger)
         mm.subject = "[ДШ] РАЗБЛОКИРОВКА УЧАСТНИКА"
         mm.text += "Текст уведомления:\n\n\n" + notification_text
     else:
@@ -103,8 +106,8 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         logger.debug(f"number_of_days|{type(payment['number_of_days'])}|{payment['number_of_days']}")
         logger.debug(f"deadline|{type(payment['deadline'])}|{payment['deadline']}")
         logger.debug(f"until_date|{type(payment['until_date'])}|{payment['until_date']}")
-        sql_text = """UPDATE participants 
-        SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s 
+        sql_text = """UPDATE participants
+        SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s
         WHERE id=%s;"""
         values_tuple = (payment["Время проведения"], payment["number_of_days"],
                         payment["deadline"], participant_type, payment["participant_id"])
@@ -113,7 +116,9 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         logger.info("Оплата в БД отмечена")
         # Уведомление участника
         logger.info("Уведомление участника")
-        notification_text = participant_notification(payment, r"[ШКОЛА ГИВИНА]. Ваша оплата принята и продлено участие в Друзьях Школы.", logger)
+        notification_text = participant_notification(payment,
+                                                     r"[ШКОЛА ГИВИНА]. Ваша оплата принята и продлено участие в Друзьях Школы.",
+                                                     logger)
         mm.subject = "[ДШ] принята оплата за ДШ"
         mm.text += "Текст уведомления:\n\n\n" + notification_text
     # Окончательное состояние участника
@@ -373,8 +378,8 @@ if __name__ == '__main__':
     """
     import core.custom_logger as custom_logger
     import os
-    from list_ import list_fio
 
+    list_fio = ''
     program_file = os.path.realpath(__file__)
     log = custom_logger.get_logger(program_file=program_file)
     # noinspection PyBroadException

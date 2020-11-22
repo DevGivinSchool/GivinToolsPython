@@ -1,28 +1,3 @@
-"""
-Отмечать присутствие на занятиях и получать итоговую таблицу
-"""
-"""!!! можно отмечать присутствие из программы циклом, а можно одним sql запросом, но нужно это делать циклом, 
-потому что есть соотвествия написания имени в zoom и членом команды отраженное в таблице zoom_join_zoom_and_members, 
-поэтому каждый раз могут появляться иные соответсвия и такие люди не будет отмечены и это никак не обнаружиться, 
-поэтому нужно идти циклом, отмечать присутствие и в конце выводить список выявленных новых соответствий, 
-их нужно заносить в таблицу вручную, ПОТОМУ ЧТО ТОЛЬКО ЧЕЛОВЕК СМОЖЕТ УСТАНОВИТЬ РЕАЛЬНОЕ СООТВЕТСВИЕ (люди иногда 
-так называют себя что там сам чёрт ногу сломит). 
-
-select 
---*
-tm.id, tm.last_name, tm.first_name, sum(conference_duration) as conference_duration 
-from team_members tm
-LEFT JOIN (select * from (select zoom_name, zoom_email, sum(conference_duration) as conference_duration
-from zoom_conference_participants
-WHERE conference_id=305 
-group by zoom_name, zoom_email) zcp
-LEFT JOIN zoom_join_zoom_and_members jm
-            ON zcp.zoom_name = jm.zoom_name) tab1
-			ON tm.id = tab1.member_id
-where tm.id<>1
-group by tm.id, tm.last_name, tm.first_name
-order by tm.last_name
-"""
 import csv
 import traceback
 import core.PASSWORDS as PASSWORDS
@@ -30,6 +5,32 @@ import sys
 import core.utils as utils
 from datetime import datetime
 from core.Class_DBPostgres import DBPostgres
+
+"""
+Отмечать присутствие на занятиях и получать итоговую таблицу
+"""
+"""!!! можно отмечать присутствие из программы циклом, а можно одним sql запросом, но нужно это делать циклом,
+потому что есть соотвествия написания имени в zoom и членом команды отраженное в таблице zoom_join_zoom_and_members,
+поэтому каждый раз могут появляться иные соответсвия и такие люди не будет отмечены и это никак не обнаружиться,
+поэтому нужно идти циклом, отмечать присутствие и в конце выводить список выявленных новых соответствий,
+их нужно заносить в таблицу вручную, ПОТОМУ ЧТО ТОЛЬКО ЧЕЛОВЕК СМОЖЕТ УСТАНОВИТЬ РЕАЛЬНОЕ СООТВЕТСВИЕ (люди иногда
+так называют себя что там сам чёрт ногу сломит).
+
+select
+--*
+tm.id, tm.last_name, tm.first_name, sum(conference_duration) as conference_duration
+from team_members tm
+LEFT JOIN (select * from (select zoom_name, zoom_email, sum(conference_duration) as conference_duration
+from zoom_conference_participants
+WHERE conference_id=305
+group by zoom_name, zoom_email) zcp
+LEFT JOIN zoom_join_zoom_and_members jm
+            ON zcp.zoom_name = jm.zoom_name) tab1
+            ON tm.id = tab1.member_id
+where tm.id<>1
+group by tm.id, tm.last_name, tm.first_name
+order by tm.last_name
+"""
 
 
 def convert_zoom_datetime(text):

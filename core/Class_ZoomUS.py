@@ -330,7 +330,7 @@ class ZoomUS:
                         # print(f'type={meet["type"]}|{meet["topic"]} - {id_} - {meet["join_url"]}')
                         # print(curr)
                     lm.append(curr)
-                except:
+                except:  # noqa: E722
                     print("ERROR")
                     print(f"meet={meet}")
                     print(traceback.format_exc())
@@ -466,7 +466,7 @@ if __name__ == '__main__':
         from Log import Log
         from log_config import log_dir, log_level
         from list_ import list_fio
-    
+
         now = datetime.now().strftime("%Y%m%d%H%M")
         logger = Log.setup_logger('__main__', log_dir, f'zoom_us_{now}.log', logging.DEBUG)
         action = 'deactivate'
@@ -509,4 +509,4 @@ if __name__ == '__main__':
         for row in reader:
             # print(row)
             change_zoom_password(row[0], row[1], zoom_user)
-"""
+"""  # noqa: W605

@@ -17,7 +17,7 @@ def copy_table(connectionStringSrc, connectionStringDst, table_name_src, table_n
                     for row in curSrc:
                         # generate %s x columns
                         query_columns = ','.join([desc[0] for desc in curSrc.description])
-                        query_values = ','.join('%s' for x in range(len(curSrc.description)))
+                        query_values = ','.join('%s' for _ in range(len(curSrc.description)))
                         query = "INSERT INTO {} ({}) VALUES ({});".format(table_name_dst, query_columns, query_values)
                         param = [item for item in row]
                         if verbose:
@@ -29,9 +29,11 @@ def copy_table(connectionStringSrc, connectionStringDst, table_name_src, table_n
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("cs_src", type=str,
-                        help='connection string source like: "host=localhost port=5432 user=admin password=mypwd dbname=mydbname"')
+                        help='connection string source like:
+                        "host=localhost port=5432 user=admin password=mypwd dbname=mydbname"')
     parser.add_argument("cs_dst", type=str,
-                        help='connection string destination like: "host=localhost port=5432 user=admin password=mypwd dbname=mydbname"')
+                        help='connection string destination like:
+                        "host=localhost port=5432 user=admin password=mypwd dbname=mydbname"')
 
     parser.add_argument("tablename", type=str,
                         help='Table name')

@@ -58,7 +58,7 @@ def create_yandex_mail(logger, familia_, name_, login_, password_=None, departme
     'position': None,
     'department': {
         'members_count': 262,
-        'description': 'Здесь находятся все созданные аккаунты для Друзей Школы. Пароли от почт: XXX', 
+        'description': 'Здесь находятся все созданные аккаунты для Друзей Школы. Пароли от почт: XXX',
         'name': '@ДРУЗЬЯ_ШКОЛЫ',
         'created': '2019-05-27T08:28:30.839880Z',
         'heads_group_id': 13,

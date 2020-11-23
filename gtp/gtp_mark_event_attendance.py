@@ -123,7 +123,7 @@ def get_participants_list(file, event_time_begin, event_time_end, conference_id,
     return participants_list
 
 
-def mark_attendance(event, db, logger):
+def mark_attendance(event, db, logger):  # noqa: C901
     """
     Читает отчёт zoom, парсит его и заносит все полученные данные в БД
     :param file: Файл отчёта
@@ -137,7 +137,7 @@ def mark_attendance(event, db, logger):
     # Создание столбца
     try:
         db.create_column(col_name)
-    except:
+    except:  # noqa: E722
         raise
     # Парсинг заголовка отчёта
     header = None
@@ -145,24 +145,24 @@ def mark_attendance(event, db, logger):
     participants_list = None
     try:
         header = get_header(file, logger)
-    except:
+    except:  # noqa: E722
         error_fixing(f"ERROR: Can't get header:\n{traceback.format_exc()}", logger)
     # На основе данных парсинга заголовка отчёта создание конференции
     try:
         logger.info("Создание конференции")
-        sql_text = """INSERT INTO public.zoom_conferences(zoom_conference_id, conference_name, time_begin, time_end, 
-        zoom_login, conference_duration, number_conference_participants) VALUES (%s, %s, %s, %s, %s, %s, 
+        sql_text = """INSERT INTO public.zoom_conferences(zoom_conference_id, conference_name, time_begin, time_end,
+        zoom_login, conference_duration, number_conference_participants) VALUES (%s, %s, %s, %s, %s, %s,
         %s) RETURNING id; """
         conference_id = db.execute_dml_id(sql_text, header)
         logger.info(f"Создана конференция id={conference_id}")
-    except:
+    except:  # noqa: E722
         error_fixing(f"ERROR: Can't create conference:\n{traceback.format_exc()}", logger)
     # Парсинг и получение списка участников
     try:
         participants_list = get_participants_list(file, event_time_begin, event_time_end, conference_id, logger)
-    except:
+    except:  # noqa: E722
         error_fixing(f"ERROR: Can't get participants list:\n{traceback.format_exc()}", logger)
-    logger.info(f"Вставка списка участников в базу данных")
+    logger.info("Вставка списка участников в базу данных")
     list_p = []  # Список участников для которых не нашлось соответсвия и их нужно вставить вручную
     participants_count = len(participants_list)
     print(f"Всего {participants_count} участников")
@@ -171,20 +171,20 @@ def mark_attendance(event, db, logger):
     for p in participants_list:
         logger.info(f"Создать участника:{p}")
         try:
-            sql_text = """INSERT INTO public.zoom_conference_participants(zoom_name, zoom_email, time_begin, 
-            time_end, conference_duration, conference_id) VALUES (%s, %s, %s, %s, %s, %s); """
+            sql_text = """INSERT INTO public.zoom_conference_participants(zoom_name, zoom_email, time_begin,
+            time_end, conference_duration, conference_id) VALUES (%s, %s, %s, %s, %s, %s);"""
             db.execute_dml(sql_text, p)
             # Выяснить какие члены команды связаны с этим участником
             pid = db.find_zoom_participant_by(p)
             if pid is None:
-                logger.warning(f"Соответствие не нашлось")
+                logger.warning("Соответствие не нашлось")
                 list_p.append(p)
             else:
                 # Отметить присутствие в таблице
                 row_count = db.mark_zoom_attendance(col_name, pid, p)
                 if row_count == 0:
-                    logger.warning(f"Ничего не отметилось")
-        except:
+                    logger.warning("Ничего не отметилось")
+        except:  # noqa: E722
             error_text = f"ERROR: Create participant:\n{traceback.format_exc()}"
             print(error_text)
             logger.error(error_text)
@@ -288,7 +288,7 @@ if __name__ == '__main__':
                         host=PASSWORDS.settings['postgres_host'],
                         port=PASSWORDS.settings['postgres_port'],
                         logger=main_logger)
-    except:
+    except:  # noqa: E722
         error_fixing(f"ERROR: Connect to Postgres:\n{traceback.format_exc()}", main_logger)
     main_logger.info("Connect to DB is OK")
     list_columns = []
@@ -301,10 +301,10 @@ if __name__ == '__main__':
         try:
             db.logger = custom_logger
             buffer += mark_attendance(event, db, custom_logger)
-        except:
+        except:  # noqa: E722
             error_fixing(f"ERROR: Ошибка при обработке отчёта:\n{traceback.format_exc()}", main_logger)
         list_columns.append(event[0])
-        main_logger.info(f"Обработка отчёта закончена.")
+        main_logger.info("Обработка отчёта закончена.")
         # print(f"Обработка отчёта закончена.")
     # Общий Список несоответсвий, точнее готовых insert
     print("=" * 80)

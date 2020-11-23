@@ -117,7 +117,7 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         # Уведомление участника
         logger.info("Уведомление участника")
         notification_text = participant_notification(payment,
-                                                     r"[ШКОЛА ГИВИНА]. Ваша оплата принята и продлено участие в Друзьях Школы.",
+                                                     r"[ДШ]. Ваша оплата принята и продлено участие в Друзьях Школы.",
                                                      logger)
         mm.subject = "[ДШ] принята оплата за ДШ"
         mm.text += "Текст уведомления:\n\n\n" + notification_text
@@ -143,7 +143,7 @@ def participant_notification(payment, subject, logger):
     return mail_text2
 
 
-def from_list_create_sf_participants(list_, database, logger):
+def create_sf_participants(list_, database, logger):
     """
     Создание нескольких участников ДШ по списку.
     Список в формате:
@@ -151,7 +151,7 @@ def from_list_create_sf_participants(list_, database, logger):
     :param logger:
     :param database:
     :param list_:
-    :return: 
+    :return:
     """
     logger.info("Начинаю обработку списка")
     line_number = 1
@@ -165,7 +165,7 @@ def from_list_create_sf_participants(list_, database, logger):
             exit(1)
         try:
             payment["Имя"] = line_[1]
-        except:
+        except:  # noqa: E722
             print(f"Строка №{line_number}. Нет имени, участник не создан")
             exit(1)
         try:
@@ -186,8 +186,8 @@ def from_list_create_sf_participants(list_, database, logger):
         # noinspection PyBroadException
         try:
             create_sf_participant(payment, database, logger)
-        except:  # noinspection PyBroadException
-            mail_text = f'Ошибка создания участника\n' + traceback.format_exc()
+        except:  # noqa: E722
+            mail_text = 'Ошибка создания участника\n' + traceback.format_exc()
             logger.error(mail_text)
             send_mail(PASSWORDS.settings['admin_emails'], "ERROR CREATE PARTICIPANT", mail_text, logger)
         line_number += 1
@@ -196,7 +196,7 @@ def from_list_create_sf_participants(list_, database, logger):
 
 
 def create_sf_participant(payment, database, logger):
-    logger.info(f">>>>sf_participant_create.create_sf_participant begin")
+    logger.info(">>>>sf_participant_create.create_sf_participant begin")
     # This is new participant
     # Participant must have Name, Surname, Email
     # mail_text = ""
@@ -240,11 +240,13 @@ def create_sf_participant(payment, database, logger):
     mm.text += f"\nВНИМАНИЕ: Необходимо отправить оповещение участнику {payment['telegram']} в Telegram вручную."
     if payment["Электронная почта"]:
         # Оповещение участника
-        notification_text = participant_notification(payment, r"[ШКОЛА ГИВИНА]. Поздравляем, Вы приняты в Друзья Школы", logger)
+        notification_text = participant_notification(payment,
+                                                     r"[ШКОЛА ГИВИНА]. Поздравляем, Вы приняты в Друзья Школы",
+                                                     logger)
     else:
         mm.text += f"\nВНИМАНИЕ: Отправить почтовое уведомление (email) участнику"
         logger.warning("+" * 60)
-        logger.warning(f"ВНИМАНИЕ: Отправить почтовое уведомление (email) участнику")
+        logger.warning("ВНИМАНИЕ: Отправить почтовое уведомление (email) участнику")
         logger.warning("+" * 60)
         notification_text = "НЕТ ТЕКСТА ОПОВЕЩЕНИЯ УЧАСТНИКА. Т.к. у участника не email"
     mm.text += "Текст уведомления:\n\n\n" + notification_text
@@ -255,7 +257,7 @@ def create_sf_participant(payment, database, logger):
     list_.extend(item for item in PASSWORDS.settings['manager_emails'] if item not in PASSWORDS.settings['admin_emails'])
     logger.info(f"list_={list_}")
     send_mail(list_, mm.subject, mm.text, logger)
-    logger.info(f">>>>sf_participant_create.create_sf_participant end")
+    logger.info(">>>>sf_participant_create.create_sf_participant end")
 
 
 def create_sf_participant_yandex(logger, payment, mm):
@@ -274,7 +276,8 @@ def create_sf_participant_yandex(logger, payment, mm):
               f'telegram: {payment["telegram"]}'
     print(message)
     logger.info(message)
-    # region Сейчас учётка zoom создаётся из кода приложения, без получения подтверждения на email, поэтому реально почта не нужна.
+    # region Сейчас учётка zoom создаётся из кода приложения, без получения подтверждения на email,
+    # поэтому реально почта не нужна.
     """
     try:
         result = yandex_mail.create_yandex_mail(payment["Фамилия"], payment["Имя"], payment["login"], department_id_=4)
@@ -336,13 +339,13 @@ def create_sf_participant_db(database, logger, payment, mm):
     # Создаём нового пользователя в БД
     logger.info(f"Создаём нового пользователя в БД ({payment['fio_lang']})")
     if payment["fio_lang"] == "RUS":
-        sql_text = """INSERT INTO participants(last_name, first_name, fio, email, telegram, type) 
+        sql_text = """INSERT INTO participants(last_name, first_name, fio, email, telegram, type)
         VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;"""
         values_tuple = (payment["Фамилия"], payment["Имя"],
                         payment["Фамилия Имя"], payment["Электронная почта"],
                         payment["telegram"], 'N')
     else:
-        sql_text = """INSERT INTO participants(last_name, first_name, fio, email, telegram, type, last_name_eng, 
+        sql_text = """INSERT INTO participants(last_name, first_name, fio, email, telegram, type, last_name_eng,
         first_name_eng, fio_eng) 
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
         values_tuple = (payment["Фамилия"], payment["Имя"],
@@ -367,7 +370,7 @@ def create_sf_participant_db(database, logger, payment, mm):
     # Окончательный вид участника в БД
     line = f'{select_participant(payment["participant_id"], database)}'
     mm.text += f'\nСведения об участнике успешно внесены в БД:\n{line}'
-    logger.info(f'Сведения об участнике успешно внесены в БД:')
+    logger.info('Сведения об участнике успешно внесены в БД:')
     logger.info(f'{line}')
     return mm
 
@@ -398,4 +401,4 @@ if __name__ == '__main__':
         send_mail(PASSWORDS.settings['admin_emails'], "MAIN ERROR (Postgres)", main_error_text, log)
         log.error("Exit with error")
         sys.exit(1)
-    from_list_create_sf_participants(list_fio, db, logger=log)
+    create_sf_participants(list_fio, db, logger=log)

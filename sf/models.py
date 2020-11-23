@@ -90,7 +90,8 @@ class Task(models.Model):
     """
     Задание (по сути это отдельно письмо которое обрабатывается)
     """
-    time_begin = models.DateTimeField(null=False, editable=False, auto_now_add=True, verbose_name="Дата и время начала задания")
+    time_begin = models.DateTimeField(null=False, editable=False, auto_now_add=True,
+                                      verbose_name="Дата и время начала задания")
     time_end = models.DateTimeField(null=True, verbose_name="Дата и время окончания задания")
     task_from = models.CharField(null=True, max_length=254, verbose_name="От кого (email)")
     task_subject = models.CharField(null=True, max_length=2000, verbose_name="Тема (email)")

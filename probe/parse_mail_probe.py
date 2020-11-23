@@ -1,5 +1,5 @@
 import email
-import unicodedata
+# import unicodedata
 
 f = open("mail.txt", "r")
 email_message = f.read()

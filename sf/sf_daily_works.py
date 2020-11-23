@@ -103,30 +103,30 @@ def participants_notification(db_connect, logger):
 --current_date,
 until_date - current_date as "INTERVAL2",
 deadline - current_date as "INTERVAL",
---last_name, 
+--last_name,
 --first_name,
-fio, 
-email, 
+fio,
+email,
 telegram,
-payment_date, 
-number_of_days, 
-deadline, 
+payment_date,
+number_of_days,
+deadline,
 until_date
 --,comment
 FROM public.participants
 WHERE type in ('P', 'N')
 and (
-    ((deadline - current_date = 7 and until_date is NULL) or (until_date - current_date = 7 and until_date is not NULL)) 
-    or 
+    ((deadline - current_date = 7 and until_date is NULL) or (until_date - current_date = 7 and until_date is not NULL))
+    or
     ((deadline - current_date = 3 and until_date is NULL) or (until_date - current_date = 3 and until_date is not NULL))
 )
 order by last_name"""
 
     values_tuple = (None,)
     records = db_connect.execute_select(sql_text, values_tuple)
-    # (None, 7, 'АЛААА', 'anxxxxx@mail.ru', datetime.date(2019, 12, 31), None)
-    # (None, 7, 'БАРААААА', 'ИРАААА', 'barxxxx.xxx@inbox.ru', '@xxx', datetime.date(2019, 12, 8), 30, datetime.date(2020, 1, 7), None)
-    # (None, 7, 'БАРААААА ИРАААА', 'barxxxx.xxx@inbox.ru', '@xxx', datetime.date(2019, 12, 8), 30, datetime.date(2020, 1, 7), None)
+    # (None,7,'АЛААА','anxxxxx@mail.ru',datetime.date(2019, 12, 31),None)
+    # (None,7,'БАРААААА','ИРАААА','xxx@inbox.ru','@xxx',datetime.date(2019, 12, 8),30,datetime.date(2020, 1, 7),None)
+    # (None,7,'БАРААААА ИРАААА','xxx@inbox.ru','@xxx',datetime.date(2019, 12, 8),30,datetime.date(2020, 1, 7),None)
     intervals = {3: "3 дня", 7: "7 дней"}
 
     for p in records:
@@ -140,12 +140,13 @@ order by last_name"""
             until_date = p[8]
         else:
             until_date = p[7]
-        mail_text = f"""Здравствуйте, {p[2].title()}!  
+        mail_text = f"""Здравствуйте, {p[2].title()}!
 
 Напоминаем вам о том, что вы {p[5].strftime("%d.%m.%Y")} оплатили период {p[6]} дней Друзей Школы (ДШ).
 {until_date} через {interval} у вас истекает оплаченный период Друзей Школы (ДШ).
 
-Вы можете оплатить ДШ через страницу оплаты (доступен PayPal). Возможна оплата сразу за 3 или 6 месяцев, при этом вы полаете скидки 7% и 13% соответственно:
+Вы можете оплатить ДШ через страницу оплаты (доступен PayPal).
+Возможна оплата сразу за 3 или 6 месяцев, при этом вы полаете скидки 7% и 13% соответственно:
 (+PayPal) https://givinschoolru.getcourse.ru/sf
 
 Пожалуйста, при оплате, указывайте свои Фамилию, Имя, такие же как и при регистрации.
@@ -161,7 +162,7 @@ order by last_name"""
         logger.info(mail_text)
         try:
             send_mail([p[3]], r"[ШКОЛА ГИВИНА]. Напоминание об оплате ДШ", mail_text, logger)
-        except:
+        except:  # noqa: E722
             send_error_to_admin(f"DAILY WORKS ERROR: Ошибка при попытке выслать оповещение должнику:\n{p}", logger,
                                 prog_name="sf_daily_works.py")
         logger.info('\n' + '=' * 120)
@@ -189,7 +190,7 @@ or (until_date - CURRENT_TIMESTAMP < INTERVAL '0 days' and until_date is not NUL
 order by last_name"""
     values_tuple = (None,)
     records = db_connect.execute_select(sql_text, values_tuple)
-    # (1126, 'P', 'АБРАМОВА', 'ЕЛЕНА', 'el34513543@gmail.com', '@el414342', datetime.date(2019, 8, 7), 45, datetime.date(2019, 9, 21), datetime.date(2019, 10, 15), None)
+    # (1126, 'P', 'АБРАМОВА', 'ЕЛЕНА', 'el34513543@gmail.com', '@el414342', datetime.date(2019, 8, 7), 45, datetime.date(2019, 9, 21), datetime.date(2019, 10, 15), None)  # noqa: E501
     now_for_text = datetime.now().strftime("%d.%m.%Y")
     if len(records) != 0:
         # now_for_file = datetime.now().strftime("%d%m%Y_%H%M")
@@ -197,11 +198,11 @@ order by last_name"""
         xlsx_file_path = os.path.join(os.path.dirname(logger.handlers[0].baseFilename), f'DEBTORS_{now_for_file}.xlsx')
         table_text = get_excel_table(records, xlsx_file_path)
         mail_text = f"""Здравствуйте!
-    
+
     Во вложении содержиться список должников на сегодня {now_for_text} в формате xlsx.
     Таблица в виде текста:
     {table_text}
-        
+
     С уважением, ваш робот."""
         print(mail_text)
         logger.info(mail_text)
@@ -234,7 +235,7 @@ WHERE type in ('P', 'N')
 order by last_name"""
     values_tuple = (None,)
     records = db_connect.execute_select(sql_text, values_tuple)
-    # (1126, 'P', 'АБРАМОВА', 'ЕЛЕНА', 'el34513543@gmail.com', '@el414342', datetime.date(2019, 8, 7), 45, datetime.date(2019, 9, 21), datetime.date(2019, 10, 15), None)
+    # (1126, 'P', 'АБРАМОВА', 'ЕЛЕНА', 'el34513543@gmail.com', '@el414342', datetime.date(2019, 8, 7), 45, datetime.date(2019, 9, 21), datetime.date(2019, 10, 15), None)  # noqa: E501
     count_participants = len(records)
     print(f"ВСЕГО {count_participants} УЧАСТНИКОВ")
     # now_for_file = datetime.now().strftime("%d%m%Y_%H%M")

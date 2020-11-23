@@ -143,7 +143,7 @@ def participant_notification(payment, subject, logger):
     return mail_text2
 
 
-def create_sf_participants(list_, database, logger):
+def create_sf_participants(list_, database, logger):  # noqa: C901
     """
     Создание нескольких участников ДШ по списку.
     Список в формате:
@@ -244,7 +244,7 @@ def create_sf_participant(payment, database, logger):
                                                      r"[ШКОЛА ГИВИНА]. Поздравляем, Вы приняты в Друзья Школы",
                                                      logger)
     else:
-        mm.text += f"\nВНИМАНИЕ: Отправить почтовое уведомление (email) участнику"
+        mm.text += "\nВНИМАНИЕ: Отправить почтовое уведомление (email) участнику"
         logger.warning("+" * 60)
         logger.warning("ВНИМАНИЕ: Отправить почтовое уведомление (email) участнику")
         logger.warning("+" * 60)
@@ -346,7 +346,7 @@ def create_sf_participant_db(database, logger, payment, mm):
                         payment["telegram"], 'N')
     else:
         sql_text = """INSERT INTO participants(last_name, first_name, fio, email, telegram, type, last_name_eng,
-        first_name_eng, fio_eng) 
+        first_name_eng, fio_eng)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
         values_tuple = (payment["Фамилия"], payment["Имя"],
                         payment["Фамилия Имя"], payment["Электронная почта"],

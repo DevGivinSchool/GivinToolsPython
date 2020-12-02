@@ -155,28 +155,27 @@ def create_sf_participants(list_, database, logger):  # noqa: C901
     """
     logger.info("Начинаю обработку списка")
     line_number = 1
-    for line in list_.splitlines():
+    for line in list_:
         payment = payment_creater.get_clear_payment()
-        line_ = line.split(';')
         try:
-            payment["Фамилия"] = line_[0]
+            payment["Фамилия"] = line[0]
         except IndexError:
             print("Нет фамилии. Скорее всего файл list_.py пустой.")
             exit(1)
         try:
-            payment["Имя"] = line_[1]
+            payment["Имя"] = line[1]
         except:  # noqa: E722
             print(f"Строка №{line_number}. Нет имени, участник не создан")
             exit(1)
         try:
-            if line_[2]:
-                payment["Электронная почта"] = line_[2]
+            if line[2]:
+                payment["Электронная почта"] = line[2]
         except IndexError:
             print(f"Строка №{line_number}. Нет email, участник не создан")
             exit(1)
         try:
-            if line_[3]:
-                payment["telegram"] = line_[3]
+            if line[3]:
+                payment["telegram"] = line[3]
         except IndexError:
             pass
         payment["Время проведения"] = datetime.now()
@@ -381,10 +380,11 @@ if __name__ == '__main__':
     """
     import core.custom_logger as custom_logger
     import os
+    import csv
 
-    list_fio = ''
     program_file = os.path.realpath(__file__)
     log = custom_logger.get_logger(program_file=program_file)
+
     # noinspection PyBroadException
     try:
         log.info("Try connect to DB")
@@ -401,4 +401,9 @@ if __name__ == '__main__':
         send_mail(PASSWORDS.settings['admin_emails'], "MAIN ERROR (Postgres)", main_error_text, log)
         log.error("Exit with error")
         sys.exit(1)
-    create_sf_participants(list_fio, db, logger=log)
+
+    file = PASSWORDS.settings['list_path']
+    with open(file, newline='', encoding='utf-8') as f:
+        reader = csv.reader(f, delimiter=';')
+        # headers = next(reader, None)
+        create_sf_participants(reader, db, logger=log)

@@ -12,6 +12,19 @@ id=1234
 ;
 
 -- ===============================================================
+-- Список платежей конкретного участника
+select
+*
+--id, last_name, first_name, fio, email, telegram, time_begin, time_end, login, password, payment_date, number_of_days, deadline, regexp_replace(comment, E'[\n\r]+', ' ', 'g' ), until_date, type
+from public.payments
+where
+--telegram=lower('ххххх')
+--last_name like upper('%ххххх%')
+--last_name_eng like upper('%ххххх%')
+id=1234
+;
+
+-- ===============================================================
 -- Обновить участника
 update participants set
 email=lower('@')

@@ -15,7 +15,9 @@ if __name__ == "__main__":
     logger = custom_logger.get_logger(program_file=program_file)
     logger.info('START gtp_school_friends')
     try:
-        logger.info("Try connect to DB")
+        logger.info(f"Try connect to DB {PASSWORDS.settings['postgres_dbname']}@"
+                    f"{PASSWORDS.settings['postgres_host']}:{PASSWORDS.settings['postgres_port']} "
+                    f"as {PASSWORDS.settings['postgres_user']}")
         postgres = DBPostgres(dbname=PASSWORDS.settings['postgres_dbname'], user=PASSWORDS.settings['postgres_user'],
                               password=PASSWORDS.settings['postgres_password'],
                               host=PASSWORDS.settings['postgres_host'],

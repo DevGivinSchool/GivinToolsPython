@@ -1,28 +1,3 @@
-"""
-Отмечать присутствие на занятиях и получать итоговую таблицу
-"""
-"""!!! можно отмечать присутствие из программы циклом, а можно одним sql запросом, но нужно это делать циклом, 
-потому что есть соотвествия написания имени в zoom и членом команды отраженное в таблице zoom_join_zoom_and_members, 
-поэтому каждый раз могут появляться иные соответсвия и такие люди не будет отмечены и это никак не обнаружиться, 
-поэтому нужно идти циклом, отмечать присутствие и в конце выводить список выявленных новых соответствий, 
-их нужно заносить в таблицу вручную, ПОТОМУ ЧТО ТОЛЬКО ЧЕЛОВЕК СМОЖЕТ УСТАНОВИТЬ РЕАЛЬНОЕ СООТВЕТСВИЕ (люди иногда 
-так называют себя что там сам чёрт ногу сломит). 
-
-select 
---*
-tm.id, tm.last_name, tm.first_name, sum(conference_duration) as conference_duration 
-from team_members tm
-LEFT JOIN (select * from (select zoom_name, zoom_email, sum(conference_duration) as conference_duration
-from zoom_conference_participants
-WHERE conference_id=305 
-group by zoom_name, zoom_email) zcp
-LEFT JOIN zoom_join_zoom_and_members jm
-            ON zcp.zoom_name = jm.zoom_name) tab1
-			ON tm.id = tab1.member_id
-where tm.id<>1
-group by tm.id, tm.last_name, tm.first_name
-order by tm.last_name
-"""
 import csv
 import traceback
 import core.PASSWORDS as PASSWORDS
@@ -30,6 +5,32 @@ import sys
 import core.utils as utils
 from datetime import datetime
 from core.Class_DBPostgres import DBPostgres
+
+"""
+Отмечать присутствие на занятиях и получать итоговую таблицу
+"""
+"""!!! можно отмечать присутствие из программы циклом, а можно одним sql запросом, но нужно это делать циклом,
+потому что есть соотвествия написания имени в zoom и членом команды отраженное в таблице zoom_join_zoom_and_members,
+поэтому каждый раз могут появляться иные соответсвия и такие люди не будет отмечены и это никак не обнаружиться,
+поэтому нужно идти циклом, отмечать присутствие и в конце выводить список выявленных новых соответствий,
+их нужно заносить в таблицу вручную, ПОТОМУ ЧТО ТОЛЬКО ЧЕЛОВЕК СМОЖЕТ УСТАНОВИТЬ РЕАЛЬНОЕ СООТВЕТСВИЕ (люди иногда
+так называют себя что там сам чёрт ногу сломит).
+
+select
+--*
+tm.id, tm.last_name, tm.first_name, sum(conference_duration) as conference_duration
+from team_members tm
+LEFT JOIN (select * from (select zoom_name, zoom_email, sum(conference_duration) as conference_duration
+from zoom_conference_participants
+WHERE conference_id=305
+group by zoom_name, zoom_email) zcp
+LEFT JOIN zoom_join_zoom_and_members jm
+            ON zcp.zoom_name = jm.zoom_name) tab1
+            ON tm.id = tab1.member_id
+where tm.id<>1
+group by tm.id, tm.last_name, tm.first_name
+order by tm.last_name
+"""
 
 
 def convert_zoom_datetime(text):
@@ -122,7 +123,7 @@ def get_participants_list(file, event_time_begin, event_time_end, conference_id,
     return participants_list
 
 
-def mark_attendance(event, db, logger):
+def mark_attendance(event, db, logger):  # noqa: C901
     """
     Читает отчёт zoom, парсит его и заносит все полученные данные в БД
     :param file: Файл отчёта
@@ -136,7 +137,7 @@ def mark_attendance(event, db, logger):
     # Создание столбца
     try:
         db.create_column(col_name)
-    except:
+    except:  # noqa: E722
         raise
     # Парсинг заголовка отчёта
     header = None
@@ -144,24 +145,24 @@ def mark_attendance(event, db, logger):
     participants_list = None
     try:
         header = get_header(file, logger)
-    except:
+    except:  # noqa: E722
         error_fixing(f"ERROR: Can't get header:\n{traceback.format_exc()}", logger)
     # На основе данных парсинга заголовка отчёта создание конференции
     try:
         logger.info("Создание конференции")
-        sql_text = """INSERT INTO public.zoom_conferences(zoom_conference_id, conference_name, time_begin, time_end, 
-        zoom_login, conference_duration, number_conference_participants) VALUES (%s, %s, %s, %s, %s, %s, 
+        sql_text = """INSERT INTO public.zoom_conferences(zoom_conference_id, conference_name, time_begin, time_end,
+        zoom_login, conference_duration, number_conference_participants) VALUES (%s, %s, %s, %s, %s, %s,
         %s) RETURNING id; """
         conference_id = db.execute_dml_id(sql_text, header)
         logger.info(f"Создана конференция id={conference_id}")
-    except:
+    except:  # noqa: E722
         error_fixing(f"ERROR: Can't create conference:\n{traceback.format_exc()}", logger)
     # Парсинг и получение списка участников
     try:
         participants_list = get_participants_list(file, event_time_begin, event_time_end, conference_id, logger)
-    except:
+    except:  # noqa: E722
         error_fixing(f"ERROR: Can't get participants list:\n{traceback.format_exc()}", logger)
-    logger.info(f"Вставка списка участников в базу данных")
+    logger.info("Вставка списка участников в базу данных")
     list_p = []  # Список участников для которых не нашлось соответсвия и их нужно вставить вручную
     participants_count = len(participants_list)
     print(f"Всего {participants_count} участников")
@@ -170,20 +171,20 @@ def mark_attendance(event, db, logger):
     for p in participants_list:
         logger.info(f"Создать участника:{p}")
         try:
-            sql_text = """INSERT INTO public.zoom_conference_participants(zoom_name, zoom_email, time_begin, 
-            time_end, conference_duration, conference_id) VALUES (%s, %s, %s, %s, %s, %s); """
+            sql_text = """INSERT INTO public.zoom_conference_participants(zoom_name, zoom_email, time_begin,
+            time_end, conference_duration, conference_id) VALUES (%s, %s, %s, %s, %s, %s);"""
             db.execute_dml(sql_text, p)
             # Выяснить какие члены команды связаны с этим участником
             pid = db.find_zoom_participant_by(p)
             if pid is None:
-                logger.warning(f"Соответствие не нашлось")
+                logger.warning("Соответствие не нашлось")
                 list_p.append(p)
             else:
                 # Отметить присутствие в таблице
                 row_count = db.mark_zoom_attendance(col_name, pid, p)
                 if row_count == 0:
-                    logger.warning(f"Ничего не отметилось")
-        except:
+                    logger.warning("Ничего не отметилось")
+        except:  # noqa: E722
             error_text = f"ERROR: Create participant:\n{traceback.format_exc()}"
             print(error_text)
             logger.error(error_text)
@@ -287,7 +288,7 @@ if __name__ == '__main__':
                         host=PASSWORDS.settings['postgres_host'],
                         port=PASSWORDS.settings['postgres_port'],
                         logger=main_logger)
-    except:
+    except:  # noqa: E722
         error_fixing(f"ERROR: Connect to Postgres:\n{traceback.format_exc()}", main_logger)
     main_logger.info("Connect to DB is OK")
     list_columns = []
@@ -300,10 +301,10 @@ if __name__ == '__main__':
         try:
             db.logger = custom_logger
             buffer += mark_attendance(event, db, custom_logger)
-        except:
+        except:  # noqa: E722
             error_fixing(f"ERROR: Ошибка при обработке отчёта:\n{traceback.format_exc()}", main_logger)
         list_columns.append(event[0])
-        main_logger.info(f"Обработка отчёта закончена.")
+        main_logger.info("Обработка отчёта закончена.")
         # print(f"Обработка отчёта закончена.")
     # Общий Список несоответсвий, точнее готовых insert
     print("=" * 80)

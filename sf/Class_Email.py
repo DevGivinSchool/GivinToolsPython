@@ -72,7 +72,7 @@ class Email:
         self.logger.info(f"Удаляю сообщение: {uuid}")
         self.client.move(uuid, "Trash")
 
-    def sort_mail(self):
+    def sort_mail(self):  # noqa: C901
         """Sort mail and start work """
         self.logger.info("sort_mail begin")
         messages = self.client.search('ALL')
@@ -126,24 +126,27 @@ class Email:
                 self.move_email_to_trash(uuid)
                 # continue
             # Create Task and insert it to DB
-            self.logger.info(f"Create Task")
+            self.logger.info("Create Task")
             task = Task(uuid, ffrom, fsubject, self.logger, self.postgres)
-            self.logger.info(f"Insert Task to DB")
+            self.logger.info("Insert Task to DB")
             task_is_new = self.postgres.create_task(self.session_id, task)
             self.logger.info(f"Task begin: ID={uuid}|NEW={task_is_new}")
             if task_is_new:
                 if task_error:
-                    continue  # Если ERROR: Неизвестный формат письма, то первый раз continue, а потом письмо больше не будет обрабатываться.
+                    # Если ERROR: Неизвестный формат письма, то первый раз continue,
+                    # а потом письмо больше не будет обрабатываться.
+                    continue
                 else:
                     payment = None
                     try:
                         """Определяем типа письма (платёж / не платёж) и вытаскиваем данные платежа в payment."""
                         # PayKeeper
                         if ffrom == 'noreply@server.paykeeper.ru' and fsubject == 'Принята оплата':
-                            self.logger.info(f'Это письмо от платежной системы - PayKeeper')
+                            self.logger.info('Это письмо от платежной системы - PayKeeper')
                             try:
                                 self.logger.info(
-                                    f"Текст полученного оповещения (письма), используется для первоначального парсинга\n{body['body_html']}")
+                                    f"Текст полученного оповещения (письма), "
+                                    f"используется для первоначального парсинга\n{body['body_html']}")
                                 payment = payment_creater.parse_paykeeper_html(body['body_html'], self.logger)
                             except Exception:
                                 raise_error("ERROR: parse_paykeeper_html", self.logger, prog_name="payment_creater.py")
@@ -151,14 +154,15 @@ class Email:
                             self.payment_verification_for_school_friends(ffrom, fsubject, payment, self.postgres, task,
                                                                          uuid)
                         # Getcourse
-                        elif (
-                                ffrom == 'no-reply@getcourse.ru' or ffrom == 'info@study.givinschool.org' or ffrom == 'info@givin.school') \
-                                and fsubject.startswith("Поступил платеж"):
-                            self.logger.info(f'Это письмо от платежной системы - GetCourse')
+                        elif (ffrom == 'no-reply@getcourse.ru'
+                              or ffrom == 'info@study.givinschool.org'
+                              or ffrom == 'info@givin.school') and fsubject.startswith("Поступил платеж"):
+                            self.logger.info('Это письмо от платежной системы - GetCourse')
                             # print(f'Это письмо от платежной системы - GetCourse')
                             try:
                                 self.logger.info(
-                                    f"Текст полученного оповещения (письма), используется для первоначального парсинга\n{body['body_html']}")
+                                    f"Текст полученного оповещения (письма), "
+                                    f"используется для первоначального парсинга\n{body['body_html']}")
                                 payment = payment_creater.parse_getcourse_html(body['body_html'], self.logger)
                                 if fdate is not None:  # #4
                                     payment["Время проведения"] = fdate
@@ -169,7 +173,7 @@ class Email:
                                                                          uuid)
                         # Это письмо вообще не платёж
                         else:
-                            self.logger.info(f'ЭТО ПИСЬМО НЕ ОТ ПЛАТЁЖНЫХ СИСТЕМ (ничего с ним не делаю, пока...)')
+                            self.logger.info('ЭТО ПИСЬМО НЕ ОТ ПЛАТЁЖНЫХ СИСТЕМ (ничего с ним не делаю, пока...)')
                             # print(f'Это письмо НЕ от платежных систем - ничего с ним не делаю, пока...')
                             # Если в тема письма начинается на #
                             # значит это команда иначе удалить
@@ -186,7 +190,7 @@ class Email:
                                         self.logger.info(f"    BODY\n: {body['body_text']}")
                                     elif body['body_type'] == 'html':
                                         # Преобразование письма в формате html в текст
-                                        self.logger.info(f"Преобразование письма в формате html в текст")
+                                        self.logger.info("Преобразование письма в формате html в текст")
                                         h = html2text.HTML2Text()
                                         h.ignore_links = False
                                         h.single_line_break = True
@@ -225,11 +229,11 @@ class Email:
                         raise_error(f"TASK {uuid} ERROR: {error_text}", self.logger, prog_name="Class_Email.py")
                         continue
             else:
-                self.logger.warning(f"ВНИМАНИЕ: Это письмо уже обрабатывалось!")
+                self.logger.warning("ВНИМАНИЕ: Это письмо уже обрабатывалось!")
             self.logger.info(f"Task end: ID={uuid}|NEW={task_is_new}")
             print(uuid)
             # print('-' * 45)
-            self.logger.info('\n'+('=' * 120) + '\n' + ('=' * 120) + '\n' + ('=' * 120))
+            self.logger.info('\n' + ('=' * 120) + '\n' + ('=' * 120) + '\n' + ('=' * 120))
             # -----------------------------------------------------------------
         self.client.expunge()
         self.logger.info("sort_mail end")
@@ -284,7 +288,8 @@ class Email:
         :param task:
         :return:
         """
-        self.logger.info("Дополняем платёж полученный после парсинга страницы заказа информацией из БД, если она там найдётся.")
+        self.logger.info("Дополняем платёж полученный после парсинга страницы заказа информацией из БД, "
+                         "если она там найдётся.")
         self.logger.info(">>>>Class_Email.addition_of_payment_information_from_db begin")
         task.payment = payment
         postgres.create_payment_in_db(task)

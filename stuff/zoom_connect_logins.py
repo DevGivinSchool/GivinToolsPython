@@ -40,7 +40,7 @@ def connect_zoom_login(login, password):
             browser.execute_script("return arguments[0].scrollIntoView(true);", button)
             button.click()
             print(f"{login},{password}")
-    except:
+    except:  # noqa: E722
         print(traceback.format_exc())
     finally:
         # закрываем браузер даже в случае ошибки
@@ -48,7 +48,6 @@ def connect_zoom_login(login, password):
 
 
 if __name__ == '__main__':
-    import csv
     file = r'd:\YandexDisk\TEMP\GS\3.txt'
     # file = r'd:\!SAVE\GS\test.csv'
     with open(file, newline='') as f:

@@ -49,7 +49,12 @@ class Participant(models.Model):
         max_length=1,
         choices=PARTICIPANT_TYPE_VOC,
         default='N',
-        verbose_name="Тип участника: N - новый участник (первый месяц); P - регулярный участник; B - заблокированный; E - наш сотрудник; V - VIP (особые условия, например, участие без оплаты)",
+        verbose_name="Тип участника: "
+                     "N - новый участник (первый месяц); "
+                     "P - регулярный участник; "
+                     "B - заблокированный; "
+                     "E - наш сотрудник; "
+                     "V - VIP (особые условия, например, участие без оплаты)",
     )
     last_name_eng = models.CharField(blank=True, null=True, max_length=255, verbose_name="Фамилия по английски")
     first_name_eng = models.CharField(blank=True, null=True, max_length=255, verbose_name="Имя по английски")
@@ -85,7 +90,8 @@ class Task(models.Model):
     """
     Задание (по сути это отдельно письмо которое обрабатывается)
     """
-    time_begin = models.DateTimeField(null=False, editable=False, auto_now_add=True, verbose_name="Дата и время начала задания")
+    time_begin = models.DateTimeField(null=False, editable=False, auto_now_add=True,
+                                      verbose_name="Дата и время начала задания")
     time_end = models.DateTimeField(null=True, verbose_name="Дата и время окончания задания")
     task_from = models.CharField(null=True, max_length=254, verbose_name="От кого (email)")
     task_subject = models.CharField(null=True, max_length=2000, verbose_name="Тема (email)")

@@ -63,16 +63,14 @@ def get_login(familia_, name_, type=None):
 
 def split_str(line):
     """
-    Разделяет строку через табуляцию и пробел, возвращает список
+    Разделяет строку через ';' и пробел, возвращает список
     :param line:
     :return:
     """
-    line_ = line.split('\t', maxsplit=1)
+    line_ = line.split(';', maxsplit=1)
     # print(line_, len(line_))
     if len(line_) < 2:
-        line_ = line.split(' ', maxsplit=1)
-        if len(line_) < 2:
-            raise Exception(f"ERROR: Строка ФИО '{line_}' не разделяется ни через пробел ни через табуляцию")
+        raise Exception(f"ERROR: Строка '{line_}' не разделяется через точку с запятой")
     # print(f"line_={line_}; line_[0]={line_[0]}; line_[1]={line_[1]}")
     return line_
 

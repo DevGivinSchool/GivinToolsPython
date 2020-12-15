@@ -1,12 +1,16 @@
+import base64
+import core.PASSWORDS as PASSWORDS
+import requests
+
+
 def get_token():
     from yandex_connect import token_get_by_code
     token = token_get_by_code()
+    return token
+
 
 # Выдернул процедуру получения токена Яндекс, т.к. неудобно вручную каждый раз вводить ID и т.п.
 def token_get_by_code():
-    import base64
-    import PASSWORDS
-    import requests
     client_id = PASSWORDS.settings['gtp_mail_robot_ID']
     client_secret = PASSWORDS.settings['gtp_mail_robot_password']
     print('Open link in browser:')
@@ -30,7 +34,6 @@ def token_get_by_code():
 
 
 def yandex_tocken_test():
-    import PASSWORDS
     from yandex_connect import YandexConnectDirectory
     # api = YandexConnectDirectory(PASSWORDS.logins['token_yandex'], org_id=None)
     api = YandexConnectDirectory(PASSWORDS.settings['token_yandex'], org_id=2520809)

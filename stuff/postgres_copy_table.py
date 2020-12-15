@@ -1,5 +1,5 @@
 import psycopg2
-import argparse
+# import argparse
 import core.PASSWORDS as PASSWORDS
 
 
@@ -17,7 +17,7 @@ def copy_table(connectionStringSrc, connectionStringDst, table_name_src, table_n
                     for row in curSrc:
                         # generate %s x columns
                         query_columns = ','.join([desc[0] for desc in curSrc.description])
-                        query_values = ','.join('%s' for x in range(len(curSrc.description)))
+                        query_values = ','.join('%s' for _ in range(len(curSrc.description)))
                         query = "INSERT INTO {} ({}) VALUES ({});".format(table_name_dst, query_columns, query_values)
                         param = [item for item in row]
                         if verbose:
@@ -29,9 +29,11 @@ def copy_table(connectionStringSrc, connectionStringDst, table_name_src, table_n
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("cs_src", type=str,
-                        help='connection string source like: "host=localhost port=5432 user=admin password=mypwd dbname=mydbname"')
+                        help='connection string source like:
+                        "host=localhost port=5432 user=admin password=mypwd dbname=mydbname"')
     parser.add_argument("cs_dst", type=str,
-                        help='connection string destination like: "host=localhost port=5432 user=admin password=mypwd dbname=mydbname"')
+                        help='connection string destination like:
+                        "host=localhost port=5432 user=admin password=mypwd dbname=mydbname"')
 
     parser.add_argument("tablename", type=str,
                         help='Table name')
@@ -46,8 +48,16 @@ if __name__ == '__main__':
     copy_table(args.cs_src, args.cs_dst, args.tablename, args.verbose, args.where)
 """
 if __name__ == '__main__':
-    connectionStringSrc = f"host={PASSWORDS.settings['postgres_host']} port={PASSWORDS.settings['postgres_port']} user={PASSWORDS.settings['postgres_user']} password={PASSWORDS.settings['postgres_password']} dbname={PASSWORDS.settings['postgres_dbname_src']}"
-    connectionStringDst = f"host={PASSWORDS.settings['postgres_host']} port={PASSWORDS.settings['postgres_port']} user={PASSWORDS.settings['postgres_user']} password={PASSWORDS.settings['postgres_password']} dbname={PASSWORDS.settings['postgres_dbname_dst']}"
+    connectionStringSrc = f"host={PASSWORDS.settings['postgres_host']} " \
+                          f"port={PASSWORDS.settings['postgres_port']} " \
+                          f"user={PASSWORDS.settings['postgres_user']} " \
+                          f"password={PASSWORDS.settings['postgres_password']} " \
+                          f"dbname={PASSWORDS.settings['postgres_dbname_src']}"
+    connectionStringDst = f"host={PASSWORDS.settings['postgres_host']} " \
+                          f"port={PASSWORDS.settings['postgres_port']} " \
+                          f"user={PASSWORDS.settings['postgres_user']} " \
+                          f"password={PASSWORDS.settings['postgres_password']} " \
+                          f"dbname={PASSWORDS.settings['postgres_dbname_dst']}"
     table_name_src = PASSWORDS.settings['table_name_src']
     table_name_dst = PASSWORDS.settings['table_name_dst']
     copy_table(connectionStringSrc, connectionStringDst, table_name_src, table_name_dst, verbose=True)

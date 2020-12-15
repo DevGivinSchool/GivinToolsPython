@@ -4,7 +4,7 @@ import core.custom_logger as custom_logger
 import os
 import csv
 import core.PASSWORDS as PASSWORDS
-from core.utils import get_login, split_str
+from core.utils import get_login
 from core.password_generator import password_for_sf
 
 program_file = os.path.realpath(__file__)
@@ -20,7 +20,8 @@ def file_processing(func):
         reader = csv.reader(f, delimiter=';')
         # headers = next(reader, None)
         for row in reader:
-            # print(row)
+            print(row)
+            print(type(row))
             func(row)
 
 
@@ -29,7 +30,6 @@ def create_team_mail(line):
         В list_.py нужно внести список Фамилия + Имя
         Иванов Иван
     """
-    line = split_str(line)
     # ['Карякина', 'Наталья']
     login_ = get_login(line[0], line[1], type="team")
     print(f"Фамилия: {line[0]}; Имя: {line[1]}; Email: {login_}@givinschool.org")
@@ -112,7 +112,6 @@ def generate_password():
     z = 7
     while z not in [0, 1]:
         z = int(input("Пароль для Zoom? 0-Нет; 1-Да:"))
-    ln = int(input("Длина пароля (по умолчанию 10 символов):") or 10)
     print(f"Пароль: {password_for_sf()}")
 
 

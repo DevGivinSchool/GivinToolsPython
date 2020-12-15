@@ -1,17 +1,16 @@
+import email
+# import unicodedata
+
 f = open("mail.txt", "r")
 email_message = f.read()
 f.close()
-#print(email_message)
+# print(email_message)
+# ffrom = email_message.get('From')
+# fsubject =  email_message.get('Subject')
+# print(f"ffrom={ffrom}")
+# print(f"fsubject={fsubject}")
+# print(email.message_from_string(email_message))
 
-import email
-import unicodedata
-
-#ffrom = email_message.get('From')
-#fsubject =  email_message.get('Subject')
-#print(f"ffrom={ffrom}")
-#print(f"fsubject={fsubject}")
-
-#print(email.message_from_string(email_message))
 
 def get_decoded_email_body(message_body):
     """ Decode email body.
@@ -22,7 +21,7 @@ def get_decoded_email_body(message_body):
     """
 
     msg = email.message_from_string(message_body)
-    #msg = message_body
+    # msg = message_body
 
     text = ""
     if msg.is_multipart():
@@ -54,5 +53,6 @@ def get_decoded_email_body(message_body):
         text = msg.get_payload(decode=True).decode(msg.get_content_charset(), 'ignore').encode('utf8', 'replace')
         text = msg.get_payload(decode=True).decode(msg.get_content_charset(), 'ignore')
         return text.strip()
+
 
 print(get_decoded_email_body(email_message))

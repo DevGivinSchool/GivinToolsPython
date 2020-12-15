@@ -3,7 +3,7 @@ from multiprocessing import Pool, Queue
 from os import getpid
 import time
 import argparse
-import logging
+# import logging
 
 
 class Executor:
@@ -72,11 +72,11 @@ class Executor:
             self.logger.debug("{0} retrieved: {1}".format(getpid(), task))
             # simulate some random length operations
             self.do_work(task)
-            self.logger.debug(f'executer sleep 60 sec ...................')
+            self.logger.debug('executer sleep 60 sec ...................')
             time.sleep(60)
 
     def help(self):
-        self.logger.debug(f'function help')
+        self.logger.debug('function help')
 
     def hello(self):
-        self.logger.debug(f'function hello')
+        self.logger.debug('function hello')

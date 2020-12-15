@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('gtp_index', '0007_auto_20200820_1452'),
     ]
@@ -55,12 +54,14 @@ class Migration(migrations.Migration):
                 ('time_end', models.DateTimeField(null=True, verbose_name='Дата и время окончания задания')),
                 ('task_from', models.CharField(max_length=254, null=True, verbose_name='От кого (email)')),
                 ('task_subject', models.CharField(max_length=2000, null=True, verbose_name='Тема (email)')),
-                ('task_body_type', models.CharField(max_length=4, null=True, verbose_name='Типа тела письма (TEXT;HTML;MIX)')),
+                ('task_body_type',
+                 models.CharField(max_length=4, null=True, verbose_name='Типа тела письма (TEXT;HTML;MIX)')),
                 ('task_body_html', models.TextField(null=True, verbose_name='Тело письма HTML')),
                 ('task_body_text', models.TextField(null=True, verbose_name='Тело письма TEXT')),
                 ('task_error', models.CharField(max_length=4000, null=True, verbose_name='Сообщение об ошибке')),
                 ('number_of_attempts', models.PositiveSmallIntegerField(null=True, verbose_name='Количество попыток')),
-                ('participant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='gtp_index.participant')),
+                ('participant',
+                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='gtp_index.participant')),
                 ('session', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='gtp_index.session')),
             ],
             options={
@@ -72,21 +73,30 @@ class Migration(migrations.Migration):
             name='Payment',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name_of_service', models.CharField(max_length=255, null=True, verbose_name='Наименование услуги (как в письме)')),
+                ('name_of_service',
+                 models.CharField(max_length=255, null=True, verbose_name='Наименование услуги (как в письме)')),
                 ('payment_id', models.CharField(max_length=10, null=True, verbose_name='ID платежа (как в письме)')),
                 ('amount', models.PositiveSmallIntegerField(null=True, verbose_name='Сумма платежа')),
-                ('sales_slip', models.CharField(max_length=500, null=True, verbose_name='Кассовый чек 54-ФЗ (ссылка на него)')),
-                ('card_number', models.CharField(max_length=20, null=True, verbose_name='Номер кредитной карты плательщика')),
-                ('card_type', models.CharField(max_length=10, null=True, verbose_name='Тип кредитной карты плательщика')),
-                ('payment_purpose', models.CharField(choices=[('ДШ', 'Друзья Школы')], default='ДШ', max_length=2, verbose_name='Назначение платежа')),
+                ('sales_slip',
+                 models.CharField(max_length=500, null=True, verbose_name='Кассовый чек 54-ФЗ (ссылка на него)')),
+                ('card_number',
+                 models.CharField(max_length=20, null=True, verbose_name='Номер кредитной карты плательщика')),
+                ('card_type',
+                 models.CharField(max_length=10, null=True, verbose_name='Тип кредитной карты плательщика')),
+                ('payment_purpose', models.CharField(choices=[('ДШ', 'Друзья Школы')], default='ДШ', max_length=2,
+                                                     verbose_name='Назначение платежа')),
                 ('last_name', models.CharField(max_length=255, null=True, verbose_name='Фамилия по русски')),
                 ('first_name', models.CharField(max_length=255, null=True, verbose_name='Имя по русски')),
-                ('fio', models.CharField(db_index=True, max_length=500, null=True, verbose_name='Фамилия и Имя по русски')),
+                ('fio',
+                 models.CharField(db_index=True, max_length=500, null=True, verbose_name='Фамилия и Имя по русски')),
                 ('email', models.CharField(db_index=True, max_length=254, null=True, verbose_name='Email')),
                 ('telegram', models.CharField(db_index=True, max_length=32, null=True, verbose_name='Telegram name')),
                 ('time_create', models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')),
-                ('payment_system', models.CharField(choices=[('GC', 'GetCourse'), ('PK', 'PayKeeper')], default='GC', max_length=2, verbose_name='Платёжная система')),
-                ('participant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='gtp_index.participant')),
+                ('payment_system',
+                 models.CharField(choices=[('GC', 'GetCourse'), ('PK', 'PayKeeper')], default='GC', max_length=2,
+                                  verbose_name='Платёжная система')),
+                ('participant',
+                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='gtp_index.participant')),
                 ('task', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='gtp_index.task')),
             ],
             options={

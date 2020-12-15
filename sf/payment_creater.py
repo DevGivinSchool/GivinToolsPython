@@ -77,7 +77,7 @@ def payment_normalization2(payment):
 
 def payment_computation(payment, logger):
     # По сумме оплаты вычислить за сколько месяцев оплачено
-    logger.debug(f">>>>payment_creater.payment_computation begin")
+    logger.debug(r">>>>payment_creater.payment_computation begin")
     logger.debug(f"payment[Оплаченная сумма]=|{type(payment['Оплаченная сумма'])}|{payment['Оплаченная сумма']}|")
     if payment["Оплаченная сумма"] < 3980:  # <=1990 >1990 <3980 весь этот промежуток это 30 дней
         payment["number_of_days"] = 30
@@ -99,7 +99,7 @@ def payment_computation(payment, logger):
         logger.debug(f"payment[Время проведения]=|{type(payment['Время проведения'])}|{payment['Время проведения']}|")
         payment["deadline"] = payment["Время проведения"] + timedelta(days=payment["number_of_days"])
         logger.debug(f"payment[deadline]=|{type(payment['deadline'])}|{payment['deadline']}|")
-    logger.debug(f">>>>payment_creater.payment_computation end")
+    logger.debug(r">>>>payment_creater.payment_computation end")
 
 
 def parse_getcourse_html(body_html, logger):
@@ -250,7 +250,8 @@ def parse_getcourse_page(link, payment, logger):
     причём csrf они вроде не проверяют, раз из постмана могу всё грузить
     url = "https://givinschoolru.getcourse.ru/cms/system/login"
     querystring = {"required": "true"}
-    payload = "action=processXdget&xdgetId=99945&params%5Baction%5D=login&params%5Bemail%5D=asutov%40outlook.com&params%5Bpassword%5D=password123"
+    payload = "action=processXdget&xdgetId=99945&params%5Baction%5D=login&params%5Bemail%5D=asutov%40outlook.com
+               &params%5Bpassword%5D=password123"
     headers = {
         'Content-Type': "application/x-www-form-urlencoded",
         'cache-control': "no-cache",
@@ -270,7 +271,7 @@ def parse_getcourse_page(link, payment, logger):
             browser = webdriver.Chrome(PASSWORDS.settings['chromedriver_path'])
         logger.debug(f"browser={browser}")
         # Вход в GetCourse иначе страница заказа будет недоступна
-        logger.debug(f"Try login to GetCourse")
+        logger.debug("Try login to GetCourse")
         browser.get(PASSWORDS.settings['getcourse_login_page'])
         input_login = browser.find_element_by_css_selector("input.form-control.form-field-email")
         input_login.send_keys(PASSWORDS.settings['getcourse_login'])
@@ -280,14 +281,14 @@ def parse_getcourse_page(link, payment, logger):
         button.click()
         time.sleep(10)
         # Выделить из ссылки заказа ID и открыть страницу заказа (ссылка которая в письме не открывается)
-        logger.debug(f"Выделить из ссылки заказа ID и открыть страницу заказа")
+        logger.debug("Выделить из ссылки заказа ID и открыть страницу заказа")
         link_id = link.rsplit("/", 1)
         link = "https://givinschoolru.getcourse.ru/sales/control/deal/update/id/" + link_id[1]
         logger.debug(f"link={link}")
         browser.get(link)
         time.sleep(10)
         # Поиск email на странице заказа
-        logger.debug(f"Поиск email на странице заказа")
+        logger.debug("Поиск email на странице заказа")
         email_element = browser.find_element_by_css_selector("div.user-email")
         logger.debug(f"email_element.text={email_element.text}")
         email = email_element.text
@@ -299,19 +300,19 @@ def parse_getcourse_page(link, payment, logger):
             logger.info(f"PARSING: email={email}")
         # Поиск telegram на странице заказа
         # telegram вариант 2 (только первый div может содержать telegram)
-        logger.debug(f"Поиск telegram на странице заказа. Вариант 2")
+        logger.debug("Поиск telegram на странице заказа. Вариант 2")
         telegram_elements = browser.find_elements_by_xpath(
             "//*[contains(text(), 'Ник телеграмм')]/following-sibling::div")
         result = None
         if len(telegram_elements) == 0:
-            logger.info(f"PARSING: На странице нет элемента 'Ник телеграмм'")
+            logger.info("PARSING: На странице нет элемента 'Ник телеграмм'")
         else:
             logger.debug(f"telegram_elements[0].text={telegram_elements[0].text}")
             result = get_telegram_from_text(telegram_elements[0].text, logger)
         if not result:
             # telegram вариант 1 (здесь несколько равнозначных блоков из них выделяется телеграм, можно по идее брать
             # только второй блок)
-            logger.debug(f"Поиск telegram на странице заказа. Вариант 1")
+            logger.debug("Поиск telegram на странице заказа. Вариант 1")
             telegram_elements = browser.find_elements_by_css_selector(".text-block>div[style]")
             if len(telegram_elements) > 0:
                 text = ""
@@ -325,12 +326,12 @@ def parse_getcourse_page(link, payment, logger):
         else:
             logger.warning(f"PARSING: Не нашел telegram на странице заказа - {link}")
         # закрываем браузер после всех манипуляций
-        logger.debug(f"закрываем браузер после всех манипуляций")
+        logger.debug("закрываем браузер после всех манипуляций")
         browser.quit()
-        logger.debug(f"payment_normalization(payment)")
+        logger.debug("payment_normalization(payment)")
         payment_normalization(payment)
-    except:
-        mail_text = f'Ошибка парсинга страницы заказа GetCourse\n' + traceback.format_exc()
+    except:  # noqa: E722
+        mail_text = 'Ошибка парсинга страницы заказа GetCourse\n' + traceback.format_exc()
         logger.error(mail_text)
         send_mail(PASSWORDS.settings['admin_emails'], "[ERROR][PARSING]", mail_text, logger)
     finally:

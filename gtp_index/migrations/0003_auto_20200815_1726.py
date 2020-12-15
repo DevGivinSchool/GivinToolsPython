@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('gtp_index', '0002_auto_20200815_1649'),
     ]
@@ -39,7 +38,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='participant',
             name='fio_eng',
-            field=models.CharField(db_index=True, max_length=4000, null=True, verbose_name='Фамилия и Имя по английски'),
+            field=models.CharField(db_index=True, max_length=4000, null=True,
+                                   verbose_name='Фамилия и Имя по английски'),
         ),
         migrations.AddField(
             model_name='participant',
@@ -64,7 +64,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='participant',
             name='login',
-            field=models.CharField(max_length=2000, null=True, verbose_name='Логин пользователя в домене @givinschool.org, соответствует почте'),
+            field=models.CharField(max_length=2000, null=True,
+                                   verbose_name='Логин пользователя в домене @givinschool.org, соответствует почте'),
         ),
         migrations.AddField(
             model_name='participant',

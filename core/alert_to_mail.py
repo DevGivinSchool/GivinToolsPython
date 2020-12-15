@@ -24,8 +24,8 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None,
     :param int port: Порт
     :return:
     """
-    logger.debug(f">>>>alert_to_mail.send_mail begin")
-    logger.info(f"Отправка почтовых оповещений")
+    logger.debug(">>>>alert_to_mail.send_mail begin")
+    logger.info("Отправка почтовых оповещений")
     # Все письма отправляются на почту robot для хранения.
     if PASSWORDS.settings['ymail_login'] not in receiver_emails:
         receiver_emails.append(PASSWORDS.settings['ymail_login'])
@@ -56,7 +56,7 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None,
         xlsx.add_header('Content-Disposition', 'attachment', filename=attached_file_name)
         msg.attach(xlsx)
     else:
-        logger.info(f"Вложение: НЕТ")
+        logger.info("Вложение: НЕТ")
     logger.info(f"Список адресов: {receiver_emails}")
     for one_receiver in receiver_emails:
         # print(f"Send email to {one_receiver}")
@@ -68,7 +68,7 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None,
         except Exception:
             logger.error(f"ERROR: Can't send email to {one_receiver}:\n" + traceback.format_exc())
     server.quit()
-    logger.debug(f">>>>alert_to_mail.send_mail end")
+    logger.debug(">>>>alert_to_mail.send_mail end")
 
 
 def send_error_to_admin(subject, logger, prog_name="NONE"):
@@ -118,7 +118,9 @@ def get_participant_notification_text(last_name, first_name, login, password):
 5) Введите логин и пароль, предоставленные вам в этом письме.
 6) Поставьте птичку (галку) в поле Keep me logged in ("Не выходить из системы").
 7) Нажмите Sign In ("Войти"). 
-8) Далее из чата Объявлений в телеграмме найдет сообщение с ссылкой на занятия. Нажмите на неё. Она будет открываться в браузере, появится сверху сообщение с кнопкой, жмём на кнопку Open ZOOM Meetings (либо Открыть ZOOM).
+8) Далее из чата Объявлений в телеграмме найдет сообщение с ссылкой на занятия. Нажмите на неё.
+   Она будет открываться в браузере, появится сверху сообщение с кнопкой,
+   жмём на кнопку Open ZOOM Meetings (либо Открыть ZOOM).
 
 С благодарностью и сердечным теплом,
 команда Школы Гивина."""
@@ -128,7 +130,6 @@ def get_participant_notification_text(last_name, first_name, login, password):
 if __name__ == "__main__":
     # print(get_participant_notification_text("fam", "mane", "xxx@givinschool.org", "passwd"))
     import core.custom_logger as custom_logger
-    import os
 
     program_file = os.path.realpath(__file__)
     logger = custom_logger.get_logger(program_file=program_file)

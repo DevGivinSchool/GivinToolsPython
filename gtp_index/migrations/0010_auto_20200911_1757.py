@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('gtp_index', '0009_delete_settings'),
     ]
@@ -13,6 +12,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='participant',
             name='login',
-            field=models.CharField(max_length=100, null=True, verbose_name='Логин пользователя в домене @givinschool.org, соответствует почте'),
+            field=models.CharField(max_length=100, null=True,
+                                   verbose_name='Логин пользователя в домене @givinschool.org, соответствует почте'),
         ),
     ]

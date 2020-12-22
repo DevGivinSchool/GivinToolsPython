@@ -47,12 +47,16 @@ def get_login(familia_, name_, type=None):
     familia_ = familia_.strip()
     if is_rus(familia_):
         familia_ = translit_name(familia_.lower()).replace(' ', '_')
+    else:
+        familia_ = familia_.lower().replace(' ', '_')
     if name_ is None or name_ == '':
         return familia_
     else:
         name_ = name_.strip()
         if is_rus(name_):
             name_ = translit_name(name_.lower()).replace(' ', '_')
+        else:
+            name_ = name_.lower().replace(' ', '_')
         if type == "team":
             return familia_ + "." + name_[0]
             # ivanov.i

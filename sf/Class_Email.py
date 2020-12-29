@@ -255,7 +255,7 @@ class Email:
         :param uuid: UUID письма
         :return:
         """
-        self.logger.debug(f"Наименование услуги={payment['Наименование услуги']}")
+        self.logger.info(f"Наименование услуги={payment['Наименование услуги']}")
         # if verification_for_school_friends(payment["Наименование услуги"]):
         if 'Друзья Школы -' in payment["Наименование услуги"]:
             # print('Это платёж Друзья Школы')

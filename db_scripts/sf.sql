@@ -21,7 +21,8 @@ where
 --telegram=lower('ххххх')
 --last_name like upper('%ххххх%')
 --last_name_eng like upper('%ххххх%')
-id=1234
+participant_id=1234
+order by id
 ;
 
 -- ===============================================================

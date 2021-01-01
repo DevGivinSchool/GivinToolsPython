@@ -257,7 +257,7 @@ class Email:
         """
         self.logger.info(f"Наименование услуги={payment['Наименование услуги']}")
         # if verification_for_school_friends(payment["Наименование услуги"]):
-        if 'Друзья Школы -' in payment["Наименование услуги"]:
+        if 'Клуб пробуждения Друзья (2 уровень)' in payment["Наименование услуги"]:
             # print('Это платёж Друзья Школы')
             self.logger.info('Это платёж Друзья Школы')
             self.addition_of_payment_information_from_db(payment, postgres, task)

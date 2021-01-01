@@ -79,19 +79,19 @@ def payment_computation(payment, logger):
     # По сумме оплаты вычислить за сколько месяцев оплачено
     logger.debug(r">>>>payment_creater.payment_computation begin")
     logger.debug(f"payment[Оплаченная сумма]=|{type(payment['Оплаченная сумма'])}|{payment['Оплаченная сумма']}|")
-    if payment["Оплаченная сумма"] < 3980:  # <=1990 >1990 <3980 весь этот промежуток это 30 дней
+    if payment["Оплаченная сумма"] < 5000:  # <=2500 & >2500 <5000 весь этот промежуток это 30 дней
         payment["number_of_days"] = 30
-    elif 3980 <= payment["Оплаченная сумма"] < 5580:
+    elif 5000 <= payment["Оплаченная сумма"] < 6975:
         payment["number_of_days"] = 60
-    elif 5580 <= payment["Оплаченная сумма"] < 7440:
+    elif 6975 <= payment["Оплаченная сумма"] < 9300:
         payment["number_of_days"] = 90
-    elif 7440 <= payment["Оплаченная сумма"] < 9300:
+    elif 9300 <= payment["Оплаченная сумма"] < 11625:
         payment["number_of_days"] = 120
-    elif 9300 <= payment["Оплаченная сумма"] < 10440:
+    elif 11625 <= payment["Оплаченная сумма"] < 13050:
         payment["number_of_days"] = 150
-    elif 10440 <= payment["Оплаченная сумма"] < 20280:
+    elif 13050 <= payment["Оплаченная сумма"] < 25500:
         payment["number_of_days"] = 180
-    elif payment["Оплаченная сумма"] >= 20280:
+    elif payment["Оплаченная сумма"] >= 25500:
         payment["number_of_days"] = 365
     logger.debug(f"payment[number_of_days]=|{type(payment['number_of_days'])}|{payment['number_of_days']}|")
     # Вычисляем до какой даты произведена оплата

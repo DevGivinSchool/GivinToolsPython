@@ -41,24 +41,21 @@ def get_decoded_str(line):
     return final_text
 
 
-# def verification_for_school_friends(text):
-#     """Проверяем что назначение платежа - Друзья школы"""
-#     # Т.к. теперь оплата только через GetCourse можно проверять более чёткое соответствие
-#     # checked_text = text.lower().strip()
-#     # checked_text = text.strip()
-#     # print(f'text_lower={text_lower}')
-#     # list_ofstrs = ['дш', 'друзья школы', 'д.ш.', 'друзей школы']
-#     # list_ofstrs = ['Друзья Школы -', ]
-#     # print(f'list_ofstrs={list_ofstrs}')
-#     # Check if all strings from the list exists in given string
-#     # result = False
-#     # for sub_str in list_ofstrs:
-#     #     if sub_str in checked_text:
-#     #         result = True
-#     #         break
-#     # result = all(([True if sub_str in text_lower else False for sub_str in list_ofstrs]))
-#     # print(f'result={result}')
-#     # return result
+def verification_for_school_friends(text):
+    """Проверяем что назначение платежа - Друзья школы"""
+    # text_lower = text.lower().strip()
+    # print(f'text_lower={text_lower}')
+    list_ofstrs = ['Клуб пробуждения Друзья (2 уровень)', 'Друзья Школы - произвольный платёж']
+    # print(f'list_ofstrs={list_ofstrs}')
+    # Check if all strings from the list exists in given string
+    result = False
+    for sub_str in list_ofstrs:
+        if sub_str in text:
+            result = True
+            break
+    # result = all(([True if sub_str in text_lower else False for sub_str in list_ofstrs]))
+    # print(f'result={result}')
+    return result
 
 
 class Email:
@@ -256,8 +253,8 @@ class Email:
         :return:
         """
         self.logger.info(f"Наименование услуги={payment['Наименование услуги']}")
-        # if verification_for_school_friends(payment["Наименование услуги"]):
-        if 'Клуб пробуждения Друзья (2 уровень)' in payment["Наименование услуги"]:
+        if verification_for_school_friends(payment["Наименование услуги"]):
+        # if 'Клуб пробуждения Друзья (2 уровень)' in payment["Наименование услуги"]:
             # print('Это платёж Друзья Школы')
             self.logger.info('Это платёж Друзья Школы')
             self.addition_of_payment_information_from_db(payment, postgres, task)

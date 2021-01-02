@@ -1,7 +1,7 @@
 import datetime
 import core.utils as utils
 import psycopg2
-import sf.payment_creater as payment_creater
+import sf.payment_creator as payment_creator
 import core.PASSWORDS as PASSWORDS
 
 
@@ -75,7 +75,7 @@ class DBPostgres:
         :param value: ID
         :return:
         """
-        sql_text = r"select last_name, first_name, fio, email, telegram, login, password from participants where id=%s;"
+        sql_text = r"select last_name, first_name, fio, email, telegram, login, password, login1, sf_level from participants where id=%s;"
         values_tuple = (value,)
         return self.execute_select(sql_text, values_tuple)
 
@@ -172,7 +172,7 @@ class DBPostgres:
                 self.logger.info("Ничего не найдено, поэтому пробуем парсить страницу заказа")
                 # Если это Getcourse и ничего по ФИО и почте (которой могло и не быть) не нашлось,
                 # тогда парсим страницу GetCourse и пытаемся еще раз поискать по почте и телеграм
-                payment_creater.parse_getcourse_page(task.payment["Кассовый чек 54-ФЗ"], task.payment, self.logger)
+                payment_creator.parse_getcourse_page(task.payment["Кассовый чек 54-ФЗ"], task.payment, self.logger)
                 self.logger.info(f"Ищем участника повторно по email - {task.payment['Электронная почта']}")
                 participant = self.find_participant_by('email', task.payment["Электронная почта"])
                 if participant['id'] is None:
@@ -189,6 +189,8 @@ class DBPostgres:
             task.payment["telegram"] = participant['telegram']
             task.payment["login"] = participant['login']
             task.payment["password"] = participant['password']
+            task.payment["login1"] = participant['login1']
+            task.payment["level"] = participant['sf_level']
             # issues 2. Если срок платежа не закончился то нужно прибавлять эти дни.
             # Для новеньких это не нужно.
             # Срок окончания оплаченного периода может быть как deadline, так и until_date.
@@ -278,7 +280,6 @@ class DBPostgres:
         :param participant: Кортеж участника
         :return: [(405,)]
         """
-        res = None
         records = []
         # Ищем сначала по email, если она есть она сразу в lower
         if participant[1]:
@@ -326,7 +327,9 @@ class DBPostgres:
             'email': None,
             'telegram': None,
             'login': None,
-            'password': None
+            'password': None,
+            'login1': None,
+            'sf_level': None
         }
         if value is None or not value:
             self.logger.warning(f"{criterion} отсутствует. Поиск по {criterion} невозможен")
@@ -348,7 +351,7 @@ class DBPostgres:
                     raise
             self.logger.info(f"Осуществляем поиск участника по {criterion}={value}")
             # Искать нужно с любым type т.к. заблокированный участник тоже может вновь оплатить
-            sql_text = f"select id, type, deadline, until_date, email, telegram, login, password " \
+            sql_text = f"select id, type, deadline, until_date, email, telegram, login, password, login1, sf_level " \
                        f"from participants where {criterion}=%s;"
             values_tuple = (value,)
             records = self.execute_select(sql_text, values_tuple)
@@ -368,7 +371,9 @@ class DBPostgres:
                     'email': records[0][4],
                     'telegram': records[0][5],
                     'login': records[0][6],
-                    'password': records[0][7]
+                    'password': records[0][7],
+                    'login1': records[0][8],
+                    'sf_level': records[0][9],
                 }
             self.logger.debug(f"participant type={type(participant)}")
             self.logger.debug(f"participant={participant}")

@@ -5,7 +5,7 @@ import traceback
 from email.header import decode_header
 import html2text
 # import core.PASSWORDS as PASSWORDS
-from . import payment_creater
+from . import payment_creator
 # from core.Class_DBPostgres import DBPostgres
 from .Class_Task import Task
 from core.alert_to_mail import raise_error, send_error_to_admin
@@ -43,19 +43,12 @@ def get_decoded_str(line):
 
 def verification_for_school_friends(text):
     """Проверяем что назначение платежа - Друзья школы"""
-    # text_lower = text.lower().strip()
-    # print(f'text_lower={text_lower}')
-    list_ofstrs = ['Клуб пробуждения Друзья (2 уровень)', 'Друзья Школы - произвольный платёж']
-    # print(f'list_ofstrs={list_ofstrs}')
-    # Check if all strings from the list exists in given string
-    result = False
-    for sub_str in list_ofstrs:
-        if sub_str in text:
-            result = True
-            break
-    # result = all(([True if sub_str in text_lower else False for sub_str in list_ofstrs]))
-    # print(f'result={result}')
-    return result
+    if 'Клуб пробуждения Друзья (2 уровень)' in text:
+        return 2
+    elif 'Клуб пробуждения Друзья (1 уровень)' in text:
+        return 1
+    else:
+        return 0  # неизвестный уровень
 
 
 class Email:
@@ -147,9 +140,9 @@ class Email:
                                 self.logger.info(
                                     f"Текст полученного оповещения (письма), "
                                     f"используется для первоначального парсинга\n{body['body_html']}")
-                                payment = payment_creater.parse_paykeeper_html(body['body_html'], self.logger)
+                                payment = payment_creator.parse_paykeeper_html(body['body_html'], self.logger)
                             except Exception:
-                                raise_error("ERROR: parse_paykeeper_html", self.logger, prog_name="payment_creater.py")
+                                raise_error("ERROR: parse_paykeeper_html", self.logger, prog_name="payment_creator.py")
                                 sys.exit(1)
                             self.payment_verification_for_school_friends(ffrom, fsubject, payment, self.postgres, task,
                                                                          uuid)
@@ -163,11 +156,11 @@ class Email:
                                 self.logger.info(
                                     f"Текст полученного оповещения (письма), "
                                     f"используется для первоначального парсинга\n{body['body_html']}")
-                                payment = payment_creater.parse_getcourse_html(body['body_html'], self.logger)
+                                payment = payment_creator.parse_getcourse_html(body['body_html'], self.logger)
                                 if fdate is not None:  # #4
                                     payment["Время проведения"] = fdate
                             except Exception:
-                                raise_error("ERROR: parse_getcourse_html", self.logger, prog_name="payment_creater.py")
+                                raise_error("ERROR: parse_getcourse_html", self.logger, prog_name="payment_creator.py")
                                 sys.exit(1)
                             self.payment_verification_for_school_friends(ffrom, fsubject, payment, self.postgres, task,
                                                                          uuid)
@@ -253,10 +246,16 @@ class Email:
         :return:
         """
         self.logger.info(f"Наименование услуги={payment['Наименование услуги']}")
-        if verification_for_school_friends(payment["Наименование услуги"]):
-        # if 'Клуб пробуждения Друзья (2 уровень)' in payment["Наименование услуги"]:
+        payment["level"] = verification_for_school_friends(payment["Наименование услуги"])
+        self.logger.info(f"level={payment['level']}")
+        if payment["level"] in [1, 2]:
             # print('Это платёж Друзья Школы')
             self.logger.info('Это платёж Друзья Школы')
+            # теперь зная level можно определить количество оплаченных дней
+            if payment["level"] == 1:
+                payment_creator.payment_computation1(payment, self.logger)
+            else:
+                payment_creator.payment_computation2(payment, self.logger)
             self.addition_of_payment_information_from_db(payment, postgres, task)
             task.task_run()
         # Это платёж но НЕ за ДШ

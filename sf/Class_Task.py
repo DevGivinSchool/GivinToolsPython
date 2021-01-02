@@ -40,5 +40,6 @@ class Task:
         else:
             # Отмечаем оплату в БД
             self.logger.info('ОТМЕЧАЕМ ОПЛАТУ В БД')
+            # TODO: Если 1 уровень оплачивает за 2 уровень, то нужно создать новую учётку если её нет.
             sf_participant_create.mark_payment_into_db(self.payment, self.database, self.logger)
         self.logger.info('>>>>task_run end')

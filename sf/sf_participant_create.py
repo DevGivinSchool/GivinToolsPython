@@ -1,6 +1,6 @@
 # import core.yandex_mail
 # import yandex_connect
-import sf.payment_creater as payment_creater
+import sf.payment_creator as payment_creator
 import traceback
 import core.PASSWORDS as PASSWORDS
 import sys
@@ -49,6 +49,9 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
     # Для заблокированного пользователя меняется его тип (type) и из пароля удаляются два последних символа
     if payment["participant_type"] == "B":
         # Нужно дополнить сведения участника которых не хватает (т.к. это не новый участник а заблокированный)
+        # TODO: По-моему эти сведения не нужны здесь.
+        logger.debug(f"payment до и после дополнения сведениями в mark_payment_into_db")
+        logger.debug(payment)
         result = database.get_participant_by_id(payment["participant_id"])[0]
         payment["Фамилия"] = result[0]
         payment["Имя"] = result[1]
@@ -57,10 +60,10 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         payment["telegram"] = result[4]
         payment["login"] = result[5]
         payment["password"] = result[6]
+        payment["login1"] = result[7]
+        payment["level"] = result[8]
+        logger.debug(payment)
         # [('ИВАНОВ', 'ИВАН', 'ИВАНОВ ИВАН', 'xxx@mail.ru', '@xxxx', 'ivanov_ivan@givinschool.org', '43RFji1r48')]
-        # Исправление пароля (вырезать 55 в конце)
-        if payment["password"][-2:] == "55":
-            payment["password"] = payment["password"][:-2]
         logger.info("Изменение статуса учатника в БД")
         sql_text = """UPDATE participants
         SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s, password=%s
@@ -69,10 +72,14 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
                         payment["deadline"], participant_type, payment["password"], payment["participant_id"])
         database.execute_dml(sql_text, values_tuple)
         logger.info("Статус учатника в БД изменён")
-        # Измение статуса в zoom
+        # Изменение статуса в zoom
         logger.info("Активация участника в Zoom")
         zoom_user = ZoomUS(logger)
-        zoom_result = zoom_user.zoom_users_userstatus(payment["login"], "activate")
+        if payment["level"] == 2:
+            login_ = payment["login"]
+        else:
+            login_ = payment["login1"]
+        zoom_result = zoom_user.zoom_users_userstatus(login_, "activate")
         if zoom_result is not None:
             if zoom_result["message"].startswith("User does not exist"):
                 # Если вдруг оказалось что такого пользователя нет в zoom - пробуем его создать
@@ -85,7 +92,7 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
                             f"{zoom_result}\n" \
                             f"ID      : {payment['participant_id']}\n" \
                             f"ФИО     : {payment['Фамилия Имя']}\n" \
-                            f"Login   : {payment['login']}\n" \
+                            f"Login   : {login_}\n" \
                             f"Password: {payment['password']}"
                 send_mail(PASSWORDS.settings['admin_emails'], "UNBLOCK PARTICIPANT ERROR", mail_text, logger,
                           attached_file=logger.handlers[0].baseFilename)
@@ -147,7 +154,7 @@ def create_sf_participants(list_, database, logger):  # noqa: C901
     """
     Создание нескольких участников ДШ по списку.
     Список в формате:
-    Фамлия; Имя; email; telegram
+    Фамилия; Имя; email; telegram
     :param logger:
     :param database:
     :param list_:
@@ -156,7 +163,7 @@ def create_sf_participants(list_, database, logger):  # noqa: C901
     logger.info("Начинаю обработку списка")
     line_number = 1
     for line in list_:
-        payment = payment_creater.get_clear_payment()
+        payment = payment_creator.get_clear_payment()
         try:
             payment["Фамилия"] = line[0]
         except IndexError:
@@ -180,8 +187,9 @@ def create_sf_participants(list_, database, logger):  # noqa: C901
             pass
         payment["Время проведения"] = datetime.now()
         payment["auto"] = False
-        payment_creater.payment_normalization(payment)
-        payment_creater.payment_computation(payment, logger)
+        payment_creator.payment_normalization(payment)
+        # TODO: Эту всю процедуру нужно переделывать под 2 уровня!!!
+        payment_creator.payment_computation(payment, logger)
         # noinspection PyBroadException
         try:
             create_sf_participant(payment, database, logger)
@@ -260,14 +268,17 @@ def create_sf_participant(payment, database, logger):
 
 
 def create_sf_participant_yandex(logger, payment, mm):
-    # Создаём почту новому участнику в домене @givinschool.org
-    logger.info("Создаём почту новому участнику в домене @givinschool.org")
+    # Создаём почту новому участнику в домене соответствующего уровню участия
+    logger.info("Создаём почту новому участнику в домене соответствующего уровню участия")
     # было так
     # payment["login"] = get_login(payment["Фамилия"], payment["Имя"])
     # добавил эти 4 строчки вместо предыдущей
-    payment["login"] = get_login(payment["Фамилия"], payment["Имя"]) + '@givinschool.org'
+    if payment["level"] == 2:
+        login_ = payment["login"] = get_login(payment["Фамилия"], payment["Имя"]) + '@givinschool.org'
+    else:
+        login_ = payment["login1"] = get_login(payment["Фамилия"], payment["Имя"]) + '@givinschool.com'
     message = f'Создать почту для:\n' \
-              f'Логин   : {payment["login"].lower()}\n' \
+              f'Логин   : {login_}\n' \
               f'Пароль  : {PASSWORDS.settings["default_ymail_password"]}\n' \
               f'Фамилия : {payment["Фамилия"]}\n' \
               f'Имя     : {payment["Имя"]}\n' \
@@ -277,6 +288,8 @@ def create_sf_participant_yandex(logger, payment, mm):
     logger.info(message)
     # region Сейчас учётка zoom создаётся из кода приложения, без получения подтверждения на email,
     # поэтому реально почта не нужна.
+    # TODO: Сейчас два уровня, поэтому если раскоментировать,
+    #  то нужно создавать учётки в @givinschool.org и в @givinschool.com
     """
     try:
         result = yandex_mail.create_yandex_mail(payment["Фамилия"], payment["Имя"], payment["login"], department_id_=4)
@@ -309,7 +322,11 @@ def create_sf_participant_zoom(logger, payment, mm):
     # logger.info(f"Имя: {payment['Имя'].title()}")
     logger.info("Создание учётки Zoom участнику")
     zoom_user = ZoomUS(logger)
-    zoom_result = zoom_user.zoom_users_usercreate(payment["login"], payment['Имя'].title(),
+    if payment["level"] == 2:
+        login_ = payment["login"]
+    else:
+        login_ = payment["login1"]
+    zoom_result = zoom_user.zoom_users_usercreate(login_, payment['Имя'].title(),
                                                   payment['Фамилия'].title(), payment["password"])
     if zoom_result is not None:
         logger.error("+" * 60)
@@ -321,7 +338,7 @@ def create_sf_participant_zoom(logger, payment, mm):
                      f"ID      : {payment['participant_id']}\n" \
                      f"Фамилия : {payment['Фамилия'].title()}\n" \
                      f"Имя     : {payment['Имя'].title()}\n" \
-                     f"Login   : {payment['login']}\n" \
+                     f"Login   : {login_}\n" \
                      f"Password: {payment['password']}\n" \
                      f"Сведения по участнику и платежу можно посмотреть по ссылке - {payment['Кассовый чек 54-ФЗ']}\n" \
                      f"ERROR:\n{zoom_result}\n\n"
@@ -363,8 +380,12 @@ def create_sf_participant_db(database, logger, payment, mm):
         logger.info(select_payment(payment["task_uuid"], database))
     # Обновляем участнику логин и пароль в БД
     logger.info("Обновляем участнику логин и пароль в БД")
+    if payment["level"] == 2:
+        login_ = payment["login"]
+    else:
+        login_ = payment["login1"]
     sql_text = """UPDATE participants SET login=%s, password=%s WHERE id=%s;"""
-    values_tuple = (payment["login"], payment["password"], payment["participant_id"])
+    values_tuple = (login_, payment["password"], payment["participant_id"])
     database.execute_dml(sql_text, values_tuple)
     # Окончательный вид участника в БД
     line = f'{select_participant(payment["participant_id"], database)}'
@@ -376,7 +397,7 @@ def create_sf_participant_db(database, logger, payment, mm):
 
 if __name__ == '__main__':
     """ Создание участников по списку. Список в формате:
-    Фамлия; Имя; email; telegram
+    Фамилия; Имя; email; telegram
     """
     import core.custom_logger as custom_logger
     import os

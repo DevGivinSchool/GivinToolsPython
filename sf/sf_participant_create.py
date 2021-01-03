@@ -202,7 +202,7 @@ def create_sf_participants(list_, database, logger):  # noqa: C901
     logger.info("Обработка списка закончена")
 
 
-def create_sf_participant(payment, database, logger):
+def create_sf_participant(payment, database, logger, special_case=False):
     logger.info(">>>>sf_participant_create.create_sf_participant begin")
     # This is new participant
     # Participant must have Name, Surname, Email
@@ -231,13 +231,14 @@ def create_sf_participant(payment, database, logger):
     # Создать участнику ДШ учётку (email) Yandex
     mm = create_sf_participant_yandex(logger, payment, mm)
     # Генерация пароля для Zoom (для всех почт пароль одинаковый)
-    payment["password"] = password_for_sf()
+    if payment["password"] is None:
+        payment["password"] = password_for_sf()
     mm.text += f'\nPassword: {payment["password"]}'
     logger.info(f'Password: {payment["password"]}')
     # Создать участнику ДШ учётку Zoom
     mm = create_sf_participant_zoom(logger, payment, mm)
     # Создать участника ДШ в БД и отметить ему оплату
-    mm = create_sf_participant_db(database, logger, payment, mm)
+    mm = create_sf_participant_db(database, logger, payment, mm, special_case)
     # Почтовые оповещения
     # TODO Отправить Telegram участнику
     #  https://github.com/DevGivinSchool/GivinToolsPython/issues/13#issue-650152143
@@ -269,6 +270,7 @@ def create_sf_participant(payment, database, logger):
 
 def create_sf_participant_yandex(logger, payment, mm):
     # Создаём почту новому участнику в домене соответствующего уровню участия
+    logger.info(">>>>sf_participant_create.create_sf_participant_yandex begin")
     logger.info("Создаём почту новому участнику в домене соответствующего уровню участия")
     # было так
     # payment["login"] = get_login(payment["Фамилия"], payment["Имя"])
@@ -312,6 +314,7 @@ def create_sf_participant_yandex(logger, payment, mm):
             raise
     """
     # endregion
+    logger.info(">>>>sf_participant_create.create_sf_participant_yandex end")
     return mm
 
 
@@ -320,6 +323,7 @@ def create_sf_participant_zoom(logger, payment, mm):
     # Для удобства создания учётки zoom записать в лог фамилию и имя
     # logger.info(f"Фамилия: {payment['Фамилия'].title()}")
     # logger.info(f"Имя: {payment['Имя'].title()}")
+    logger.info(">>>>sf_participant_create.create_sf_participant_zoom begin")
     logger.info("Создание учётки Zoom участнику")
     zoom_user = ZoomUS(logger)
     if payment["level"] == 2:
@@ -348,27 +352,30 @@ def create_sf_participant_zoom(logger, payment, mm):
     else:
         mm.text += "\nУчётка Zoom успешно создана"
         logger.info("Учётка Zoom успешно создана")
+    logger.info(">>>>sf_participant_create.create_sf_participant_zoom end")
     return mm
 
 
-def create_sf_participant_db(database, logger, payment, mm):
-    # Создаём нового пользователя в БД
-    logger.info(f"Создаём нового пользователя в БД ({payment['fio_lang']})")
-    if payment["fio_lang"] == "RUS":
-        sql_text = """INSERT INTO participants(last_name, first_name, fio, email, telegram, type)
-        VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;"""
-        values_tuple = (payment["Фамилия"], payment["Имя"],
-                        payment["Фамилия Имя"], payment["Электронная почта"],
-                        payment["telegram"], 'N')
-    else:
-        sql_text = """INSERT INTO participants(last_name, first_name, fio, email, telegram, type, last_name_eng,
-        first_name_eng, fio_eng)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
-        values_tuple = (payment["Фамилия"], payment["Имя"],
-                        payment["Фамилия Имя"], payment["Электронная почта"],
-                        payment["telegram"], 'N',
-                        payment["Фамилия"], payment["Имя"], payment["Фамилия Имя"])
-    payment["participant_id"] = database.execute_dml_id(sql_text, values_tuple)
+def create_sf_participant_db(database, logger, payment, mm, special_case):
+    # Создаём нового пользователя в БД если это нужно
+    logger.info(">>>>sf_participant_create.create_sf_participant_db begin")
+    if not special_case:  # Участник оплатил 2 уровень но такой учётки у него еще нет.
+        logger.info(f"Создаём нового пользователя ({payment['fio_lang']}) в БД")
+        if payment["fio_lang"] == "RUS":
+            sql_text = """INSERT INTO participants(last_name, first_name, fio, email, telegram, type)
+            VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;"""
+            values_tuple = (payment["Фамилия"], payment["Имя"],
+                            payment["Фамилия Имя"], payment["Электронная почта"],
+                            payment["telegram"], 'N')
+        else:
+            sql_text = """INSERT INTO participants(last_name, first_name, fio, email, telegram, type, last_name_eng,
+            first_name_eng, fio_eng)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
+            values_tuple = (payment["Фамилия"], payment["Имя"],
+                            payment["Фамилия Имя"], payment["Электронная почта"],
+                            payment["telegram"], 'N',
+                            payment["Фамилия"], payment["Имя"], payment["Фамилия Имя"])
+        payment["participant_id"] = database.execute_dml_id(sql_text, values_tuple)
     logger.info(select_participant(payment["participant_id"], database))
     # Отмечаем оплату в БД этому участнику
     mark_payment_into_db(payment, database, logger, participant_type='N')
@@ -379,19 +386,22 @@ def create_sf_participant_db(database, logger, payment, mm):
         database.execute_dml(sql_text, values_tuple)
         logger.info(select_payment(payment["task_uuid"], database))
     # Обновляем участнику логин и пароль в БД
-    logger.info("Обновляем участнику логин и пароль в БД")
+    logger.info("Обновляем участнику логин и пароль в БД и level")
     if payment["level"] == 2:
         login_ = payment["login"]
+        sql_text = """UPDATE participants SET login=%s, password=%s, sf_level=%s WHERE id=%s;"""
     else:
         login_ = payment["login1"]
+        sql_text = """UPDATE participants SET login1=%s, password=%s, sf_level=%s WHERE id=%s;"""
     sql_text = """UPDATE participants SET login=%s, password=%s WHERE id=%s;"""
-    values_tuple = (login_, payment["password"], payment["participant_id"])
+    values_tuple = (login_, payment["password"], payment["level"], payment["participant_id"])
     database.execute_dml(sql_text, values_tuple)
     # Окончательный вид участника в БД
     line = f'{select_participant(payment["participant_id"], database)}'
     mm.text += f'\nСведения об участнике успешно внесены в БД:\n{line}'
     logger.info('Сведения об участнике успешно внесены в БД:')
     logger.info(f'{line}')
+    logger.info(">>>>sf_participant_create.create_sf_participant_db end")
     return mm
 
 

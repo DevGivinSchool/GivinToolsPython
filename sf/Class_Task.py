@@ -41,5 +41,9 @@ class Task:
             # Отмечаем оплату в БД
             self.logger.info('ОТМЕЧАЕМ ОПЛАТУ В БД')
             # TODO: Если 1 уровень оплачивает за 2 уровень, то нужно создать новую учётку если её нет.
+            # Участник оплатил 2 уровень но такой учётки у него еще нет и это особый случай special_case=True
+            if self.payment["level"] == 2 and not self.payment["login"]:
+                self.logger.info('ЭТО ОСОБЫЙ СЛУЧАЙ переход с level1 на level2')
+                sf_participant_create.create_sf_participant(self.payment, self.database, self.logger, special_case=True)
             sf_participant_create.mark_payment_into_db(self.payment, self.database, self.logger)
         self.logger.info('>>>>task_run end')

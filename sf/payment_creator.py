@@ -13,22 +13,28 @@ from selenium import webdriver
 
 def get_clear_payment():
     payment_zero = {
-        "task_uuid": None,
-        "participant_id": None,
-        "number_of_days": 30,
-        "deadline": None,
-        "until_date": None,
-        "fio_lang": "RUS",
-        "participant_type": None,
+        "task_uuid": None,  # По сути uuid обрабатываемого письма, соответствует таблице tasks.task_uuid
+        "level": 0,  # Всего два уровня 1 и 2
+        "participant_id": None,  # participants.id
+        "number_of_days": 30,  # Количество оплаченных дней
+        "deadline": None,  # До какого числа произведена оплата
+        "until_date": None,  # До какого числа отсрочка
+        "fio_lang": "RUS",  # Язык фамилии ENG, RUS
+        "participant_type": None,  # Тип участника:
+                                   # P - регулярный участник;
+                                   # B - заблокированный;
+                                   # E - наш сотрудник;
+                                   # V - VIP (особые условия, например, участие без оплаты)
         "login": None,
+        "login1": None,
         "password": None,
-        "auto": True,
+        "auto": True,  # Создан из программы или вручную
         "Фамилия": None,
         "Имя": None,
         "Фамилия Имя": None,
         "Электронная почта": None,
         "telegram": None,
-        "Наименование услуги": None,
+        "Наименование услуги": None,  # По этому определяется уровень
         "ID платежа": None,
         "Оплаченная сумма": None,
         "Кассовый чек 54-ФЗ": None,
@@ -75,9 +81,36 @@ def payment_normalization2(payment):
         payment["telegram"] = payment["telegram"].lower()
 
 
-def payment_computation(payment, logger):
+def payment_computation1(payment, logger):
     # По сумме оплаты вычислить за сколько месяцев оплачено
-    logger.debug(r">>>>payment_creater.payment_computation begin")
+    logger.debug(r">>>>payment_creater.payment_computation1 begin")
+    logger.debug(f"payment[Оплаченная сумма]=|{type(payment['Оплаченная сумма'])}|{payment['Оплаченная сумма']}|")
+    if payment["Оплаченная сумма"] < 2000:  # <=1000 & >1000 <2000 весь этот промежуток это 30 дней
+        payment["number_of_days"] = 30
+    elif 2000 <= payment["Оплаченная сумма"] < 3000:
+        payment["number_of_days"] = 60
+    elif 3000 <= payment["Оплаченная сумма"] < 4000:
+        payment["number_of_days"] = 90
+    elif 4000 <= payment["Оплаченная сумма"] < 5000:
+        payment["number_of_days"] = 120
+    elif 5000 <= payment["Оплаченная сумма"] < 6000:
+        payment["number_of_days"] = 150
+    elif 6000 <= payment["Оплаченная сумма"] < 12000:
+        payment["number_of_days"] = 180
+    elif payment["Оплаченная сумма"] >= 12000:
+        payment["number_of_days"] = 365
+    logger.debug(f"payment[number_of_days]=|{type(payment['number_of_days'])}|{payment['number_of_days']}|")
+    # Вычисляем до какой даты произведена оплата
+    if isinstance(payment["Время проведения"], datetime):
+        logger.debug(f"payment[Время проведения]=|{type(payment['Время проведения'])}|{payment['Время проведения']}|")
+        payment["deadline"] = payment["Время проведения"] + timedelta(days=payment["number_of_days"])
+        logger.debug(f"payment[deadline]=|{type(payment['deadline'])}|{payment['deadline']}|")
+    logger.debug(r">>>>payment_creater.payment_computation1 end")
+
+
+def payment_computation2(payment, logger):
+    # По сумме оплаты вычислить за сколько месяцев оплачено
+    logger.debug(r">>>>payment_creater.payment_computation2 begin")
     logger.debug(f"payment[Оплаченная сумма]=|{type(payment['Оплаченная сумма'])}|{payment['Оплаченная сумма']}|")
     if payment["Оплаченная сумма"] < 5000:  # <=2500 & >2500 <5000 весь этот промежуток это 30 дней
         payment["number_of_days"] = 30
@@ -99,7 +132,7 @@ def payment_computation(payment, logger):
         logger.debug(f"payment[Время проведения]=|{type(payment['Время проведения'])}|{payment['Время проведения']}|")
         payment["deadline"] = payment["Время проведения"] + timedelta(days=payment["number_of_days"])
         logger.debug(f"payment[deadline]=|{type(payment['deadline'])}|{payment['deadline']}|")
-    logger.debug(r">>>>payment_creater.payment_computation end")
+    logger.debug(r">>>>payment_creater.payment_computation2 end")
 
 
 def parse_getcourse_html(body_html, logger):
@@ -183,7 +216,7 @@ def parse_getcourse_html(body_html, logger):
     payment["Время проведения"] = datetime.now()
     payment["Платежная система"] = 1
     payment_normalization(payment)
-    payment_computation(payment, logger)
+    # payment_computation(payment, logger)
     logger.info(f'payment after parsing\n{payment}')
     logger.info(">>>> parse_getcourse_html end")
     return payment
@@ -224,7 +257,7 @@ def parse_paykeeper_html(body_html, logger):
     payment["Время проведения"] = datetime.strptime(payment["Время проведения"], '%Y-%m-%d %H:%M:%S')
     payment["Платежная система"] = 2
     payment_normalization(payment)
-    payment_computation(payment, logger)
+    # payment_computation(payment, logger)
     logger.info(f'payment after parsing\n{payment}')
     logger.info(">>>> parse_paykeeper_html end")
     return payment

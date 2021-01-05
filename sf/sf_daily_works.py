@@ -12,6 +12,7 @@ from core.utils import delete_obsolete_files
 
 
 def block_participants(db_connect, logger):
+    # TODO: Переделать под два уровня -
     """
     Блокировка участников у которых оплата просрочена на 5 дней
     :param db_connect: Соединение с БД
@@ -70,7 +71,7 @@ order by last_name"""
 
     Вы можете оплатить ДШ через страницу оплаты (доступен PayPal).
     Возможна оплата сразу за 3 или 6 месяцев, при этом вы получите скидку 7% и 13% соответственно:
-    (+PayPal) https://givinschoolru.getcourse.ru/sf
+    (+PayPal) https://givinschoolru.getcourse.ru/sf-level2
 
     Пожалуйста, при оплате, указывайте свои Фамилию, Имя, такие же как и при регистрации.
     В назначение платежа можно написать "друзья школы" или просто "дш".
@@ -91,6 +92,7 @@ order by last_name"""
 
 
 def participants_notification(db_connect, logger):
+    # TODO: Переделать под два уровня
     """
     Уведомление участников о необходимости оплаты
     :param logger:
@@ -147,7 +149,7 @@ order by last_name"""
 
 Вы можете оплатить ДШ через страницу оплаты (доступен PayPal).
 Возможна оплата сразу за 3 или 6 месяцев, при этом вы полаете скидки 7% и 13% соответственно:
-(+PayPal) https://givinschoolru.getcourse.ru/sf
+(+PayPal) https://givinschoolru.getcourse.ru/sf-level2
 
 Пожалуйста, при оплате, указывайте свои Фамилию, Имя, такие же как и при регистрации.
 В назначение платежа можно написать "друзья школы" или просто "дш".

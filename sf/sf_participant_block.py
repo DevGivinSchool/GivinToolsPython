@@ -16,6 +16,7 @@ def participants_block(list_participants, logger2):
 
 
 def block_one_participant(p, postgres, logger):  # noqa: C901
+    # TODO: Переделать под два уровня
     print(f"Попытка блокировки участника |{p}|")
     logger.info(f"Попытка блокировки участника |{p}|")
     # Проверяем что p это ID

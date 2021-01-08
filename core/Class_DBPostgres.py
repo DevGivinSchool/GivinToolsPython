@@ -181,7 +181,7 @@ class DBPostgres:
         self.logger.info("Поиск участника окончен")
         self.logger.info("Дополнение платежа созданного после парсинга письма сведениями из БД из найденого участника")
         # Дополнение платежа созданного после парсинга письма сведениями из БД из найденого участника.
-        if participant['id'] is not None:  # Для новеньких ничего не найдётся.
+        if participant['id'] is not None:  # Это старенький участник, для него можно получить сведения из БД
             self.logger.info("Участник найден - это не новичёк")
             task.payment["participant_id"] = participant['id']
             task.payment["participant_type"] = participant['type']
@@ -190,7 +190,7 @@ class DBPostgres:
             task.payment["login"] = participant['login']
             task.payment["password"] = participant['password']
             task.payment["login1"] = participant['login1']
-            task.payment["level"] = participant['sf_level']
+            # task.payment["level"] = participant['sf_level']
             # issues 2. Если срок платежа не закончился то нужно прибавлять эти дни.
             # Для новеньких это не нужно.
             # Срок окончания оплаченного периода может быть как deadline, так и until_date.
@@ -208,7 +208,12 @@ class DBPostgres:
                 self.logger.debug(
                     f"task.payment[deadline]=|{type(task.payment['deadline'])}|{task.payment['deadline']}|")
                 self.logger.info(f"Добавлено {days_} дней")
-            #
+        else:  # для новеньких 1 уровня добавляю 30 дней (т.к. первый месяц бесплатно)
+            if task.payment["level"] == 1:
+                self.logger.info(f"Добавляем 30 дней для новенького 1 уровня.")
+                task.payment["until_date"] = task.payment["until_date"] + datetime.timedelta(days=30)
+                self.logger.debug(
+                    f"task.payment[until_date]=|{type(task.payment['until_date'])}|{task.payment['until_date']}|")
         self.logger.info(f'payment\n{task.payment}')
         cursor = self.conn.cursor()
         sql_text = """INSERT INTO payments(task_uuid, name_of_service, payment_id, amount, participant_id,

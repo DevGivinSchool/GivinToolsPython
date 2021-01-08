@@ -393,7 +393,6 @@ def create_sf_participant_db(database, logger, payment, mm, special_case):
     else:
         login_ = payment["login1"]
         sql_text = """UPDATE participants SET login1=%s, password=%s, sf_level=%s WHERE id=%s;"""
-    sql_text = """UPDATE participants SET login=%s, password=%s WHERE id=%s;"""
     values_tuple = (login_, payment["password"], payment["level"], payment["participant_id"])
     database.execute_dml(sql_text, values_tuple)
     # Окончательный вид участника в БД

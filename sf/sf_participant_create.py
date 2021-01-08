@@ -49,7 +49,6 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
     # Для заблокированного пользователя меняется его тип (type) и из пароля удаляются два последних символа
     if payment["participant_type"] == "B":
         # Нужно дополнить сведения участника которых не хватает (т.к. это не новый участник а заблокированный)
-        # TODO: По-моему эти сведения не нужны здесь.
         logger.debug(f"payment до и после дополнения сведениями в mark_payment_into_db")
         logger.debug(payment)
         result = database.get_participant_by_id(payment["participant_id"])[0]
@@ -61,7 +60,7 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         payment["login"] = result[5]
         payment["password"] = result[6]
         payment["login1"] = result[7]
-        payment["level"] = result[8]
+        # payment["level"] = result[8]
         logger.debug(payment)
         # [('ИВАНОВ', 'ИВАН', 'ИВАНОВ ИВАН', 'xxx@mail.ru', '@xxxx', 'ivanov_ivan@givinschool.org', '43RFji1r48')]
         logger.info("Изменение статуса учатника в БД")
@@ -185,11 +184,18 @@ def create_sf_participants(list_, database, logger):  # noqa: C901
                 payment["telegram"] = line[3]
         except IndexError:
             pass
+        try:
+            if line[4]:
+                payment["level"] = line[4]
+        except IndexError:
+            pass
         payment["Время проведения"] = datetime.now()
         payment["auto"] = False
         payment_creator.payment_normalization(payment)
-        # TODO: Эту всю процедуру нужно переделывать под 2 уровня!!!
-        payment_creator.payment_computation(payment, logger)
+        if payment["level"] == 1:
+            payment_creator.payment_computation1(payment, logger)
+        else:
+            payment_creator.payment_computation2(payment, logger)
         # noinspection PyBroadException
         try:
             create_sf_participant(payment, database, logger)

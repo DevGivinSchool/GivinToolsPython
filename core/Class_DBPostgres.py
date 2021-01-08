@@ -208,12 +208,6 @@ class DBPostgres:
                 self.logger.debug(
                     f"task.payment[deadline]=|{type(task.payment['deadline'])}|{task.payment['deadline']}|")
                 self.logger.info(f"Добавлено {days_} дней")
-        else:  # для новеньких 1 уровня добавляю 30 дней (т.к. первый месяц бесплатно)
-            if task.payment["level"] == 1:
-                self.logger.info(f"Добавляем 30 дней для новенького 1 уровня.")
-                task.payment["until_date"] = task.payment["until_date"] + datetime.timedelta(days=30)
-                self.logger.debug(
-                    f"task.payment[until_date]=|{type(task.payment['until_date'])}|{task.payment['until_date']}|")
         self.logger.info(f'payment\n{task.payment}')
         cursor = self.conn.cursor()
         sql_text = """INSERT INTO payments(task_uuid, name_of_service, payment_id, amount, participant_id,

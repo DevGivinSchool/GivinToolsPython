@@ -105,7 +105,7 @@ def show_groups():
 
 
 def generate_password():
-    # TODO Нужно переделать, т.к. сейчас только пароли для ДШ password_for_sf()
+    # TODO Нужно переделать, т.к. сейчас только пароли для КПД password_for_sf()
     s = 7
     while s not in [0, 1]:
         s = int(input("Строгий пароль (цифры и спецсимволы)? 0-Нет; 1-Да:"))
@@ -172,8 +172,8 @@ if __name__ == "__main__":
             "3": ("Логин для FTP", create_ftp_login),
             "4": ("Посмотреть список групп", show_groups),
             "5": ("Генерировать пароль", generate_password),
-            "6": ("Генерировать пароль для ДШ", generate_sf_password),
-            "7": ("DEBUG: Создание учётки для ДШ", create_participant),
+            "6": ("Генерировать пароль для КПД", generate_sf_password),
+            "7": ("DEBUG: Создание учётки для КПД", create_participant),
             "8": ("Выход", exit_fn)
             }
     for key in sorted(menu.keys()):

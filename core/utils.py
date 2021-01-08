@@ -37,7 +37,7 @@ def get_login(familia_, name_, type=None):
     """
     Создание логина из фамилии и имени. # У некоторых фамили и имена сложные = несколько слов через пробел,
     поэтому пробел заменяю на подчёркивание
-    :param type: team - для команды; frend - ДШ
+    :param type: team - для команды; frend - КПД
     :param familia_:
     :param name_:
     :return: login_

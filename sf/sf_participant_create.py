@@ -102,9 +102,9 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         # Уведомление участника
         logger.info("Уведомление участника")
         notification_text = participant_notification(payment,
-                                                     r"[ШКОЛА ГИВИНА]. Ваша учётная запись в Друзьях Школы разблокирована.",
+                                                     r"[ШКОЛА ГИВИНА]. Ваша учётная запись в Клуб пробуждения Друзья (КПД) разблокирована.",
                                                      logger)
-        mm.subject = "[ДШ] РАЗБЛОКИРОВКА УЧАСТНИКА"
+        mm.subject = "[КПД] РАЗБЛОКИРОВКА УЧАСТНИКА"
         mm.text += "Текст уведомления:\n\n\n" + notification_text
     else:
         logger.info("Отмечаем оплату в БД")
@@ -123,9 +123,9 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         # Уведомление участника
         logger.info("Уведомление участника")
         notification_text = participant_notification(payment,
-                                                     r"[ДШ]. Ваша оплата принята и продлено участие в Друзьях Школы.",
+                                                     r"[КПД]. Ваша оплата принята и продлено участие в Друзьях Школы.",
                                                      logger)
-        mm.subject = "[ДШ] принята оплата за ДШ"
+        mm.subject = "[КПД] принята оплата за КПД"
         mm.text += "Текст уведомления:\n\n\n" + notification_text
     # Окончательное состояние участника
     logger.info(f"Окончательное состояние участника\n{select_participant(payment['participant_id'], database)}")
@@ -151,7 +151,7 @@ def participant_notification(payment, subject, logger):
 
 def create_sf_participants(list_, database, logger):  # noqa: C901
     """
-    Создание нескольких участников ДШ по списку.
+    Создание нескольких участников КПД по списку.
     Список в формате:
     Фамилия; Имя; email; telegram
     :param logger:
@@ -214,7 +214,7 @@ def create_sf_participant(payment, database, logger, special_case=False):
     # Participant must have Name, Surname, Email
     # mail_text = ""
     # subject = "НОВЫЙ УЧАСТНИК"
-    mm = MailMessage("[ДШ] НОВЫЙ УЧАСТНИК", "")
+    mm = MailMessage("[КПД] НОВЫЙ УЧАСТНИК", "")
     logger.info(f"Создание участника:{payment}")
     if not payment["Фамилия"]:
         logger.error("The participant must have a Surname")
@@ -234,16 +234,16 @@ def create_sf_participant(payment, database, logger, special_case=False):
         logger.warning("+" * 60)
         # raise Exception("The participant must have a Email")
         mm.text += "\nВНИМАНИЕ: У участника нет Telegram!!!"
-    # Создать участнику ДШ учётку (email) Yandex
+    # Создать участнику КПД учётку (email) Yandex
     mm = create_sf_participant_yandex(logger, payment, mm)
     # Генерация пароля для Zoom (для всех почт пароль одинаковый)
     if payment["password"] is None:
         payment["password"] = password_for_sf()
     mm.text += f'\nPassword: {payment["password"]}'
     logger.info(f'Password: {payment["password"]}')
-    # Создать участнику ДШ учётку Zoom
+    # Создать участнику КПД учётку Zoom
     mm = create_sf_participant_zoom(logger, payment, mm)
-    # Создать участника ДШ в БД и отметить ему оплату
+    # Создать участника КПД в БД и отметить ему оплату
     mm = create_sf_participant_db(database, logger, payment, mm, special_case)
     # Почтовые оповещения
     # TODO Отправить Telegram участнику

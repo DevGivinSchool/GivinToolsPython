@@ -28,9 +28,9 @@ urlpatterns = [
     path('gs-logout', views.GSLogoutView.as_view(), name='gs_logout'),
     path('not-authorized', views.not_authorized, name='not_authorized'),
     ###########################################################################
-    # path('sf/', views.ParticipantListView.as_view(), name='sf'),  # Список ДШ
-    # path('sf-list/', views.sf_list, name='sf_list'),  # Список ДШ
-    path('sf-list', views.ParticipantCreateView.as_view(), name='sf_list'),  # Список ДШ
+    # path('sf/', views.ParticipantListView.as_view(), name='sf'),  # Список КПД
+    # path('sf-list/', views.sf_list, name='sf_list'),  # Список КПД
+    path('sf-list', views.ParticipantCreateView.as_view(), name='sf_list'),  # Список КПД
     path('sf-detail/<int:pk>', views.ParticipantDetailView.as_view(), name='sf_user_page'),
     # path('sf-participant-edit/<int:pk>', views.sf_participant_edit, name='sf_participant_edit'),
     path('sf-participant-edit/<int:pk>', views.ParticipantEditView.as_view(), name='sf_participant_edit'),

@@ -14,9 +14,9 @@ def create_yandex_mail(logger, familia_, name_, login_, password_=None, departme
     :param password_: Пароль (у Друзей Школы почтовый пароль один на всех)
     """
     api = get_api()
-    # Если пароль пустой то пароль будет стандартный для ДЩ
+    # Если пароль пустой то пароль будет стандартный для КПД
     if password_ is None:
-        # Единый пароль для всех создаваемых почт для ДШ
+        # Единый пароль для всех создаваемых почт для КПД
         password_ = PASSWORDS.settings['default_ymail_password']
     # print(password_)
     logger.debug(f"password_={password_}")
@@ -110,7 +110,7 @@ def show_organizations():
 
 
 def show_user_list_full():
-    """ Списко почт ДШ"""
+    """ Списко почт КПД"""
     api = get_api()
     user_list = api.user_list_full(fields='email', department_id=4)
     return user_list

@@ -4,7 +4,7 @@ from sys import argv
 
 def password_for_sf():
     """
-    Генератор паролей для ДШ, слово из словаря английских слов по маске AAffaa33
+    Генератор паролей для КПД, слово из словаря английских слов по маске AAffaa33
     :return:
     """
     word = words[random.randint(1, 536)]

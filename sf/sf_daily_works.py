@@ -12,7 +12,6 @@ from core.utils import delete_obsolete_files
 
 
 def block_participants(db_connect, logger):
-    # TODO: Переделать под два уровня -
     """
     Блокировка участников у которых оплата просрочена на 5 дней
     :param db_connect: Соединение с БД
@@ -35,7 +34,8 @@ number_of_days,
 deadline,
 until_date,
 --,comment
-id
+id,
+sf_level
 FROM public.participants
 WHERE type in ('P', 'N')
 and (
@@ -59,22 +59,25 @@ order by last_name"""
 
         try:
             block_one_participant(p[9], db_connect, logger)
+            if p[10] == 1:
+                fac_url = 'https://givinschoolru.getcourse.ru/sf-level1'
+            else:
+                fac_url = 'https://givinschoolru.getcourse.ru/sf-level2'
 
             mail_text = f"""Здравствуйте, {p[2].title()}!
 
-    Наша автоматическая система заблокировала вашу учётную запись для Друзей Школы (ДШ),
-    потому что вы {p[5].strftime("%d.%m.%Y")} оплатили период {p[6]} дней Друзей Школы (ДШ)
+    Наша автоматическая система заблокировала вашу учётную запись для проекта Клуб пробуждения Друзья (КПД),
+    потому что вы {p[5].strftime("%d.%m.%Y")} оплатили период {p[6]} дней участия в КПД
     и ваша оплата просрочена на 5 дней.
     Система предупреждала вас за 3 и 7 дней до срока, письмом на email - {p[3]}.
-    Для разблокировки достаточно просто оплатить ДШ.
-    Если же вы больше не хотите участвовать в ДШ - система больше не будет вас беспокоить.
+    Для разблокировки достаточно просто оплатить КПД.
+    Если же вы больше не хотите участвовать в КПД - система больше не будет вас беспокоить.
 
-    Вы можете оплатить ДШ через страницу оплаты (доступен PayPal).
+    Вы можете оплатить КПД через страницу оплаты (доступен PayPal).
     Возможна оплата сразу за 3 или 6 месяцев, при этом вы получите скидку 7% и 13% соответственно:
-    (+PayPal) https://givinschoolru.getcourse.ru/sf-level2
+    (+PayPal) {fac_url}
 
     Пожалуйста, при оплате, указывайте свои Фамилию, Имя, такие же как и при регистрации.
-    В назначение платежа можно написать "друзья школы" или просто "дш".
 
     Ваш email:    {p[3]}
     Ваш telegram: {p[4]}
@@ -84,7 +87,7 @@ order by last_name"""
         """
             logger.info(mail_text)
             send_mail([p[3]] + PASSWORDS.settings['manager_emails'],
-                      r"[ШКОЛА ГИВИНА]. Оповещение о блокировке в ДШ", mail_text, logger)
+                      r"[ШКОЛА ГИВИНА]. Оповещение о блокировке в КПД", mail_text, logger)
         except:  # noqa: E722
             send_error_to_admin(f"DAILY WORKS ERROR: Ошибка при попытке заблокировать участника:\n{p}",
                                 logger, prog_name="sf_daily_works.py")
@@ -92,7 +95,6 @@ order by last_name"""
 
 
 def participants_notification(db_connect, logger):
-    # TODO: Переделать под два уровня
     """
     Уведомление участников о необходимости оплаты
     :param logger:
@@ -113,7 +115,8 @@ telegram,
 payment_date,
 number_of_days,
 deadline,
-until_date
+until_date,
+sf_level
 --,comment
 FROM public.participants
 WHERE type in ('P', 'N')
@@ -142,17 +145,21 @@ order by last_name"""
             until_date = p[8]
         else:
             until_date = p[7]
+        #
+        if p[9] == 1:
+            fac_url = 'https://givinschoolru.getcourse.ru/sf-level1'
+        else:
+            fac_url = 'https://givinschoolru.getcourse.ru/sf-level2'
         mail_text = f"""Здравствуйте, {p[2].title()}!
 
-Напоминаем вам о том, что вы {p[5].strftime("%d.%m.%Y")} оплатили период {p[6]} дней Друзей Школы (ДШ).
-{until_date} через {interval} у вас истекает оплаченный период Друзей Школы (ДШ).
+Напоминаем вам о том, что вы {p[5].strftime("%d.%m.%Y")} оплатили период {p[6]} дней участия в проекте Клуб пробуждения Друзья (КПД).
+{until_date} через {interval} у вас истекает оплаченный период Друзей Школы (КПД).
 
-Вы можете оплатить ДШ через страницу оплаты (доступен PayPal).
+Вы можете оплатить КПД через страницу оплаты (доступен PayPal).
 Возможна оплата сразу за 3 или 6 месяцев, при этом вы полаете скидки 7% и 13% соответственно:
-(+PayPal) https://givinschoolru.getcourse.ru/sf-level2
+(+PayPal) {fac_url}
 
 Пожалуйста, при оплате, указывайте свои Фамилию, Имя, такие же как и при регистрации.
-В назначение платежа можно написать "друзья школы" или просто "дш".
 
 Ваш email:    {p[3]}
 Ваш telegram: {p[4]}
@@ -163,7 +170,7 @@ order by last_name"""
         # print(mail_text)
         logger.info(mail_text)
         try:
-            send_mail([p[3]], r"[ШКОЛА ГИВИНА]. Напоминание об оплате ДШ", mail_text, logger)
+            send_mail([p[3]], r"[ШКОЛА ГИВИНА]. Напоминание об оплате КПД", mail_text, logger)
         except:  # noqa: E722
             send_error_to_admin(f"DAILY WORKS ERROR: Ошибка при попытке выслать оповещение должнику:\n{p}", logger,
                                 prog_name="sf_daily_works.py")
@@ -218,22 +225,23 @@ order by last_name"""
                   mail_text, logger)
 
 
-def get_full_list_participants(db_connect, logger):
+def get_full_list_participants(db_connect, logger, level_):
     """
     Получение полного списка участников и отправка его менеджерам
+    :param level_:
     :param logger:
     :param db_connect: Соединение с БД
     :return:
     """
     logger.info("Получение полного списка участников и отправка его менеджерам")
     # Полный список участников
-    sql_text = """SELECT
+    sql_text = f"""SELECT
 id, type,
 last_name as "Фамилия", first_name as "Имя", email, telegram,
 payment_date "Дата оплаты", number_of_days as "Дней", deadline "Оплачено до",
 until_date as "Отсрочка до", comment
 FROM public.participants
-WHERE type in ('P', 'N')
+WHERE type in ('P', 'N') and sf_level={level_}
 order by last_name"""
     values_tuple = (None,)
     records = db_connect.execute_select(sql_text, values_tuple)
@@ -242,13 +250,13 @@ order by last_name"""
     print(f"ВСЕГО {count_participants} УЧАСТНИКОВ")
     # now_for_file = datetime.now().strftime("%d%m%Y_%H%M")
     now_for_file = datetime.now().strftime("%Y_%m_%d")
-    xlsx_file_path = os.path.join(os.path.dirname(logger.handlers[0].baseFilename), f'PARTICIPANTS_{now_for_file}.xlsx')
+    xlsx_file_path = os.path.join(os.path.dirname(logger.handlers[0].baseFilename), f'PARTICIPANTS{level_}_{now_for_file}.xlsx')
     table_text = get_excel_table(records, xlsx_file_path)
 
     now_for_text = datetime.now().strftime("%d.%m.%Y")
     mail_text = f"""Здравствуйте!
 
-Во вложении содержиться полный список участников ДШ на {now_for_text} в формате xlsx.
+Во вложении содержится полный список участников КПД {level_} уровня на {now_for_text} в формате xlsx.
 ВСЕГО {count_participants} УЧАСТНИКОВ
 
 Таблица в виде текста:
@@ -257,8 +265,9 @@ order by last_name"""
 С уважением, ваш робот."""
     print(mail_text)
     logger.info(mail_text)
-    send_mail(PASSWORDS.settings['full_list_participants_to_emails'],
-              f"[ШКОЛА ГИВИНА]. Полный список участников ДШ на {now_for_text}. Всего {count_participants}.",
+    logger.debug(f"Список получателей:\n{PASSWORDS.settings['full_list_participants_to_emails'][level_]}")
+    send_mail(PASSWORDS.settings['full_list_participants_to_emails'][level_],
+              f"[ШКОЛА ГИВИНА]. Полный список участников КПД уровня {level_} на {now_for_text}. Всего {count_participants}.",
               mail_text, logger, xlsx_file_path)
 
 
@@ -340,6 +349,7 @@ def main():
     import core.custom_logger as custom_logger
     import os
 
+    levels = ['1', '2']
     program_file = os.path.realpath(__file__)
     logger = custom_logger.get_logger(program_file=program_file)
     logger.info("Try connect to DB")
@@ -371,11 +381,12 @@ def main():
     #     send_error("DAILY WORKS ERROR: get_list_debtors()")
     # logger.info('\n' + '#' * 120)
     # Получение полного списка участников и отправка его менеджерам
-    try:
-        get_full_list_participants(db_connect, logger)
-    except Exception:
-        send_error_to_admin("DAILY WORKS ERROR: get_full_list_participants()", logger, prog_name="sf_daily_works.py")
-    logger.info('\n' + '#' * 120)
+    for level in levels:
+        try:
+            get_full_list_participants(db_connect, logger, level)
+        except Exception:
+            send_error_to_admin("DAILY WORKS ERROR: get_full_list_participants()", logger, prog_name="sf_daily_works.py")
+        logger.info('\n' + '#' * 120)
     # Удаление лог файлов старше 31 дня
     try:
         delete_obsolete_files(os.path.dirname(logger.handlers[0].baseFilename), 31, logger)

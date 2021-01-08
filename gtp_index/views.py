@@ -141,7 +141,7 @@ class SuccessMessageMixin:
 
 
 class ParticipantCreateView(SuccessMessageMixin, CreateView):
-    """ Страница показывает список ДШ и обеспечивает создание новых членов ДШ. """
+    """ Страница показывает список КПД и обеспечивает создание новых членов КПД. """
     model = Participant
     template_name = 'sf_list.html'
     form_class = ParticipantCreateForm
@@ -171,7 +171,7 @@ class ParticipantCreateView(SuccessMessageMixin, CreateView):
 
 
 class ParticipantEditView(SuccessMessageMixin, UpdateView):
-    """ Страница редактирования участника ДШ. """
+    """ Страница редактирования участника КПД. """
     model = Participant
     template_name = 'sf_list.html'
     form_class = ParticipantEditForm
@@ -199,7 +199,7 @@ class ParticipantEditView(SuccessMessageMixin, UpdateView):
 
 
 class ParticipantDetailView(DetailView):
-    """ Страница детальной информации об участнике ДШ. """
+    """ Страница детальной информации об участнике КПД. """
     model = Participant
     template_name = 'sf_user.html'
     context_object_name = 'the_participant'
@@ -218,7 +218,7 @@ class ParticipantDetailView(DetailView):
 
 
 class ParticipantDeleteView(DeleteView):
-    """ Страница удаления участника ДШ.
+    """ Страница удаления участника КПД.
     (Класс DeleteView в отличие от функции sf_participant_delete работает методом POST!!!) """
     model = Participant
     template_name = 'sf_list.html'

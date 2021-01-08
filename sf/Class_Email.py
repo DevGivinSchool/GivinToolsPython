@@ -258,7 +258,7 @@ class Email:
                 payment_creator.payment_computation2(payment, self.logger)
             self.addition_of_payment_information_from_db(payment, postgres, task)
             task.task_run()
-        # Это платёж но НЕ за ДШ
+        # Это платёж но НЕ за КПД
         else:
             self.logger.info(f"ЭТО ИНОЙ ПЛАТЁЖ: {payment['Наименование услуги']}")
             if uuid is not None:

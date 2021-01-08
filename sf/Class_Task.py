@@ -40,7 +40,6 @@ class Task:
         else:
             # Отмечаем оплату в БД
             self.logger.info('ОТМЕЧАЕМ ОПЛАТУ В БД')
-            # TODO: Если 1 уровень оплачивает за 2 уровень, то нужно создать новую учётку если её нет.
             # Участник оплатил 2 уровень но такой учётки у него еще нет и это особый случай special_case=True
             if self.payment["level"] == 2 and not self.payment["login"]:
                 self.logger.info('ЭТО ОСОБЫЙ СЛУЧАЙ переход с level1 на level2')

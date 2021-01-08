@@ -16,7 +16,6 @@ def participants_block(list_participants, logger2):
 
 
 def block_one_participant(p, postgres, logger):  # noqa: C901
-    # TODO: Переделать под два уровня
     print(f"Попытка блокировки участника |{p}|")
     logger.info(f"Попытка блокировки участника |{p}|")
     # Проверяем что p это ID
@@ -75,7 +74,7 @@ def block_one_participant(p, postgres, logger):  # noqa: C901
                 print(f"Блокировка участника ID={id_}")
                 logger.info(f"Блокировка участника ID={id_}")
                 # Состояние участник
-                sql_text = 'SELECT id, fio, login, password, type FROM participants where id=%s;'
+                sql_text = 'SELECT id, fio, login, password, type, login1, level FROM participants where id=%s;'
                 # [(1420, 'ВОЛЬНЫХ НАТАЛЬЯ', 'volnyh_natalja@givinschool.org', 'password', 'B')]
                 values_tuple = (id_,)
                 participant = postgres.execute_select(sql_text, values_tuple)[0]
@@ -85,15 +84,20 @@ def block_one_participant(p, postgres, logger):  # noqa: C901
                 print("Блокировка участника в Zoom")
                 logger.info("Блокировка участника в Zoom")
                 zoom_user = ZoomUS(logger)
-                zoom_result = zoom_user.zoom_users_userstatus(participant[2], "deactivate")
+                if participant[6] == 1:  # level
+                    login_ = participant[5]  # login1
+                else:
+                    login_ = participant[2]  # login
+                zoom_result = zoom_user.zoom_users_userstatus(login_, "deactivate")
                 print(zoom_result)
                 logger.debug(f"zoom_result={zoom_result}")
                 if zoom_result is not None:
                     logger.error("+" * 60)
                     mail_text = f"\nПроцедура не смогла автоматически заблокировать участника. Ошибка:\n" \
-                                f"{zoom_result}" \
-                                f"ID={participant[0]}\n{participant[1]}:" \
-                                f"\nLogin: {participant[2]}\nPassword: {participant[3]}"
+                                f"{zoom_result}\n" \
+                                f"ID: {participant[0]}\nFIO: {participant[1]}\n" \
+                                f"Level: {participant[6]}\n" \
+                                f"Login: {login_}\nPassword: {participant[3]}"
                     send_mail(PASSWORDS.settings['admin_emails'], "BLOCK PARTICIPANT ERROR", mail_text, logger)
                     print(mail_text)
                     logger.error(mail_text)

@@ -12,7 +12,6 @@ from core.utils import delete_obsolete_files
 
 
 def block_participants(db_connect, logger):
-    # TODO: Переделать под два уровня -
     """
     Блокировка участников у которых оплата просрочена на 5 дней
     :param db_connect: Соединение с БД
@@ -35,7 +34,8 @@ number_of_days,
 deadline,
 until_date,
 --,comment
-id
+id,
+sf_level
 FROM public.participants
 WHERE type in ('P', 'N')
 and (
@@ -59,6 +59,10 @@ order by last_name"""
 
         try:
             block_one_participant(p[9], db_connect, logger)
+            if p[10] == 1:
+                fac_url = 'https://givinschoolru.getcourse.ru/sf-level1'
+            else:
+                fac_url = 'https://givinschoolru.getcourse.ru/sf-level2'
 
             mail_text = f"""Здравствуйте, {p[2].title()}!
 
@@ -71,7 +75,7 @@ order by last_name"""
 
     Вы можете оплатить КПД через страницу оплаты (доступен PayPal).
     Возможна оплата сразу за 3 или 6 месяцев, при этом вы получите скидку 7% и 13% соответственно:
-    (+PayPal) https://givinschoolru.getcourse.ru/sf-level2
+    (+PayPal) {fac_url}
 
     Пожалуйста, при оплате, указывайте свои Фамилию, Имя, такие же как и при регистрации.
 
@@ -91,7 +95,6 @@ order by last_name"""
 
 
 def participants_notification(db_connect, logger):
-    # TODO: Переделать под два уровня
     """
     Уведомление участников о необходимости оплаты
     :param logger:
@@ -112,7 +115,8 @@ telegram,
 payment_date,
 number_of_days,
 deadline,
-until_date
+until_date,
+sf_level
 --,comment
 FROM public.participants
 WHERE type in ('P', 'N')
@@ -141,6 +145,11 @@ order by last_name"""
             until_date = p[8]
         else:
             until_date = p[7]
+        #
+        if p[9] == 1:
+            fac_url = 'https://givinschoolru.getcourse.ru/sf-level1'
+        else:
+            fac_url = 'https://givinschoolru.getcourse.ru/sf-level2'
         mail_text = f"""Здравствуйте, {p[2].title()}!
 
 Напоминаем вам о том, что вы {p[5].strftime("%d.%m.%Y")} оплатили период {p[6]} дней участия в проекте Клуб пробуждения Друзья (КПД).
@@ -148,7 +157,7 @@ order by last_name"""
 
 Вы можете оплатить КПД через страницу оплаты (доступен PayPal).
 Возможна оплата сразу за 3 или 6 месяцев, при этом вы полаете скидки 7% и 13% соответственно:
-(+PayPal) https://givinschoolru.getcourse.ru/sf-level2
+(+PayPal) {fac_url}
 
 Пожалуйста, при оплате, указывайте свои Фамилию, Имя, такие же как и при регистрации.
 

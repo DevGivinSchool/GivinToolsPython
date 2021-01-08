@@ -225,22 +225,23 @@ order by last_name"""
                   mail_text, logger)
 
 
-def get_full_list_participants(db_connect, logger):
+def get_full_list_participants(db_connect, logger, level_):
     """
     Получение полного списка участников и отправка его менеджерам
+    :param level_:
     :param logger:
     :param db_connect: Соединение с БД
     :return:
     """
     logger.info("Получение полного списка участников и отправка его менеджерам")
     # Полный список участников
-    sql_text = """SELECT
+    sql_text = f"""SELECT
 id, type,
 last_name as "Фамилия", first_name as "Имя", email, telegram,
 payment_date "Дата оплаты", number_of_days as "Дней", deadline "Оплачено до",
 until_date as "Отсрочка до", comment
 FROM public.participants
-WHERE type in ('P', 'N')
+WHERE type in ('P', 'N') and sf_level={level_}
 order by last_name"""
     values_tuple = (None,)
     records = db_connect.execute_select(sql_text, values_tuple)
@@ -249,13 +250,13 @@ order by last_name"""
     print(f"ВСЕГО {count_participants} УЧАСТНИКОВ")
     # now_for_file = datetime.now().strftime("%d%m%Y_%H%M")
     now_for_file = datetime.now().strftime("%Y_%m_%d")
-    xlsx_file_path = os.path.join(os.path.dirname(logger.handlers[0].baseFilename), f'PARTICIPANTS_{now_for_file}.xlsx')
+    xlsx_file_path = os.path.join(os.path.dirname(logger.handlers[0].baseFilename), f'PARTICIPANTS{level_}_{now_for_file}.xlsx')
     table_text = get_excel_table(records, xlsx_file_path)
 
     now_for_text = datetime.now().strftime("%d.%m.%Y")
     mail_text = f"""Здравствуйте!
 
-Во вложении содержиться полный список участников КПД на {now_for_text} в формате xlsx.
+Во вложении содержится полный список участников КПД {level_} уровня на {now_for_text} в формате xlsx.
 ВСЕГО {count_participants} УЧАСТНИКОВ
 
 Таблица в виде текста:
@@ -264,8 +265,9 @@ order by last_name"""
 С уважением, ваш робот."""
     print(mail_text)
     logger.info(mail_text)
-    send_mail(PASSWORDS.settings['full_list_participants_to_emails'],
-              f"[ШКОЛА ГИВИНА]. Полный список участников КПД на {now_for_text}. Всего {count_participants}.",
+    logger.debug(f"Список получателей:\n{PASSWORDS.settings['full_list_participants_to_emails'][level_]}")
+    send_mail(PASSWORDS.settings['full_list_participants_to_emails'][level_],
+              f"[ШКОЛА ГИВИНА]. Полный список участников КПД уровня {level_} на {now_for_text}. Всего {count_participants}.",
               mail_text, logger, xlsx_file_path)
 
 
@@ -347,6 +349,7 @@ def main():
     import core.custom_logger as custom_logger
     import os
 
+    levels = ['1', '2']
     program_file = os.path.realpath(__file__)
     logger = custom_logger.get_logger(program_file=program_file)
     logger.info("Try connect to DB")
@@ -378,11 +381,12 @@ def main():
     #     send_error("DAILY WORKS ERROR: get_list_debtors()")
     # logger.info('\n' + '#' * 120)
     # Получение полного списка участников и отправка его менеджерам
-    try:
-        get_full_list_participants(db_connect, logger)
-    except Exception:
-        send_error_to_admin("DAILY WORKS ERROR: get_full_list_participants()", logger, prog_name="sf_daily_works.py")
-    logger.info('\n' + '#' * 120)
+    for level in levels:
+        try:
+            get_full_list_participants(db_connect, logger, level)
+        except Exception:
+            send_error_to_admin("DAILY WORKS ERROR: get_full_list_participants()", logger, prog_name="sf_daily_works.py")
+        logger.info('\n' + '#' * 120)
     # Удаление лог файлов старше 31 дня
     try:
         delete_obsolete_files(os.path.dirname(logger.handlers[0].baseFilename), 31, logger)

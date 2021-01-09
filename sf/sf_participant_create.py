@@ -104,7 +104,7 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         notification_text = participant_notification(payment,
                                                      f'[ШКОЛА ГИВИНА] Ваша учётная запись в {PASSWORDS.settings["project_name"]} разблокирована.',
                                                      logger)
-        mm.subject = "[КПД] РАЗБЛОКИРОВКА УЧАСТНИКА"
+        mm.subject = f"[{PASSWORDS.settings['short_project_name']}] РАЗБЛОКИРОВКА УЧАСТНИКА"
         mm.text += "Текст уведомления:\n\n\n" + notification_text
     else:
         logger.info("Отмечаем оплату в БД")
@@ -125,7 +125,7 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         notification_text = participant_notification(payment,
                                                      f'[ШКОЛА ГИВИНА] Ваша оплата принята и продлено участие в онлайн-формате {PASSWORDS.settings["project_name"]}.',
                                                      logger)
-        mm.subject = "[КПД] ПРИНЯТА ОПЛАТА"
+        mm.subject = f"[{PASSWORDS.settings['short_project_name']}] ПРИНЯТА ОПЛАТА"
         mm.text += "Текст уведомления:\n\n\n" + notification_text
     # Окончательное состояние участника
     logger.info(f"Окончательное состояние участника\n{select_participant(payment['participant_id'], database)}")
@@ -214,7 +214,7 @@ def create_sf_participant(payment, database, logger, special_case=False):
     # Participant must have Name, Surname, Email
     # mail_text = ""
     # subject = "НОВЫЙ УЧАСТНИК"
-    mm = MailMessage("[КПД] НОВЫЙ УЧАСТНИК", "")
+    mm = MailMessage(f"[{PASSWORDS.settings['short_project_name']}] НОВЫЙ УЧАСТНИК", "")
     logger.info(f"Создание участника:{payment}")
     if not payment["Фамилия"]:
         logger.error("The participant must have a Surname")

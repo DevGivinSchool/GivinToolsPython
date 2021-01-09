@@ -60,20 +60,20 @@ order by last_name"""
         try:
             block_one_participant(p[9], db_connect, logger)
             if p[10] == 1:
-                fac_url = 'https://givinschoolru.getcourse.ru/sf-level1'
+                fac_url = PASSWORDS.settings['fac_url1']
             else:
-                fac_url = 'https://givinschoolru.getcourse.ru/sf-level2'
+                fac_url = PASSWORDS.settings['fac_url2']
 
             mail_text = f"""Здравствуйте, {p[2].title()}!
 
-    Наша автоматическая система заблокировала вашу учётную запись в проекте {PASSWORDS.settings['project_name']},
-    потому что вы {p[5].strftime("%d.%m.%Y")} оплатили период {p[6]} дней участия в КПД
+    Наша автоматическая система заблокировала вашу учётную запись в проекте "{PASSWORDS.settings['project_name']}",
+    потому что вы {p[5].strftime("%d.%m.%Y")} оплатили период {p[6]} дней участия в {PASSWORDS.settings['short_project_name']}
     и ваша оплата просрочена на 5 дней.
     Система предупреждала вас за 3 и 7 дней до срока, письмом на email - {p[3]}.
-    Для разблокировки достаточно просто оплатить КПД.
-    Если же вы больше не хотите участвовать в КПД - система больше не будет вас беспокоить.
+    Для разблокировки достаточно просто оплатить {PASSWORDS.settings['short_project_name']}.
+    Если же вы больше не хотите участвовать в {PASSWORDS.settings['short_project_name']} - система больше не будет вас беспокоить.
 
-    Вы можете оплатить КПД через страницу оплаты (доступен PayPal).
+    Вы можете оплатить {PASSWORDS.settings['short_project_name']} через страницу оплаты (доступен PayPal).
     Возможна оплата сразу за 3 или 6 месяцев, при этом вы получите скидку 7% и 13% соответственно:
     (+PayPal) {fac_url}
 
@@ -87,7 +87,7 @@ order by last_name"""
         """
             logger.info(mail_text)
             send_mail([p[3]] + PASSWORDS.settings['manager_emails'],
-                      r"[ШКОЛА ГИВИНА]. Оповещение о блокировке в КПД", mail_text, logger)
+                      f'[ШКОЛА ГИВИНА] Оповещение о блокировке в "{PASSWORDS.settings["project_name"]}"', mail_text, logger)
         except:  # noqa: E722
             send_error_to_admin(f"DAILY WORKS ERROR: Ошибка при попытке заблокировать участника:\n{p}",
                                 logger, prog_name="sf_daily_works.py")
@@ -147,15 +147,15 @@ order by last_name"""
             until_date = p[7]
         #
         if p[9] == 1:
-            fac_url = 'https://givinschoolru.getcourse.ru/sf-level1'
+            fac_url = PASSWORDS.settings['fac_url1']
         else:
-            fac_url = 'https://givinschoolru.getcourse.ru/sf-level2'
+            fac_url = PASSWORDS.settings['fac_url2']
         mail_text = f"""Здравствуйте, {p[2].title()}!
 
-Напоминаем вам о том, что вы {p[5].strftime("%d.%m.%Y")} оплатили период {p[6]} дней участия в проекте Клуб пробуждения Друзья (КПД).
-{until_date} через {interval} у вас истекает оплаченный период Друзей Школы (КПД).
+Напоминаем вам о том, что вы {p[5].strftime("%d.%m.%Y")} оплатили период {p[6]} дней участия в проекте {PASSWORDS.settings['project_name']} ({PASSWORDS.settings['short_project_name']}).
+{until_date} через {interval} у вас истекает оплаченный период {PASSWORDS.settings['short_project_name']}.
 
-Вы можете оплатить КПД через страницу оплаты (доступен PayPal).
+Вы можете оплатить {PASSWORDS.settings['short_project_name']} через страницу оплаты (доступен PayPal).
 Возможна оплата сразу за 3 или 6 месяцев, при этом вы полаете скидки 7% и 13% соответственно:
 (+PayPal) {fac_url}
 
@@ -170,7 +170,7 @@ order by last_name"""
         # print(mail_text)
         logger.info(mail_text)
         try:
-            send_mail([p[3]], r"[ШКОЛА ГИВИНА]. Напоминание об оплате КПД", mail_text, logger)
+            send_mail([p[3]], f'[ШКОЛА ГИВИНА] Напоминание об оплате "{PASSWORDS.settings["project_name"]}"', mail_text, logger)
         except:  # noqa: E722
             send_error_to_admin(f"DAILY WORKS ERROR: Ошибка при попытке выслать оповещение должнику:\n{p}", logger,
                                 prog_name="sf_daily_works.py")
@@ -256,7 +256,7 @@ order by last_name"""
     now_for_text = datetime.now().strftime("%d.%m.%Y")
     mail_text = f"""Здравствуйте!
 
-Во вложении содержится полный список участников КПД {level_} уровня на {now_for_text} в формате xlsx.
+Во вложении содержится полный список участников {PASSWORDS.settings['short_project_name']} {level_} уровня на {now_for_text} в формате xlsx.
 ВСЕГО {count_participants} УЧАСТНИКОВ
 
 Таблица в виде текста:
@@ -267,7 +267,7 @@ order by last_name"""
     logger.info(mail_text)
     logger.debug(f"Список получателей:\n{PASSWORDS.settings['full_list_participants_to_emails'][level_]}")
     send_mail(PASSWORDS.settings['full_list_participants_to_emails'][level_],
-              f"[ШКОЛА ГИВИНА]. Полный список участников КПД уровня {level_} на {now_for_text}. Всего {count_participants}.",
+              f"[ШКОЛА ГИВИНА] Полный список участников {PASSWORDS.settings['short_project_name']} уровня {level_} на {now_for_text}. Всего {count_participants}.",
               mail_text, logger, xlsx_file_path)
 
 

@@ -102,7 +102,7 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         # Уведомление участника
         logger.info("Уведомление участника")
         notification_text = participant_notification(payment,
-                                                     r"[ШКОЛА ГИВИНА]. Ваша учётная запись в Клуб пробуждения Друзья (КПД) разблокирована.",
+                                                     f'[ШКОЛА ГИВИНА] Ваша учётная запись в {PASSWORDS.settings["project_name"]} разблокирована.',
                                                      logger)
         mm.subject = "[КПД] РАЗБЛОКИРОВКА УЧАСТНИКА"
         mm.text += "Текст уведомления:\n\n\n" + notification_text
@@ -123,9 +123,9 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         # Уведомление участника
         logger.info("Уведомление участника")
         notification_text = participant_notification(payment,
-                                                     r"[КПД]. Ваша оплата принята и продлено участие в Друзьях Школы.",
+                                                     f'[ШКОЛА ГИВИНА] Ваша оплата принята и продлено участие в онлайн-формате {PASSWORDS.settings["project_name"]}.',
                                                      logger)
-        mm.subject = "[КПД] принята оплата за КПД"
+        mm.subject = "[КПД] ПРИНЯТА ОПЛАТА"
         mm.text += "Текст уведомления:\n\n\n" + notification_text
     # Окончательное состояние участника
     logger.info(f"Окончательное состояние участника\n{select_participant(payment['participant_id'], database)}")
@@ -255,7 +255,7 @@ def create_sf_participant(payment, database, logger, special_case=False):
     if payment["Электронная почта"]:
         # Оповещение участника
         notification_text = participant_notification(payment,
-                                                     r"[ШКОЛА ГИВИНА]. Поздравляем, Вы приняты в Друзья Школы",
+                                                     f'[ШКОЛА ГИВИНА] Поздравляем, Вы приняты в {PASSWORDS.settings["project_name"]}.',
                                                      logger)
     else:
         mm.text += "\nВНИМАНИЕ: Отправить почтовое уведомление (email) участнику"
@@ -441,5 +441,7 @@ if __name__ == '__main__':
     file = PASSWORDS.settings['list_path']
     with open(file, newline='', encoding='utf-8') as f:
         reader = csv.reader(f, delimiter=';')
+        print(type(reader))
+        print(reader)
         # headers = next(reader, None)
         create_sf_participants(reader, db, logger=log)

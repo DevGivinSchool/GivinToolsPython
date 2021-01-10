@@ -102,7 +102,7 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         # Уведомление участника
         logger.info("Уведомление участника")
         notification_text = participant_notification(payment,
-                                                     f'[ШКОЛА ГИВИНА] Ваша учётная запись в {PASSWORDS.settings["project_name"]} разблокирована.',
+                                                     f'[ШКОЛА ГИВИНА] Ваша учётная запись в {PASSWORDS.settings["project_name"]} разблокирована уровень {payment["level"]}.',
                                                      logger)
         mm.subject = f"[{PASSWORDS.settings['short_project_name']}] РАЗБЛОКИРОВКА УЧАСТНИКА"
         mm.text += "Текст уведомления:\n\n\n" + notification_text
@@ -123,7 +123,7 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         # Уведомление участника
         logger.info("Уведомление участника")
         notification_text = participant_notification(payment,
-                                                     f'[ШКОЛА ГИВИНА] Ваша оплата принята и продлено участие в онлайн-формате {PASSWORDS.settings["project_name"]}.',
+                                                     f'[ШКОЛА ГИВИНА] Ваша оплата принята и продлено участие в онлайн-формате {PASSWORDS.settings["project_name"]} уровень {payment["level"]}.',
                                                      logger)
         mm.subject = f"[{PASSWORDS.settings['short_project_name']}] ПРИНЯТА ОПЛАТА"
         mm.text += "Текст уведомления:\n\n\n" + notification_text
@@ -132,7 +132,7 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
     # Оповещение админов
     logger.info("Уведомление админов и менеджеров")
     list_ = PASSWORDS.settings['admin_emails']
-    list_.extend(item for item in PASSWORDS.settings['manager_emails'] if item not in PASSWORDS.settings['admin_emails'])
+    list_.extend(item for item in PASSWORDS.settings['manager_emails'][payment["level"]] if item not in PASSWORDS.settings['admin_emails'])
     logger.info(f"list_={list_}")
     send_mail(list_, mm.subject, mm.text, logger)
     logger.info(">>>> mark_payment_into_db end")
@@ -141,7 +141,7 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
 def participant_notification(payment, subject, logger):
     logger.info(">>>> sf_participant_create.participant_notification begin")
     logger.info("Уведомление участника")
-    mail_text2 = get_participant_notification_text(payment['Фамилия'], payment['Имя'], payment['login'], payment['password'])
+    mail_text2 = get_participant_notification_text(payment)
     logger.info(f"Message Subject: {subject}")
     logger.info(f"Message text:\n{mail_text2}")
     send_mail([payment["Электронная почта"]], subject, mail_text2, logger)
@@ -255,7 +255,7 @@ def create_sf_participant(payment, database, logger, special_case=False):
     if payment["Электронная почта"]:
         # Оповещение участника
         notification_text = participant_notification(payment,
-                                                     f'[ШКОЛА ГИВИНА] Поздравляем, Вы приняты в {PASSWORDS.settings["project_name"]}.',
+                                                     f'[ШКОЛА ГИВИНА] Поздравляем, Вы приняты в {PASSWORDS.settings["project_name"]} уровень {payment["level"]}.',
                                                      logger)
     else:
         mm.text += "\nВНИМАНИЕ: Отправить почтовое уведомление (email) участнику"
@@ -268,7 +268,7 @@ def create_sf_participant(payment, database, logger, special_case=False):
     # Вычитаю из списка почт менеджеров список почт админов, чтобы не было повторных писем
     logger.info("Уведомление админов и менеджеров")
     list_ = PASSWORDS.settings['admin_emails']
-    list_.extend(item for item in PASSWORDS.settings['manager_emails'] if item not in PASSWORDS.settings['admin_emails'])
+    list_.extend(item for item in PASSWORDS.settings['manager_emails'][payment["level"]] if item not in PASSWORDS.settings['admin_emails'])
     logger.info(f"list_={list_}")
     send_mail(list_, mm.subject, mm.text, logger)
     logger.info(">>>>sf_participant_create.create_sf_participant end")

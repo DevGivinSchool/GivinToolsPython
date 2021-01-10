@@ -71,21 +71,21 @@ def send_mail(receiver_emails, subject, message, logger, attached_file=None,
     logger.debug(">>>>alert_to_mail.send_mail end")
 
 
-def send_error_to_admin(subject, logger, prog_name="NONE"):
+def send_error_to_admin(subject, logger_, prog_name="NONE"):
     """
     Логировать сообщение об ошибке, вывод его на консоль, отослать его на email администратору.
     :param subject: Тема письма
     :return:
     """
     if not prog_name:
-        prog_name = os.path.basename(logger.handlers[0].baseFilename.split(".")[0])
+        prog_name = os.path.basename(logger_.handlers[0].baseFilename.split(".")[0])
     subject = f"[ERROR][{prog_name}]:{subject}"
     error_text = f"{subject}:\n" + traceback.format_exc()
     print(error_text)
-    logger.error(error_text)
-    logger.info(f"Send email to: {PASSWORDS.settings['admin_emails']}")
-    attached_file = logger.handlers[0].baseFilename
-    send_mail(PASSWORDS.settings['admin_emails'], subject, error_text, logger, attached_file=attached_file)
+    logger_.error(error_text)
+    logger_.info(f"Send email to: {PASSWORDS.settings['admin_emails']}")
+    attached_file = logger_.handlers[0].baseFilename
+    send_mail(PASSWORDS.settings['admin_emails'], subject, error_text, logger_, attached_file=attached_file)
 
 
 def raise_error(err_text_, logger_, prog_name="NONE"):

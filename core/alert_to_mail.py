@@ -99,14 +99,18 @@ def raise_error(err_text_, logger_, prog_name="NONE"):
     raise Exception(err_text_)
 
 
-def get_participant_notification_text(last_name, first_name, login, password):
-    mail_text2 = f"""Здравствуйте, {last_name.capitalize()} {first_name.capitalize()}!  
+def get_participant_notification_text(payment):
+    if payment["level"] == 2:
+        login_ = payment["login"]
+    else:
+        login_ = payment["login1"]
+    mail_text2 = f"""Здравствуйте, {payment['Фамилия'].capitalize()} {payment['Имя'].capitalize()}!  
 
-Поздравляем, Вы оплатили абонемент для совместных занятий в онлайн-формате "Друзья Школы Гивина". 
+Поздравляем, Вы оплатили абонемент для совместных занятий в онлайн проекте Школы Гивина "{PASSWORDS.settings['project_name']}" ({PASSWORDS.settings['short_project_name']}) уровень {payment['level']}. 
 
 Ваш zoom-аккаунт:
-Логин: {login}
-Пароль: {password}
+Логин: {login_}
+Пароль: {payment['password']}
 
 Сохраните себе эти данные, чтобы не потерять их. 
 

@@ -11,14 +11,14 @@ from datetime import datetime
 from core.utils import delete_obsolete_files
 
 
-def block_participants(db_connect, logger):
+def block_participants(db_connect, logger_):
     """
     Блокировка участников у которых оплата просрочена на 5 дней
     :param db_connect: Соединение с БД
-    :param logger:
+    :param logger_:
     :return:
     """
-    logger.info("Блокировка участников у которых оплата просрочена на 5 дней")
+    logger_.info("Блокировка участников у которых оплата просрочена на 5 дней")
     # Список участников подлежащих блокировке
     sql_text = """SELECT
 --current_date,
@@ -48,9 +48,12 @@ order by last_name"""
     # (None, 7, 'АЛААА', 'anxxxxx@mail.ru', datetime.date(2019, 12, 31), None)
     # (None, 7, 'БАР', 'ИРА', 'xxx@inbox.ru', '@xxx', datetime.date(2019, 12, 8), 30, datetime.date(2020, 1, 7), None)
     # (None, 7, 'БАР ИРА', 'xxx@inbox.ru', '@xxx', datetime.date(2019, 12, 8), 30, datetime.date(2020, 1, 7), None)
-
+    logger_.info("debug fac_url error")
+    logger_.info(PASSWORDS.settings['fac_url1'])
+    logger_.info(PASSWORDS.settings['fac_url2'])
     for p in records:
-        print(p)
+        # print(p)
+        logger_.info(f"Блокирую {p}")
         # Определяем что используется Срок оплаты или отсрочка
         # if p[7] is None:
         #     until_date = p[8]
@@ -58,12 +61,12 @@ order by last_name"""
         #     until_date = p[7]
 
         try:
-            block_one_participant(p[9], db_connect, logger)
+            block_one_participant(p[9], db_connect, logger_)
             if p[10] == 1:
                 fac_url = PASSWORDS.settings['fac_url1']
             else:
                 fac_url = PASSWORDS.settings['fac_url2']
-
+            logger_.info(f"{p[10]|fac_url}")
             mail_text = f"""Здравствуйте, {p[2].title()}!
 
     Наша автоматическая система заблокировала вашу учётную запись в проекте "{PASSWORDS.settings['project_name']}" уровень {p[10]},
@@ -85,23 +88,23 @@ order by last_name"""
     С благодарностью и сердечным теплом,
     команда Школы Гивина.
         """
-            logger.info(mail_text)
+            logger_.info(mail_text)
             send_mail([p[3]] + PASSWORDS.settings['manager_emails'][p[10]],
-                      f'[ШКОЛА ГИВИНА] Оповещение о блокировке в "{PASSWORDS.settings["project_name"]}" уровень {p[10]}', mail_text, logger)
+                      f'[ШКОЛА ГИВИНА] Оповещение о блокировке в "{PASSWORDS.settings["project_name"]}" уровень {p[10]}', mail_text, logger_)
         except:  # noqa: E722
             send_error_to_admin(f"DAILY WORKS ERROR: Ошибка при попытке заблокировать участника:\n{p}",
-                                logger, prog_name="sf_daily_works.py")
-        logger.info('\n' + '=' * 120)
+                                logger_, prog_name="sf_daily_works.py")
+        logger_.info('\n' + '=' * 120)
 
 
-def participants_notification(db_connect, logger):
+def participants_notification(db_connect, logger_):
     """
     Уведомление участников о необходимости оплаты
-    :param logger:
+    :param logger_:
     :param db_connect: Соединение с БД
     :return:
     """
-    logger.info("Уведомление участников о необходимости оплаты")
+    logger_.info("Уведомление участников о необходимости оплаты")
     # Список участников подлежащих уведомлению
     sql_text = """SELECT
 --current_date,
@@ -133,8 +136,11 @@ order by last_name"""
     # (None,7,'БАРААААА','ИРАААА','xxx@inbox.ru','@xxx',datetime.date(2019, 12, 8),30,datetime.date(2020, 1, 7),None)
     # (None,7,'БАРААААА ИРАААА','xxx@inbox.ru','@xxx',datetime.date(2019, 12, 8),30,datetime.date(2020, 1, 7),None)
     intervals = {3: "3 дня", 7: "7 дней"}
-
+    logger_.info("debug fac_url error")
+    logger_.info(PASSWORDS.settings['fac_url1'])
+    logger_.info(PASSWORDS.settings['fac_url2'])
     for p in records:
+        logger_.info(f"Информирую {p}")
         # Интервал высчитывается по двум полям until_date и deadline. Здесь определяется какой из них используется.
         if p[0] is None:
             interval = intervals[p[1]]
@@ -150,6 +156,7 @@ order by last_name"""
             fac_url = PASSWORDS.settings['fac_url1']
         else:
             fac_url = PASSWORDS.settings['fac_url2']
+        logger_.info(f"{p[9] | fac_url}")
         mail_text = f"""Здравствуйте, {p[2].title()}!
 
 Напоминаем вам о том, что вы {p[5].strftime("%d.%m.%Y")} оплатили период {p[6]} дней участия в проекте {PASSWORDS.settings['project_name']} ({PASSWORDS.settings['short_project_name']}) уровень {p[9]}.
@@ -168,24 +175,25 @@ order by last_name"""
 команда Школы Гивина.
     """
         # print(mail_text)
-        logger.info(mail_text)
+        logger_.info(mail_text)
         try:
-            send_mail([p[3]], f'[ШКОЛА ГИВИНА] Напоминание об оплате "{PASSWORDS.settings["project_name"]}" уровень {p[9]}', mail_text, logger)
+            send_mail([p[3]], f'[ШКОЛА ГИВИНА] Напоминание об оплате "{PASSWORDS.settings["project_name"]}" уровень {p[9]}', mail_text, logger_)
         except:  # noqa: E722
-            send_error_to_admin(f"DAILY WORKS ERROR: Ошибка при попытке выслать оповещение должнику:\n{p}", logger,
+            logger_.error(f"ERROR: При попытке оповещения участника\n{p}\nОтправляю почтовое оповещение админу.")
+            send_error_to_admin(f"DAILY WORKS ERROR: Ошибка при попытке выслать оповещение должнику:\n{p}", logger_,
                                 prog_name="sf_daily_works.py")
-        logger.info('\n' + '=' * 120)
+        logger_.info('\n' + '=' * 120)
 
 
-def get_list_debtors(db_connect, logger):
+def get_list_debtors(db_connect, logger_):
     # TODO: Сейчас эта функция не используется, её нужно переделать под два уровня.
     """
     Получение списка должников и отправка его менеджерам
-    :param logger:
+    :param logger_:
     :param db_connect: Соединение с БД
     :return:
     """
-    logger.info("Получение списка долников и отправка его менеджерам")
+    logger_.info("Получение списка должников и отправка его менеджерам")
 
     # Список должников
     sql_text = """SELECT
@@ -205,36 +213,36 @@ order by last_name"""
     if len(records) != 0:
         # now_for_file = datetime.now().strftime("%d%m%Y_%H%M")
         now_for_file = datetime.now().strftime("%Y_%m_%d")
-        xlsx_file_path = os.path.join(os.path.dirname(logger.handlers[0].baseFilename), f'DEBTORS_{now_for_file}.xlsx')
+        xlsx_file_path = os.path.join(os.path.dirname(logger_.handlers[0].baseFilename), f'DEBTORS_{now_for_file}.xlsx')
         table_text = get_excel_table(records, xlsx_file_path)
         mail_text = f"""Здравствуйте!
 
-    Во вложении содержиться список должников на сегодня {now_for_text} в формате xlsx.
+    Во вложении содержится список должников на сегодня {now_for_text} в формате xlsx.
     Таблица в виде текста:
     {table_text}
 
     С уважением, ваш робот."""
-        print(mail_text)
-        logger.info(mail_text)
+        # print(mail_text)
+        logger_.info(mail_text)
         send_mail(PASSWORDS.settings['manager_emails'], f"[ШКОЛА ГИВИНА]. Список должников {now_for_text}",
-                  mail_text, logger, xlsx_file_path)
+                  mail_text, logger_, xlsx_file_path)
     else:
         mail_text = "Сегодня должников нет."
-        logger.info(mail_text)
+        logger_.info(mail_text)
         send_mail(PASSWORDS.settings['manager_emails'], f"[ШКОЛА ГИВИНА]. Список должников {now_for_text}. СЕГОДНЯ "
                                                         f"ДОЛЖНИКОВ НЕТ.",
-                  mail_text, logger)
+                  mail_text, logger_)
 
 
-def get_full_list_participants(db_connect, logger, level_):
+def get_full_list_participants(db_connect, logger_, level_):
     """
     Получение полного списка участников и отправка его менеджерам
     :param level_:
-    :param logger:
+    :param logger_:
     :param db_connect: Соединение с БД
     :return:
     """
-    logger.info("Получение полного списка участников и отправка его менеджерам")
+    logger_.info("Получение полного списка участников и отправка его менеджерам")
     # Полный список участников
     sql_text = f"""SELECT
 id, type,
@@ -248,10 +256,11 @@ order by last_name"""
     records = db_connect.execute_select(sql_text, values_tuple)
     # (1126, 'P', 'АБРАМОВА', 'ЕЛЕНА', 'el34513543@gmail.com', '@el414342', datetime.date(2019, 8, 7), 45, datetime.date(2019, 9, 21), datetime.date(2019, 10, 15), None)  # noqa: E501
     count_participants = len(records)
-    print(f"ВСЕГО {count_participants} УЧАСТНИКОВ")
+    # print(f"ВСЕГО {count_participants} УЧАСТНИКОВ")
+    logger_.info(f"ВСЕГО {count_participants} УЧАСТНИКОВ")
     # now_for_file = datetime.now().strftime("%d%m%Y_%H%M")
     now_for_file = datetime.now().strftime("%Y_%m_%d")
-    xlsx_file_path = os.path.join(os.path.dirname(logger.handlers[0].baseFilename), f'PARTICIPANTS{str(level_)}_{now_for_file}.xlsx')
+    xlsx_file_path = os.path.join(os.path.dirname(logger_.handlers[0].baseFilename), f'PARTICIPANTS{str(level_)}_{now_for_file}.xlsx')
     table_text = get_excel_table(records, xlsx_file_path)
 
     now_for_text = datetime.now().strftime("%d.%m.%Y")
@@ -264,12 +273,12 @@ order by last_name"""
 {table_text}
 
 С уважением, ваш робот."""
-    print(mail_text)
-    logger.info(mail_text)
-    logger.debug(f"Список получателей:\n{PASSWORDS.settings['full_list_participants_to_emails'][level_]}")
+    # print(mail_text)
+    logger_.info(mail_text)
+    logger_.debug(f"Список получателей:\n{PASSWORDS.settings['full_list_participants_to_emails'][level_]}")
     send_mail(PASSWORDS.settings['full_list_participants_to_emails'][level_],
               f"[ШКОЛА ГИВИНА] Полный список участников {PASSWORDS.settings['short_project_name']} уровня {str(level_)} на {now_for_text}. Всего {count_participants}.",
-              mail_text, logger, xlsx_file_path)
+              mail_text, logger_, xlsx_file_path)
 
 
 # Получение списка participants на основе переданного набора данных record из select
@@ -372,6 +381,7 @@ def main():
     except Exception:
         send_error_to_admin("DAILY WORKS ERROR: participants_notification()", logger, prog_name="sf_daily_works.py")
     logger.info('\n' + '#' * 120)
+
     # Блокировка участников у которых оплата просрочена на 5 дней. Здесь проверка на ошибку для каждого конкретного
     # участника.
     block_participants(db_connect, logger)

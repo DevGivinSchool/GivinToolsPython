@@ -66,7 +66,7 @@ order by last_name"""
                 fac_url = PASSWORDS.settings['fac_url1']
             else:
                 fac_url = PASSWORDS.settings['fac_url2']
-            logger_.info(f"{p[10]|fac_url}")
+            logger_.info(f"{p[10]}|{fac_url}")
             mail_text = f"""Здравствуйте, {p[2].title()}!
 
     Наша автоматическая система заблокировала вашу учётную запись в проекте "{PASSWORDS.settings['project_name']}" уровень {p[10]},
@@ -156,7 +156,7 @@ order by last_name"""
             fac_url = PASSWORDS.settings['fac_url1']
         else:
             fac_url = PASSWORDS.settings['fac_url2']
-        logger_.info(f"{p[9] | fac_url}")
+        logger_.info(f"{p[9]}|{fac_url}")
         mail_text = f"""Здравствуйте, {p[2].title()}!
 
 Напоминаем вам о том, что вы {p[5].strftime("%d.%m.%Y")} оплатили период {p[6]} дней участия в проекте {PASSWORDS.settings['project_name']} ({PASSWORDS.settings['short_project_name']}) уровень {p[9]}.

@@ -162,6 +162,7 @@ def create_sf_participants(list_, database, logger):  # noqa: C901
     logger.info("Начинаю обработку списка")
     line_number = 1
     for line in list_:
+        print(line)
         payment = payment_creator.get_clear_payment()
         try:
             payment["Фамилия"] = line[0]
@@ -186,9 +187,12 @@ def create_sf_participants(list_, database, logger):  # noqa: C901
             pass
         try:
             if line[4]:
-                payment["level"] = line[4]
+                payment["level"] = int(line[4])
         except IndexError:
             pass
+        except ValueError:
+            print("ERROR: Не могу преобразовать level в целое число")
+            raise
         payment["Время проведения"] = datetime.now()
         payment["auto"] = False
         payment_creator.payment_normalization(payment)

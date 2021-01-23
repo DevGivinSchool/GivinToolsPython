@@ -29,12 +29,12 @@ def get_clear_payment():
         "login1": None,
         "password": None,
         "auto": True,  # Создан из программы или вручную
-        "Фамилия": None,
-        "Имя": None,
+        "Фамилия": None,  # GetCourse Фамилия {object.user.last_name}
+        "Имя": None,  # GetCourse Имя {object.user.first_name}
         "Фамилия Имя": None,
-        "Электронная почта": None,
+        "Электронная почта": None,  # GetCourse Email {object.user.email}
         "telegram": None,
-        "Наименование услуги": None,  # По этому определяется уровень
+        "Наименование услуги": None,  # По этому определяется уровень # GetCourse Предложение {object.positions}
         "ID платежа": None,
         "Оплаченная сумма": None,
         "Кассовый чек 54-ФЗ": None,
@@ -44,7 +44,10 @@ def get_clear_payment():
         "Защита 3-D Secure": None,
         "Номер транзакции": None,
         "Код авторизации": None,
-        "Платежная система": 0
+        "Платежная система": 0,
+        "order_number": 0,  # GetCourse Номер заказа {object.number}
+        "city": None,  # GetCourse Город {object.user.city}
+        "phone": None  # GetCourse Телефон {object.user.phone}
     }
     return payment_zero
 
@@ -134,6 +137,13 @@ def payment_computation2(payment, logger):
         logger.debug(f"payment[deadline]=|{type(payment['deadline'])}|{payment['deadline']}|")
     logger.debug(r">>>>payment_creater.payment_computation2 end")
 
+
+def parse_getcourse_notification(body_html, logger):
+    logger.info(">>>> parse_getcourse_notification begin")
+    logger.debug(f"body_html=\n{body_html}\n")
+    payment = get_clear_payment()
+    logger.info(">>>> parse_getcourse_notification end")
+    return payment
 
 def parse_getcourse_html(body_html, logger):
     logger.info(">>>> parse_getcourse_html begin")

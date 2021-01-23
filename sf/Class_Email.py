@@ -149,18 +149,25 @@ class Email:
                         # Getcourse
                         elif (ffrom == 'no-reply@getcourse.ru'
                               or ffrom == 'info@study.givinschool.org'
-                              or ffrom == 'info@givin.school') and fsubject.startswith("Поступил платеж"):
+                              or ffrom == 'info@givin.school') and (fsubject.startswith("Поступил платеж") or fsubject.startswith("Уведомление")):
                             self.logger.info('Это письмо от платежной системы - GetCourse')
                             # print(f'Это письмо от платежной системы - GetCourse')
                             try:
                                 self.logger.info(
                                     f"Текст полученного оповещения (письма), "
                                     f"используется для первоначального парсинга\n{body['body_html']}")
-                                payment = payment_creator.parse_getcourse_html(body['body_html'], self.logger)
+                                if fsubject.startswith("Поступил платеж"):
+                                    payment = payment_creator.parse_getcourse_html(body['body_html'], self.logger)
+                                else:  # fsubject.startswith("Уведомление")
+                                    payment = payment_creator.parse_getcourse_notification(body['body_html'], self.logger)
+                                    message_text = f"{body['body_type']}\n{body['body_text']}\n{body['body_html']}"
+                                    send_error_to_admin(message_text, self.logger, prog_name="NEW_USER")
+                                    # TODO: Убрать это continue после отладки
+                                    continue
                                 if fdate is not None:  # #4
                                     payment["Время проведения"] = fdate
                             except Exception:
-                                raise_error("ERROR: parse_getcourse_html", self.logger, prog_name="payment_creator.py")
+                                raise_error("ERROR: Parse GetCourse", self.logger, prog_name="payment_creator.py")
                                 sys.exit(1)
                             self.payment_verification_for_school_friends(ffrom, fsubject, payment, self.postgres, task,
                                                                          uuid)

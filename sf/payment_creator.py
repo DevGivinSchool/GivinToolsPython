@@ -138,6 +138,13 @@ def payment_computation2(payment, logger):
     logger.debug(r">>>>payment_creater.payment_computation2 end")
 
 
+def parse_getcourse_notification(body_html, logger):
+    logger.info(">>>> parse_getcourse_notification begin")
+    logger.debug(f"body_html=\n{body_html}\n")
+    payment = get_clear_payment()
+    logger.info(">>>> parse_getcourse_notification end")
+    return payment
+
 def parse_getcourse_html(body_html, logger):
     logger.info(">>>> parse_getcourse_html begin")
     # logger.info("Парсинг parse_getcourse_html")

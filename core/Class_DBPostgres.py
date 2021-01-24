@@ -150,7 +150,7 @@ class DBPostgres:
 
     def create_payment_in_db(self, task):
         """
-        Создание платежа. К платежу сразу привязывается плательщик, если находится соответсвие по почте или ФИО
+        Создание платежа. К платежу сразу привязывается плательщик, если находится соответствие по почте или ФИО
         :param task:
         :return:
         """
@@ -181,10 +181,10 @@ class DBPostgres:
                         self.logger.info(f"Ищем участника по Telegram - {task.payment['telegram']}")
                         participant = self.find_participant_by('telegram', task.payment["telegram"])
         self.logger.info("Поиск участника окончен")
-        self.logger.info("Дополнение платежа созданного после парсинга письма сведениями из БД из найденого участника")
-        # Дополнение платежа созданного после парсинга письма сведениями из БД из найденого участника.
+        self.logger.info("Дополнение платежа созданного после парсинга письма сведениями из БД из найденного участника")
+        # Дополнение платежа созданного после парсинга письма сведениями из БД из найденного участника.
         if participant['id'] is not None:  # Это старенький участник, для него можно получить сведения из БД
-            self.logger.info("Участник найден - это не новичёк")
+            self.logger.info("Участник найден - это не новичок")
             task.payment["participant_id"] = participant['id']
             task.payment["participant_type"] = participant['type']
             task.payment["Электронная почта"] = participant['email']
@@ -212,17 +212,10 @@ class DBPostgres:
                 self.logger.info(f"Добавлено {days_} дней")
         self.logger.info(f'payment\n{task.payment}')
         cursor = self.conn.cursor()
-        # Если это Уведомление с 1го уровня КПД то там может быть несколько участников в одном письме
-        # и тогда task_uuid = номеру заказа
-        # иначе это 2ой уровень, тогда payments.task_uuid в БД = task.uuid
-        if task.payment["task_uuid"]:
-            id_ = task.payment["order_number"]
-        else:
-            id_ = task.uuid
         sql_text = """INSERT INTO payments(task_uuid, name_of_service, payment_id, amount, participant_id,
         sales_slip, card_number, card_type, payment_purpose, last_name, first_name, fio, email, payment_system,
         log_file) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING task_uuid;"""
-        values_tuple = (id_, task.payment["Наименование услуги"], task.payment["ID платежа"],
+        values_tuple = (task.uuid, task.payment["Наименование услуги"], task.payment["ID платежа"],
                         task.payment["Оплаченная сумма"], task.payment["participant_id"],
                         task.payment["Кассовый чек 54-ФЗ"],
                         task.payment["Номер карты"], task.payment["Тип карты"], 1, task.payment["Фамилия"],

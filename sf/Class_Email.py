@@ -53,6 +53,8 @@ def verification_for_school_friends(text):
         return 1
     elif 'Друзья1' in text:
         return 1
+    elif 'Друзья1 (Первый месяц бесплатно)' in text:
+        return 1
     else:
         return 0  # неизвестный уровень
 

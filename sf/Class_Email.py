@@ -288,6 +288,7 @@ class Email:
                 self.logger.info(f"    SUBJECT: {fsubject}")
             if fsubject is not None:
                 self.logger.info(f'    PAYMENT: {payment}')
+            self.move_email_to_trash(uuid)
         self.logger.info(">>>>Class_Email.payment_verification_for_school_friends begin")
 
     def addition_of_payment_information_from_db(self, payment, postgres, task):

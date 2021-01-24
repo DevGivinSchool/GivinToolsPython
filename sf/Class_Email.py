@@ -45,7 +45,13 @@ def verification_for_school_friends(text):
     """Проверяем что назначение платежа - Друзья школы"""
     if 'Клуб пробуждения Друзья (2 уровень)' in text:
         return 2
+    elif 'Клуб пробуждение "Друзья" (Первый месяц бесплатно)' in text:
+        return 1
+    elif 'Клуб пробуждения Друзья (1 уровень) (Первый месяц бесплатно)' in text:
+        return 1
     elif 'Клуб пробуждения Друзья (1 уровень)' in text:
+        return 1
+    elif 'Друзья1' in text:
         return 1
     else:
         return 0  # неизвестный уровень
@@ -152,25 +158,23 @@ class Email:
                               or ffrom == 'info@givin.school') and (fsubject.startswith("Поступил платеж") or fsubject.startswith("Уведомление")):
                             self.logger.info('Это письмо от платежной системы - GetCourse')
                             # print(f'Это письмо от платежной системы - GetCourse')
+                            list_payments = []
                             try:
                                 self.logger.info(
                                     f"Текст полученного оповещения (письма), "
                                     f"используется для первоначального парсинга\n{body['body_html']}")
                                 if fsubject.startswith("Поступил платеж"):
                                     payment = payment_creator.parse_getcourse_html(body['body_html'], self.logger)
+                                    list_payments.append(payment)
                                 else:  # fsubject.startswith("Уведомление")
-                                    payment = payment_creator.parse_getcourse_notification(body['body_html'], self.logger)
-                                    message_text = f"{body['body_type']}\n{body['body_text']}\n{body['body_html']}"
-                                    send_error_to_admin(message_text, self.logger, prog_name="NEW_USER")
-                                    # TODO: Убрать это continue после отладки
-                                    continue
-                                if fdate is not None:  # #4
-                                    payment["Время проведения"] = fdate
+                                    list_payments = payment_creator.parse_getcourse_notification(body['body_text'], self.logger)
                             except Exception:
                                 raise_error("ERROR: Parse GetCourse", self.logger, prog_name="payment_creator.py")
                                 sys.exit(1)
-                            self.payment_verification_for_school_friends(ffrom, fsubject, payment, self.postgres, task,
-                                                                         uuid)
+                            for p in list_payments:
+                                if fdate is not None:  # #4
+                                    p["Время проведения"] = fdate
+                                self.payment_verification_for_school_friends(ffrom, fsubject, p, self.postgres, task, uuid)
                         # Это письмо вообще не платёж
                         else:
                             self.logger.info('ЭТО ПИСЬМО НЕ ОТ ПЛАТЁЖНЫХ СИСТЕМ (ничего с ним не делаю, пока...)')
@@ -342,16 +346,16 @@ class Email:
         if len(text) > 0 and len(html) > 0:
             body['body_type'] = 'mix'
             self.logger.debug(f"body_type={body['body_type']}")
-            self.logger.debug(f"body_text={body['body_text']}")
-            self.logger.debug(f"body_html={body['body_html']}")
+            self.logger.debug(f"body_text=\n{body['body_text']}")
+            self.logger.debug(f"body_html=\n{body['body_html']}")
         elif len(text) > 0 and len(html) == 0:
             body['body_type'] = 'text'
             self.logger.debug(f"body_type={body['body_type']}")
-            self.logger.debug(f"body_text={body['body_text']}")
+            self.logger.debug(f"body_text=\n{body['body_text']}")
         elif len(text) == 0 and len(html) > 0:
             body['body_type'] = 'html'
             self.logger.debug(f"body_type={body['body_type']}")
-            self.logger.debug(f"body_html={body['body_html']}")
+            self.logger.debug(f"body_html=\n{body['body_html']}")
         else:
             # raise Exception('Неизвестный формат письма')
             return None

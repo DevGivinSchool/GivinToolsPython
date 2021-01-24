@@ -3,11 +3,12 @@ import re
 import core.PASSWORDS as PASSWORDS
 import traceback
 import time
+import json
 from datetime import datetime
 from datetime import timedelta
 from lxml import html
 from core.utils import is_eng, is_rus
-from core.alert_to_mail import send_mail
+from core.alert_to_mail import send_mail, send_error_to_admin
 from selenium import webdriver
 
 
@@ -21,10 +22,10 @@ def get_clear_payment():
         "until_date": None,  # До какого числа отсрочка
         "fio_lang": "RUS",  # Язык фамилии ENG, RUS
         "participant_type": None,  # Тип участника:
-                                   # P - регулярный участник;
-                                   # B - заблокированный;
-                                   # E - наш сотрудник;
-                                   # V - VIP (особые условия, например, участие без оплаты)
+        # P - регулярный участник;
+        # B - заблокированный;
+        # E - наш сотрудник;
+        # V - VIP (особые условия, например, участие без оплаты)
         "login": None,
         "login1": None,
         "password": None,
@@ -138,12 +139,48 @@ def payment_computation2(payment, logger):
     logger.debug(r">>>>payment_creater.payment_computation2 end")
 
 
-def parse_getcourse_notification(body_html, logger):
+def parse_getcourse_notification(body_text, logger):
+    """
+    Парсинг писем GetCourse с темой 'Уведомление' = вступление в КПД level 1
+    :param body_text:
+    :param logger:
+    :return:
+    """
     logger.info(">>>> parse_getcourse_notification begin")
-    logger.debug(f"body_html=\n{body_html}\n")
-    payment = get_clear_payment()
+    logger.debug(f"body_text=\n{body_text}\n")
+    # Парсим текст на выходе получаем лист строк
+    list_payments = []
+    payment_txt = ''
+    for line in body_text.splitlines():
+        if line:
+            if line.startswith(" \t\t [BEGIN]"):
+                payment_txt = ''
+                line = line.replace(" \t\t [BEGIN]", "")
+                payment_txt += line
+            elif line.endswith("[END] "):
+                line = line.replace("[END] ", "")
+                payment_txt += line
+                payment_txt = '{' + payment_txt.replace('Клуб пробуждение "Друзья"', 'Друзья1') + '}'
+                try:
+                    payment_dict = json.loads(payment_txt)
+                except:
+                    logger.error(f"ERROR: Can't json.loads(payment_txt)=\n{payment_txt}")
+                    send_error_to_admin("ERROR: Can't json.loads(payment_txt)", logger, prog_name="payment_creator.py")
+                payment = get_clear_payment()
+                # Дополнение чистого payment сведениями из словаря полученного парсингом
+                payment = {**payment, **payment_dict}
+                list_payments.append(payment)
+            elif line.startswith(" 		 Перейти"):
+                continue
+            elif line.startswith("[http:"):
+                continue
+            else:  # строка платежа
+                payment_txt += line + " "
+        else:
+            continue
     logger.info(">>>> parse_getcourse_notification end")
-    return payment
+    return list_payments
+
 
 def parse_getcourse_html(body_html, logger):
     logger.info(">>>> parse_getcourse_html begin")
@@ -413,7 +450,7 @@ if __name__ == "__main__":
     import os
 
     program_file = os.path.realpath(__file__)
-    logger = custom_logger.get_logger(program_file=program_file)
+    logger_ = custom_logger.get_logger(program_file=program_file)
 
     # parse_getcourse_html("aaaa")
 
@@ -433,6 +470,6 @@ if __name__ == "__main__":
     # payment = get_clear_payment()
     # parse_getcourse_page("https://givinschoolru.getcourse.ru/sales/control/deal/update/id/43670994", payment, logger)
     # print(payment)
-    payment = get_clear_payment()
-    parse_getcourse_page("https://givin.school/sales/control/deal/update/id/55563843", payment, logger)
-    print(payment)
+    payment_ = get_clear_payment()
+    parse_getcourse_page("https://givin.school/sales/control/deal/update/id/55563843", payment_, logger_)
+    print(payment_)

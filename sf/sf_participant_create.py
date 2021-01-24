@@ -372,19 +372,20 @@ def create_sf_participant_db(database, logger, payment, mm, special_case):
     if not special_case:  # Участник оплатил 2 уровень но такой учётки у него еще нет.
         logger.info(f"Создаём нового пользователя ({payment['fio_lang']}) в БД")
         if payment["fio_lang"] == "RUS":
-            sql_text = """INSERT INTO participants(last_name, first_name, fio, email, telegram, type)
-            VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;"""
+            sql_text = """INSERT INTO participants(last_name, first_name, fio, email, telegram, type, telephone, city)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
             values_tuple = (payment["Фамилия"], payment["Имя"],
                             payment["Фамилия Имя"], payment["Электронная почта"],
-                            payment["telegram"], 'N')
+                            payment["telegram"], 'N', payment["phone"], payment["city"])
         else:
             sql_text = """INSERT INTO participants(last_name, first_name, fio, email, telegram, type, last_name_eng,
-            first_name_eng, fio_eng)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
+            first_name_eng, fio_eng, telephone, city)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
             values_tuple = (payment["Фамилия"], payment["Имя"],
                             payment["Фамилия Имя"], payment["Электронная почта"],
                             payment["telegram"], 'N',
-                            payment["Фамилия"], payment["Имя"], payment["Фамилия Имя"])
+                            payment["Фамилия"], payment["Имя"], payment["Фамилия Имя"],
+                            payment["phone"], payment["city"])
         payment["participant_id"] = database.execute_dml_id(sql_text, values_tuple)
     logger.info(select_participant(payment["participant_id"], database))
     # Отмечаем оплату в БД этому участнику

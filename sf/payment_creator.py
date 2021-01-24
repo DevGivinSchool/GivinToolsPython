@@ -172,7 +172,7 @@ def parse_getcourse_notification(body_text, logger):
                 payment["Время проведения"] = datetime.now()
                 payment["Платежная система"] = 1  # (1, GetCourse, GC)
                 payment["Кассовый чек 54-ФЗ"] = f'http://order_number/{payment["order_number"]}'
-                payment["ID платежа"] = payment["order_number"]
+                payment["ID платежа"] = str(payment["order_number"])
                 payment_normalization(payment)
                 # payment_computation(payment, logger)
                 logger.info(f'payment after parsing\n{payment}')

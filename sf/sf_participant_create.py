@@ -63,14 +63,14 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         # payment["level"] = result[8]
         logger.debug(payment)
         # [('ИВАНОВ', 'ИВАН', 'ИВАНОВ ИВАН', 'xxx@mail.ru', '@xxxx', 'ivanov_ivan@givinschool.org', '43RFji1r48')]
-        logger.info("Изменение статуса учатника в БД")
+        logger.info("Изменение статуса участника в БД")
         sql_text = """UPDATE participants
         SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s, password=%s
         WHERE id=%s;"""
         values_tuple = (payment["Время проведения"], payment["number_of_days"],
                         payment["deadline"], participant_type, payment["password"], payment["participant_id"])
         database.execute_dml(sql_text, values_tuple)
-        logger.info("Статус учатника в БД изменён")
+        logger.info("Статус участника в БД изменён")
         # Изменение статуса в zoom
         logger.info("Активация участника в Zoom")
         zoom_user = ZoomUS(logger)
@@ -78,6 +78,7 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
             login_ = payment["login"]
         else:
             login_ = payment["login1"]
+        logger.info(f'Активируем участника login_={login_}; level={payment["level"]}')
         zoom_result = zoom_user.zoom_users_userstatus(login_, "activate")
         if zoom_result is not None:
             if zoom_result["message"].startswith("User does not exist"):
@@ -369,7 +370,8 @@ def create_sf_participant_zoom(logger, payment, mm):
 def create_sf_participant_db(database, logger, payment, mm, special_case):
     # Создаём нового пользователя в БД если это нужно
     logger.info(">>>>sf_participant_create.create_sf_participant_db begin")
-    if not special_case:  # Участник оплатил 2 уровень но такой учётки у него еще нет.
+    # Участник оплатил 2 уровень но такой учётки у него еще нет. Здесь NOT чтобы обойти повторный insert
+    if not special_case:
         logger.info(f"Создаём нового пользователя ({payment['fio_lang']}) в БД")
         if payment["fio_lang"] == "RUS":
             sql_text = """INSERT INTO participants(last_name, first_name, fio, email, telegram, type, telephone, city)

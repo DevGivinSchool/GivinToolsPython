@@ -418,9 +418,7 @@ def parse_getcourse_page(link, payment, logger):
         logger.debug("payment_normalization(payment)")
         payment_normalization(payment)
     except:  # noqa: E722
-        mail_text = 'Ошибка парсинга страницы заказа GetCourse\n' + traceback.format_exc()
-        logger.error(mail_text)
-        send_mail(PASSWORDS.settings['admin_emails'], "[ERROR][PARSING]", mail_text, logger)
+        send_error_to_admin("ERROR: Ошибка парсинга страницы заказа GetCourse", logger, prog_name="payment_creator.py")
     finally:
         # закрываем браузер даже в случае ошибки
         browser.quit()

@@ -92,6 +92,7 @@ def raise_error(err_text_, logger_, prog_name="NONE"):
     """
     Делает всё тоже что и send_error_to_admin + генерация исключения.
     Делать ли выход из приложения (exit(1)) после генерации исключения, определяется в коде
+    :param prog_name:
     :param err_text_: Текст ошибки
     :param logger_: логгер
     """

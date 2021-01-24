@@ -45,7 +45,7 @@ def get_clear_payment():
         "Защита 3-D Secure": None,
         "Номер транзакции": None,
         "Код авторизации": None,
-        "Платежная система": 0,
+        "Платежная система": 0,  # (1, GetCourse, GC), (2, PayKeeper, PK)
         "order_number": 0,  # GetCourse Номер заказа {object.number}
         "city": None,  # GetCourse Город {object.user.city}
         "phone": None  # GetCourse Телефон {object.user.phone}
@@ -168,6 +168,7 @@ def parse_getcourse_notification(body_text, logger):
                     send_error_to_admin("ERROR: Can't json.loads(payment_txt)", logger, prog_name="payment_creator.py")
                 payment = get_clear_payment()
                 # Дополнение чистого payment сведениями из словаря полученного парсингом
+                payment["Платежная система"] = 1  # (1, GetCourse, GC)
                 payment = {**payment, **payment_dict}
                 list_payments.append(payment)
             elif line.startswith(" 		 Перейти"):

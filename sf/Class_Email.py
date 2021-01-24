@@ -313,6 +313,7 @@ class Email:
         :param msg: Raw 7-bit message body input e.g. from imaplib.
         :return: Body of the letter in the desired encoding
         """
+        self.logger.info(">>>>Class_Email.get_decoded_email_body begin")
         body = {'body_type': '', 'body_text': '', 'body_html': ''}
         text = ""
         html = ""
@@ -358,5 +359,8 @@ class Email:
             self.logger.debug(f"body_html=\n{body['body_html']}")
         else:
             # raise Exception('Неизвестный формат письма')
+            self.logger.info("Неизвестный формат письма")
+            self.logger.debug(">>>>Class_Email.get_decoded_email_body end")
             return None
+        self.logger.debug(">>>>Class_Email.get_decoded_email_body end")
         return body

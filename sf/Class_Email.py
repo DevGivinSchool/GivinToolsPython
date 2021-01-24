@@ -53,6 +53,8 @@ def verification_for_school_friends(text):
         return 1
     elif 'Друзья1' in text:
         return 1
+    elif 'Друзья1 (Первый месяц бесплатно)' in text:
+        return 1
     else:
         return 0  # неизвестный уровень
 
@@ -155,7 +157,8 @@ class Email:
                         # Getcourse
                         elif (ffrom == 'no-reply@getcourse.ru'
                               or ffrom == 'info@study.givinschool.org'
-                              or ffrom == 'info@givin.school') and (fsubject.startswith("Поступил платеж") or fsubject.startswith("Уведомление")):
+                              or ffrom == 'info@givin.school') and (
+                                fsubject.startswith("Поступил платеж") or fsubject.startswith("Уведомление")):
                             self.logger.info('Это письмо от платежной системы - GetCourse')
                             # print(f'Это письмо от платежной системы - GetCourse')
                             list_payments = []
@@ -167,14 +170,18 @@ class Email:
                                     payment = payment_creator.parse_getcourse_html(body['body_html'], self.logger)
                                     list_payments.append(payment)
                                 else:  # fsubject.startswith("Уведомление")
-                                    list_payments = payment_creator.parse_getcourse_notification(body['body_text'], self.logger)
+                                    list_payments = payment_creator.parse_getcourse_notification(body['body_text'],
+                                                                                                 self.logger)
                             except Exception:
                                 raise_error("ERROR: Parse GetCourse", self.logger, prog_name="payment_creator.py")
                                 sys.exit(1)
                             for p in list_payments:
+                                self.logger.info("####  СОЗДАНИЕ НОВОГО УЧАСТНИКА В ЦИКЛЕ  ####")
                                 if fdate is not None:  # #4
                                     p["Время проведения"] = fdate
-                                self.payment_verification_for_school_friends(ffrom, fsubject, p, self.postgres, task, uuid)
+                                self.payment_verification_for_school_friends(ffrom, fsubject, p, self.postgres, task,
+                                                                             uuid)
+                            self.move_email_to_trash(uuid)
                         # Это письмо вообще не платёж
                         else:
                             self.logger.info('ЭТО ПИСЬМО НЕ ОТ ПЛАТЁЖНЫХ СИСТЕМ (ничего с ним не делаю, пока...)')
@@ -256,6 +263,7 @@ class Email:
         :param uuid: UUID письма
         :return:
         """
+        self.logger.info(">>>>Class_Email.payment_verification_for_school_friends begin")
         self.logger.info(f"Наименование услуги={payment['Наименование услуги']}")
         payment["level"] = verification_for_school_friends(payment["Наименование услуги"])
         self.logger.info(f"level={payment['level']}")
@@ -280,17 +288,7 @@ class Email:
                 self.logger.info(f"    SUBJECT: {fsubject}")
             if fsubject is not None:
                 self.logger.info(f'    PAYMENT: {payment}')
-            """
-            if body is not None:
-                self.logger.info(f"body_type: {body['body_type']}")
-                if body['body_type'] == 'mix':
-                    self.logger.info(f"BODY\n: {body['body_text']}")
-                elif body['body_type'] == 'html':
-                    self.logger.info(f"BODY\n: {body['body_html']}")
-                else:
-                    self.logger.info(f"BODY\n: {body['body_text']}")
-            """
-        self.move_email_to_trash(uuid)
+        self.logger.info(">>>>Class_Email.payment_verification_for_school_friends begin")
 
     def addition_of_payment_information_from_db(self, payment, postgres, task):
         """

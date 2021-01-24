@@ -171,13 +171,15 @@ class DBPostgres:
             if participant['id'] is None and task.payment["Платежная система"] == 1:
                 self.logger.info("Ничего не найдено, поэтому пробуем парсить страницу заказа")
                 # Если это Getcourse и ничего по ФИО и почте (которой могло и не быть) не нашлось,
-                # тогда парсим страницу GetCourse и пытаемся еще раз поискать по почте и телеграм
-                payment_creator.parse_getcourse_page(task.payment["Кассовый чек 54-ФЗ"], task.payment, self.logger)
-                self.logger.info(f"Ищем участника повторно по email - {task.payment['Электронная почта']}")
-                participant = self.find_participant_by('email', task.payment["Электронная почта"])
-                if participant['id'] is None:
-                    self.logger.info(f"Ищем участника по Telegram - {task.payment['telegram']}")
-                    participant = self.find_participant_by('telegram', task.payment["telegram"])
+                # тогда парсим страницу GetCourse, если есть ссылка на неё,
+                # и пытаемся еще раз поискать по почте и телеграм
+                if task.payment["Кассовый чек 54-ФЗ"]:
+                    payment_creator.parse_getcourse_page(task.payment["Кассовый чек 54-ФЗ"], task.payment, self.logger)
+                    self.logger.info(f"Ищем участника повторно по email - {task.payment['Электронная почта']}")
+                    participant = self.find_participant_by('email', task.payment["Электронная почта"])
+                    if participant['id'] is None:
+                        self.logger.info(f"Ищем участника по Telegram - {task.payment['telegram']}")
+                        participant = self.find_participant_by('telegram', task.payment["telegram"])
         self.logger.info("Поиск участника окончен")
         self.logger.info("Дополнение платежа созданного после парсинга письма сведениями из БД из найденого участника")
         # Дополнение платежа созданного после парсинга письма сведениями из БД из найденого участника.

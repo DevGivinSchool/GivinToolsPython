@@ -168,8 +168,14 @@ def parse_getcourse_notification(body_text, logger):
                     send_error_to_admin("ERROR: Can't json.loads(payment_txt)", logger, prog_name="payment_creator.py")
                 payment = get_clear_payment()
                 # Дополнение чистого payment сведениями из словаря полученного парсингом
-                payment["Платежная система"] = 1  # (1, GetCourse, GC)
                 payment = {**payment, **payment_dict}
+                payment["Время проведения"] = datetime.now()
+                payment["Платежная система"] = 1  # (1, GetCourse, GC)
+                payment["Кассовый чек 54-ФЗ"] = f'http://order_number/{payment["order_number"]}'
+                payment["task_uuid"] = payment["order_number"]
+                payment_normalization(payment)
+                # payment_computation(payment, logger)
+                logger.info(f'payment after parsing\n{payment}')
                 list_payments.append(payment)
             elif line.startswith(" 		 Перейти"):
                 continue

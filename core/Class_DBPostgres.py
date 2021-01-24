@@ -173,7 +173,7 @@ class DBPostgres:
                 # Если это Getcourse и ничего по ФИО и почте (которой могло и не быть) не нашлось,
                 # тогда парсим страницу GetCourse, если есть ссылка на неё,
                 # и пытаемся еще раз поискать по почте и телеграм
-                if task.payment["Кассовый чек 54-ФЗ"]:
+                if task.payment["Кассовый чек 54-ФЗ"] and not task.payment["Кассовый чек 54-ФЗ"].startswith("http://order_number"):
                     payment_creator.parse_getcourse_page(task.payment["Кассовый чек 54-ФЗ"], task.payment, self.logger)
                     self.logger.info(f"Ищем участника повторно по email - {task.payment['Электронная почта']}")
                     participant = self.find_participant_by('email', task.payment["Электронная почта"])

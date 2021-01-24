@@ -347,6 +347,7 @@ def parse_getcourse_page(link, payment, logger):
     response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
     print(response.text)
     """
+    logger.info(f"link={link}")
     try:
         logger.debug(f"headless={PASSWORDS.settings['headless']}")
         logger.debug(f"chromedriver_path={PASSWORDS.settings['chromedriver_path']}")

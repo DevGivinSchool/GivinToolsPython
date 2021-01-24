@@ -40,9 +40,10 @@ class Task:
         else:
             # Отмечаем оплату в БД
             self.logger.info('ОТМЕЧАЕМ ОПЛАТУ В БД')
-            # Участник оплатил 2 уровень но такой учётки у него еще нет и это особый случай special_case=True
-            if self.payment["level"] == 2 and not self.payment["login"]:
-                self.logger.info('ЭТО ОСОБЫЙ СЛУЧАЙ переход с level1 на level2')
+            # Участник оплатил 1 или 2 уровень но такой учётки у него еще нет,
+            # значит нужно её создать и это особый случай special_case=True
+            if (self.payment["level"] == 2 and not self.payment["login"]) or (self.payment["level"] == 1 and not self.payment["login1"]):
+                self.logger.info('ЭТО ОСОБЫЙ СЛУЧАЙ переход с одного уровня на другой')
                 sf_participant_create.create_sf_participant(self.payment, self.database, self.logger, special_case=True)
             sf_participant_create.mark_payment_into_db(self.payment, self.database, self.logger)
         self.logger.info('>>>>task_run end')

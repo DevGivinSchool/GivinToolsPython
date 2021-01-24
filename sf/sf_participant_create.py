@@ -392,8 +392,9 @@ def create_sf_participant_db(database, logger, payment, mm, special_case):
     mark_payment_into_db(payment, database, logger, participant_type='N')
     # Прикрепить участника к платежу
     if payment["auto"]:
-        sql_text = """UPDATE payments SET participant_id=%s WHERE task_uuid=%s;"""
-        values_tuple = (payment["participant_id"], payment["task_uuid"])
+        logger.info("Прикрепить участника к платежу")
+        sql_text = """UPDATE payments SET participant_id=%s WHERE payment_id=%s;"""
+        values_tuple = (payment["participant_id"], payment["ID платежа"])
         database.execute_dml(sql_text, values_tuple)
         logger.info(select_payment(payment["task_uuid"], database))
     # Обновляем участнику логин и пароль в БД

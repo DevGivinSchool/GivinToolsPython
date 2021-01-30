@@ -185,13 +185,20 @@ class DBPostgres:
         # Дополнение платежа созданного после парсинга письма сведениями из БД из найденного участника.
         if participant['id'] is not None:  # Это старенький участник, для него можно получить сведения из БД
             self.logger.info("Участник найден - это не новичок")
-            task.payment["participant_id"] = participant['id']
-            task.payment["participant_type"] = participant['type']
-            task.payment["Электронная почта"] = participant['email']
-            task.payment["telegram"] = participant['telegram']
-            task.payment["login"] = participant['login']
-            task.payment["password"] = participant['password']
-            task.payment["login1"] = participant['login1']
+            if not task.payment["participant_id"]:
+                task.payment["participant_id"] = participant['id']
+            if not task.payment["participant_type"]:
+                task.payment["participant_type"] = participant['type']
+            if not task.payment["Электронная почта"]:
+                task.payment["Электронная почта"] = participant['email']
+            if not task.payment["telegram"]:
+                task.payment["telegram"] = participant['telegram']
+            if not task.payment["login"]:
+                task.payment["login"] = participant['login']
+            if not task.payment["password"]:
+                task.payment["password"] = participant['password']
+            if not task.payment["login1"]:
+                task.payment["login1"] = participant['login1']
             # task.payment["level"] = participant['sf_level']
             # issues 2. Если срок платежа не закончился то нужно прибавлять эти дни.
             # Для новеньких это не нужно.

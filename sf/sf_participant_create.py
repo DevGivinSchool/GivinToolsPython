@@ -52,14 +52,22 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         logger.debug(f"payment до и после дополнения сведениями в mark_payment_into_db")
         logger.debug(payment)
         result = database.get_participant_by_id(payment["participant_id"])[0]
-        payment["Фамилия"] = result[0]
-        payment["Имя"] = result[1]
-        payment["Фамилия Имя"] = result[2]
-        payment["Электронная почта"] = result[3]
-        payment["telegram"] = result[4]
-        payment["login"] = result[5]
-        payment["password"] = result[6]
-        payment["login1"] = result[7]
+        if not payment["Фамилия"]:
+            payment["Фамилия"] = result[0]
+        if not payment["Имя"]:
+            payment["Имя"] = result[1]
+        if not payment["Фамилия Имя"]:
+            payment["Фамилия Имя"] = result[2]
+        if not payment["Электронная почта"]:
+            payment["Электронная почта"] = result[3]
+        if not payment["telegram"]:
+            payment["telegram"] = result[4]
+        if not payment["login"]:
+            payment["login"] = result[5]
+        if not payment["password"]:
+            payment["password"] = result[6]
+        if not payment["login1"]:
+            payment["login1"] = result[7]
         # payment["level"] = result[8]
         logger.debug(payment)
         # [('ИВАНОВ', 'ИВАН', 'ИВАНОВ ИВАН', 'xxx@mail.ru', '@xxxx', 'ivanov_ivan@givinschool.org', '43RFji1r48')]

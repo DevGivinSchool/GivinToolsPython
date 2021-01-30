@@ -160,7 +160,7 @@ def parse_getcourse_notification(body_text, logger):
             elif line.endswith("[END] "):
                 line = line.replace("[END] ", "")
                 payment_txt += line
-                payment_txt = '{' + payment_txt.replace('Клуб пробуждение "Друзья"', 'Друзья1') + '}'
+                payment_txt = '{' + payment_txt.replace('"Друзья"', 'Друзья') + '}'
                 try:
                     payment_dict = json.loads(payment_txt)
                 except:

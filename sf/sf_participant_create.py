@@ -69,14 +69,15 @@ def mark_payment_into_db(payment, database, logger, participant_type='P'):
         if not payment["login1"]:
             payment["login1"] = result[7]
         # payment["level"] = result[8]
+        if not payment["password1"]:
+            payment["password1"] = result[9]
         logger.debug(payment)
         # [('ИВАНОВ', 'ИВАН', 'ИВАНОВ ИВАН', 'xxx@mail.ru', '@xxxx', 'ivanov_ivan@givinschool.org', '43RFji1r48')]
         logger.info("Изменение статуса участника в БД")
         sql_text = """UPDATE participants
-        SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s, password=%s
-        WHERE id=%s;"""
+        SET payment_date=%s, number_of_days=%s, deadline=%s, until_date=NULL, comment=NULL, type=%s WHERE id=%s;"""
         values_tuple = (payment["Время проведения"], payment["number_of_days"],
-                        payment["deadline"], participant_type, payment["password"], payment["participant_id"])
+                        payment["deadline"], participant_type, payment["participant_id"])
         database.execute_dml(sql_text, values_tuple)
         logger.info("Статус участника в БД изменён")
         # Изменение статуса в zoom
@@ -250,10 +251,16 @@ def create_sf_participant(payment, database, logger, special_case=False):
     # Создать участнику КПД учётку (email) Yandex
     mm = create_sf_participant_yandex(logger, payment, mm)
     # Генерация пароля для Zoom (для всех почт пароль одинаковый)
-    if payment["password"] is None:
-        payment["password"] = password_for_sf()
-    mm.text += f'\nPassword: {payment["password"]}'
-    logger.info(f'Password: {payment["password"]}')
+    if payment["level"] == 2:
+        if payment["password"] is None:
+            payment["password"] = password_for_sf()
+        mm.text += f'\nPassword: {payment["password"]}'
+        logger.info(f'Password: {payment["password"]}')
+    else:
+        if payment["password1"] is None:
+            payment["password1"] = password_for_sf()
+        mm.text += f'\nPassword: {payment["password1"]}'
+        logger.info(f'Password: {payment["password1"]}')
     # Создать участнику КПД учётку Zoom
     mm = create_sf_participant_zoom(logger, payment, mm)
     # Создать участника КПД в БД и отметить ему оплату
@@ -347,10 +354,12 @@ def create_sf_participant_zoom(logger, payment, mm):
     zoom_user = ZoomUS(logger)
     if payment["level"] == 2:
         login_ = payment["login"]
+        password_ = payment["password"]
     else:
         login_ = payment["login1"]
+        password_ = payment["password1"]
     zoom_result = zoom_user.zoom_users_usercreate(login_, payment['Имя'].title(),
-                                                  payment['Фамилия'].title(), payment["password"])
+                                                  payment['Фамилия'].title(), password_)
     if zoom_result is not None:
         logger.error("+" * 60)
         mm.subject += " + !ZOOM ERROR"
@@ -411,11 +420,13 @@ def create_sf_participant_db(database, logger, payment, mm, special_case):
     logger.info("Обновляем участнику логин и пароль в БД и level")
     if payment["level"] == 2:
         login_ = payment["login"]
+        password_ = payment["password"]
         sql_text = """UPDATE participants SET login=%s, password=%s, sf_level=%s WHERE id=%s;"""
     else:
         login_ = payment["login1"]
-        sql_text = """UPDATE participants SET login1=%s, password=%s, sf_level=%s WHERE id=%s;"""
-    values_tuple = (login_, payment["password"], payment["level"], payment["participant_id"])
+        password_ = payment["password1"]
+        sql_text = """UPDATE participants SET login1=%s, password1=%s, sf_level=%s WHERE id=%s;"""
+    values_tuple = (login_, password_, payment["level"], payment["participant_id"])
     database.execute_dml(sql_text, values_tuple)
     # Окончательный вид участника в БД
     line = f'{select_participant(payment["participant_id"], database)}'

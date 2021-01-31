@@ -75,7 +75,7 @@ class DBPostgres:
         :param value: ID
         :return:
         """
-        sql_text = r"select last_name, first_name, fio, email, telegram, login, password, login1, sf_level from participants where id=%s;"
+        sql_text = r"select last_name, first_name, fio, email, telegram, login, password, login1, sf_level, password1 from participants where id=%s;"
         values_tuple = (value,)
         return self.execute_select(sql_text, values_tuple)
 
@@ -200,6 +200,8 @@ class DBPostgres:
             if not task.payment["login1"]:
                 task.payment["login1"] = participant['login1']
             # task.payment["level"] = participant['sf_level']
+            if not task.payment["password1"]:
+                task.payment["password1"] = participant['password1']
             # issues 2. Если срок платежа не закончился то нужно прибавлять эти дни.
             # Для новеньких это не нужно.
             # Срок окончания оплаченного периода может быть как deadline, так и until_date.
@@ -337,7 +339,8 @@ class DBPostgres:
             'login': None,
             'password': None,
             'login1': None,
-            'sf_level': None
+            'sf_level': None,
+            'password1': None
         }
         if value is None or not value:
             self.logger.warning(f"{criterion} отсутствует. Поиск по {criterion} невозможен")
@@ -359,8 +362,7 @@ class DBPostgres:
                     raise
             self.logger.info(f"Осуществляем поиск участника по {criterion}={value}")
             # Искать нужно с любым type т.к. заблокированный участник тоже может вновь оплатить
-            sql_text = f"select id, type, deadline, until_date, email, telegram, login, password, login1, sf_level " \
-                       f"from participants where {criterion}=%s;"
+            sql_text = f"select id, type, deadline, until_date, email, telegram, login, password, login1, sf_level, password1 from participants where {criterion}=%s;"
             values_tuple = (value,)
             records = self.execute_select(sql_text, values_tuple)
             # print(records)
@@ -382,6 +384,7 @@ class DBPostgres:
                     'password': records[0][7],
                     'login1': records[0][8],
                     'sf_level': records[0][9],
+                    'password1': records[0][10]
                 }
             self.logger.debug(f"participant type={type(participant)}")
             self.logger.debug(f"participant={participant}")

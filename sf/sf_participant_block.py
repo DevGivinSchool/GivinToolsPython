@@ -74,7 +74,7 @@ def block_one_participant(p, postgres, logger):  # noqa: C901
                 print(f"Блокировка участника ID={id_}")
                 logger.info(f"Блокировка участника ID={id_}")
                 # Состояние участник
-                sql_text = 'SELECT id, fio, login, password, type, login1, sf_level FROM participants where id=%s;'
+                sql_text = 'SELECT id, fio, login, password, type, login1, sf_level, password1 FROM participants where id=%s;'
                 # [(1420, 'ВОЛЬНЫХ НАТАЛЬЯ', 'volnyh_natalja@givinschool.org', 'password', 'B')]
                 values_tuple = (id_,)
                 participant = postgres.execute_select(sql_text, values_tuple)[0]

@@ -29,6 +29,7 @@ def get_clear_payment():
         "login": None,
         "login1": None,
         "password": None,
+        "password1": None,
         "auto": True,  # Создан из программы или вручную
         "Фамилия": None,  # GetCourse Фамилия {object.user.last_name}
         "Имя": None,  # GetCourse Имя {object.user.first_name}

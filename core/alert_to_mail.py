@@ -103,15 +103,17 @@ def raise_error(err_text_, logger_, prog_name="NONE"):
 def get_participant_notification_text(payment):
     if payment["level"] == 2:
         login_ = payment["login"]
+        password_ = payment['password']
     else:
         login_ = payment["login1"]
+        password_ = payment['password1']
     mail_text2 = f"""Здравствуйте, {payment['Фамилия'].capitalize()} {payment['Имя'].capitalize()}!  
 
-Поздравляем, Вы оплатили абонемент для совместных занятий в онлайн проекте Школы Гивина "{PASSWORDS.settings['project_name']}" ({PASSWORDS.settings['short_project_name']}) уровень {payment['level']}. 
+Поздравляем Вас с участием в онлайн проекте Школы Гивина "{PASSWORDS.settings['project_name']}" ({PASSWORDS.settings['short_project_name']}) уровень {payment['level']}. 
 
 Ваш zoom-аккаунт:
 Логин: {login_}
-Пароль: {payment['password']}
+Пароль: {password_}
 
 Сохраните себе эти данные, чтобы не потерять их. 
 

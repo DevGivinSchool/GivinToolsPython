@@ -75,7 +75,7 @@ def create_login_mail(line):
     print(familia, name, login)
     # Отдел 3 = @СПЕЦПОЧТЫ
     try:
-        result = yandex_mail.create_yandex_mail(familia, name, login, password, department_id_=3)
+        result = yandex_mail.create_yandex_mail(logger, familia, name, login, password, department_id_=3)
     except yandex_connect.YandexConnectExceptionY as e:
         # print(e.args[0])
         if e.args[0] == 500:

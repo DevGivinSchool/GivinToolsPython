@@ -85,6 +85,19 @@ order by last_name;
 ----delete from tasks where task_uuid=1014;
 
 -- ===============================================================
+-- Проверка неправильности периода оплаты и исправление этой ситуации
+SELECT
+id, type,
+last_name as "Фамилия", first_name as "Имя",
+payment_date "Дата оплаты", number_of_days as "Дней", deadline "Оплачено до", payment_date+interval '1' day * 30
+FROM public.participants
+WHERE type in ('P', 'N') and sf_level=1
+order by last_name
+
+update public.participants set deadline = payment_date+interval '1' day * 30
+WHERE type in ('P', 'N') and sf_level=1 and payment_date+interval '1' day * 30 <> deadline
+
+-- ===============================================================
 -- Создать участника
 insert into public.participants(
 	last_name, first_name, fio, last_name_eng, first_name_eng, fio_eng, email, telegram, login, password, payment_date, number_of_days, deadline, type, comment)

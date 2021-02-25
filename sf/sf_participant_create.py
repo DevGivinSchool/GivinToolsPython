@@ -439,7 +439,7 @@ def create_sf_participant_db(database, logger, payment, mm, special_case):
 
 if __name__ == '__main__':
     """ Создание участников по списку. Список в формате:
-    Фамилия; Имя; email; telegram; level
+    Фамилия;Имя;email;telegram;level
     """
     import core.custom_logger as custom_logger
     import os
@@ -467,7 +467,7 @@ if __name__ == '__main__':
 
     file = PASSWORDS.settings['list_path']
     with open(file, newline='', encoding='utf-8') as f:
-        # Фамилия; Имя; email; telegram; level
+        # Фамилия;Имя;email;telegram;level
         reader = csv.reader(f, delimiter=';')
         print(type(reader))
         print(reader)

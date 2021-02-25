@@ -63,11 +63,9 @@ def create_team_mail(line):
 
 def create_login_mail(line):
     """ English login (для технических почт)
-        В list_.py нужно внести список Имя + Login
-        Zoom10 zoom10
+        В list.txt нужно внести список Имя + Login
+        Zoom10;zoom10
     """
-    # На вход подаються Фамилия Имя Логин
-    # Отдел Кадров	hr
     login = line[1].lower()
     familia = line[0]
     name = line[1]

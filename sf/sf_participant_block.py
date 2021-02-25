@@ -1,3 +1,4 @@
+import traceback
 import core.PASSWORDS as PASSWORDS
 from core.Class_ZoomUS import ZoomUS
 from core.alert_to_mail import send_mail
@@ -118,10 +119,34 @@ def block_one_participant(p, postgres, logger):  # noqa: C901
 if __name__ == '__main__':
     import core.custom_logger as custom_logger
     import os
+    import csv
     # from list_ import list_fio
 
     program_file = os.path.realpath(__file__)
-    logger_ = custom_logger.get_logger(program_file=program_file)
+    log = custom_logger.get_logger(program_file=program_file)
 
-    list_fio = ''  # TODO Это нужно переделать на процедруру file_processing(func) из gtp_create_logins.py
-    participants_block(list_fio, logger_)
+    # noinspection PyBroadException
+    try:
+        log.info("Try connect to DB")
+        db = DBPostgres(dbname=PASSWORDS.settings['postgres_dbname'], user=PASSWORDS.settings['postgres_user'],
+                        password=PASSWORDS.settings['postgres_password'],
+                        host=PASSWORDS.settings['postgres_host'],
+                        port=PASSWORDS.settings['postgres_port'], logger=log)
+    except Exception:
+        main_error_text = \
+            f"MAIN ERROR (Postgres):\n{traceback.format_exc()}"
+        print(main_error_text)
+        log.error(main_error_text)
+        log.error(f"Send email to: {PASSWORDS.settings['admin_emails']}")
+        send_mail(PASSWORDS.settings['admin_emails'], "MAIN ERROR (Postgres)", main_error_text, log)
+        log.error("Exit with error")
+        exit(1)
+
+    file = PASSWORDS.settings['list_path']
+    with open(file, newline='', encoding='utf-8') as f:
+        reader = csv.reader(f, delimiter=';')
+        # headers = next(reader, None)
+        for row in reader:
+            print(row[0])
+            print(type(row[0]))
+            block_one_participant(row[0], db, log)

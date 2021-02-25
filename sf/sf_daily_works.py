@@ -64,8 +64,10 @@ order by last_name"""
             block_one_participant(p[9], db_connect, logger_)
             if p[10] == 1:
                 fac_url = PASSWORDS.settings['fac_url1']
+                discount_text = ""
             else:
                 fac_url = PASSWORDS.settings['fac_url2']
+                discount_text = ", при этом вы получите скидку 7% и 13% соответственно"
             logger_.info(f"{p[10]}|{fac_url}")
             mail_text = f"""Здравствуйте, {p[2].title()}!
 
@@ -77,7 +79,7 @@ order by last_name"""
     Если же вы больше не хотите участвовать в {PASSWORDS.settings['short_project_name']} - система больше не будет вас беспокоить.
 
     Вы можете оплатить {PASSWORDS.settings['short_project_name']} через страницу оплаты (доступен PayPal).
-    Возможна оплата сразу за 3 или 6 месяцев, при этом вы получите скидку 7% и 13% соответственно:
+    Возможна оплата сразу за 3 или 6 месяцев{discount_text}:
     (+PayPal) {fac_url}
 
     Пожалуйста, при оплате, указывайте свои Фамилию, Имя, такие же как и при регистрации.
@@ -154,8 +156,10 @@ order by last_name"""
         #
         if p[9] == 1:
             fac_url = PASSWORDS.settings['fac_url1']
+            discount_text = ""
         else:
             fac_url = PASSWORDS.settings['fac_url2']
+            discount_text = ", при этом вы получите скидку 7% и 13% соответственно"
         logger_.info(f"{p[9]}|{fac_url}")
         mail_text = f"""Здравствуйте, {p[2].title()}!
 
@@ -163,7 +167,7 @@ order by last_name"""
 {until_date} через {interval} у вас истекает оплаченный период {PASSWORDS.settings['short_project_name']}.
 
 Вы можете оплатить {PASSWORDS.settings['short_project_name']} через страницу оплаты (доступен PayPal).
-Возможна оплата сразу за 3 или 6 месяцев, при этом вы полаете скидки 7% и 13% соответственно:
+Возможна оплата сразу за 3 или 6 месяцев{discount_text}:
 (+PayPal) {fac_url}
 
 Пожалуйста, при оплате, указывайте свои Фамилию, Имя, такие же как и при регистрации.

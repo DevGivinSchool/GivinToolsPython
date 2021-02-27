@@ -89,13 +89,15 @@ order by last_name;
 SELECT
 id, type,
 last_name as "Фамилия", first_name as "Имя",
-payment_date "Дата оплаты", number_of_days as "Дней", deadline "Оплачено до", payment_date+interval '1' day * 30
+payment_date "Дата оплаты", number_of_days as "Дней", deadline "Оплачено до",
+deadline-payment_date "Контроль1", payment_date+interval '1' day * 30 "Контроль2"
 FROM public.participants
 WHERE type in ('P', 'N') and sf_level=1
+--and payment_date+number_of_days <> deadline
 order by last_name
 
-update public.participants set deadline = payment_date+interval '1' day * 30
-WHERE type in ('P', 'N') and sf_level=1 and payment_date+interval '1' day * 30 <> deadline
+update public.participants set deadline = payment_date+number_of_days
+WHERE type in ('P', 'N') and sf_level=1 and payment_date+number_of_days <> deadline
 
 -- ===============================================================
 -- Создать участника

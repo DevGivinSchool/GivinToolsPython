@@ -137,6 +137,11 @@ order by last_name"""
     # (None,7,'АЛААА','anxxxxx@mail.ru',datetime.date(2019, 12, 31),None)
     # (None,7,'БАРААААА','ИРАААА','xxx@inbox.ru','@xxx',datetime.date(2019, 12, 8),30,datetime.date(2020, 1, 7),None)
     # (None,7,'БАРААААА ИРАААА','xxx@inbox.ru','@xxx',datetime.date(2019, 12, 8),30,datetime.date(2020, 1, 7),None)
+    """
+0	        1	        2	3	    4	        5	            6               7           8	        9
+INTERVAL2	INTERVAL	fio	email	telegram	payment_date	number_of_days	deadline	until_date	sf_level
+3	        -24	        ФИО x@x.com	NULL	    03.01.2021	    30	            03.02.2021	02.03.2021	2
+    """
     intervals = {3: "3 дня", 7: "7 дней"}
     logger_.info("debug fac_url error")
     logger_.info(PASSWORDS.settings['fac_url1'])
@@ -148,6 +153,10 @@ order by last_name"""
             interval = intervals[p[1]]
         else:
             interval = intervals[p[0]]
+        # Для уровень 1 не оповещаем за 3 дня только за 7
+        if p[9] == 1 and interval == 3:
+            logger_.info(f"Пропускаю это оповещение уровень 1 за 3 дня!!!")
+            continue
         # Определяем что используется Срок оплаты или отсрочка
         if p[7] is None:
             until_date = p[8]

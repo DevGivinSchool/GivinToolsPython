@@ -3,6 +3,14 @@ import re
 import os
 import time
 
+abc = {'a': 'a', 'b': 'b', 'c': 'c', 'd': 'd', 'e': 'e', 'f': 'f', 'g': 'g', 'h': 'h', 'i': 'i', 'j': 'j', 'k': 'k',
+       'l': 'l', 'm': 'm', 'n': 'n', 'o': 'o', 'p': 'p', 'q': 'q', 'r': 'r', 's': 's', 't': 't', 'u': 'u', 'v': 'v',
+       'w': 'w', 'x': 'x', 'y': 'y', 'z': 'z',
+       'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e', 'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y',
+       'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f',
+       'х': 'h', 'ц': 'c', 'ч': 'ch', 'ш': 'sh', 'щ': 'shh', 'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya',
+       }
+
 
 def translit_name(text):
     """
@@ -10,7 +18,12 @@ def translit_name(text):
     :param text:
     :return:
     """
-    return transliterate.translit(text, reversed=True).replace("'", "").strip()
+    text = text.replace("'", "").strip()
+    text2 = ""
+    for s in text:
+        text2 += abc.get(s, "_")
+    return text2
+    # return transliterate.translit(text, reversed=True).replace("'", "").strip()
 
 
 def is_eng(text):
@@ -125,8 +138,5 @@ def delete_obsolete_files(path, days, logger):
 
 
 if __name__ == '__main__':
-    import core.custom_logger as custom_logger
-    program_file = os.path.realpath(__file__)
-    logger = custom_logger.get_logger(program_file=program_file)
-    log_path = r"c:\\MyGit\\GivinToolsPython\\log\\"
-    delete_obsolete_files(log_path, 31, logger)
+    print(translit_name("бiлавина светлана"))
+    print(get_login("бiлавина", "свiтлана", type=None))

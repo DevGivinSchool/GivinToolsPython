@@ -214,11 +214,13 @@ class DBPostgres:
             if task.payment["Время проведения"].date() < end_date:
                 days_ = (end_date - task.payment["Время проведения"].date()).days
                 self.logger.debug(
-                    f"task.payment[deadline]=|{type(task.payment['deadline'])}|{task.payment['deadline']}|")
+                    f"task.payment[deadline]1=|{type(task.payment['deadline'])}|{task.payment['deadline']}|")
                 task.payment["deadline"] = task.payment["deadline"] + datetime.timedelta(days=days_)
                 self.logger.debug(
-                    f"task.payment[deadline]=|{type(task.payment['deadline'])}|{task.payment['deadline']}|")
+                    f"task.payment[deadline]2=|{type(task.payment['deadline'])}|{task.payment['deadline']}|")
+                task.payment["number_of_days"] = task.payment["number_of_days"] + days_
                 self.logger.info(f"Добавлено {days_} дней")
+                self.logger.debug(f"task.payment[number_of_days]={task.payment['number_of_days']}")
         self.logger.info(f'payment\n{task.payment}')
         cursor = self.conn.cursor()
         sql_text = """INSERT INTO payments(task_uuid, name_of_service, payment_id, amount, participant_id,

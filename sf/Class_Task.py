@@ -31,7 +31,7 @@ class Task:
         Обработка платежа, пока без обработки шагов
         :return:
         """
-        self.logger.info('>>>>task_run begin')
+        self.logger.info('>>>>Class_Task.task_run begin')
         self.logger.info(f'task_run payment = \n{self.payment}')
         if self.payment["participant_id"] is None:
             # This is new participant
@@ -46,4 +46,4 @@ class Task:
                 self.logger.info('ЭТО ОСОБЫЙ СЛУЧАЙ переход с одного уровня на другой')
                 sf_participant_create.create_sf_participant(self.payment, self.database, self.logger, special_case=True)
             sf_participant_create.mark_payment_into_db(self.payment, self.database, self.logger)
-        self.logger.info('>>>>task_run end')
+        self.logger.info('>>>>Class_Task.task_run end')
